@@ -1,5 +1,5 @@
 <p align="center">
-  <img align="center" src="lostitem.gif">
+ <img src="lostitem.gif" style="width: 500px; height: auto;">
 
 # <h1 align="center">CometClaim 💫</h1>
 
