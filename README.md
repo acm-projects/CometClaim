@@ -302,9 +302,9 @@ UTD's Lost and Found system needs a digital upgrade to improve convenience. Inst
 
 ## CometClaim TEAM!! :tada:
 
--
--
--
--
+- Mohammad Mehrab
+- Hannah Rauch
+- Tien Phan
+- Neeharika Dasaraju
 - Jason Luu - Project Manager
 - Suraj Khosla - Industry Mentor
