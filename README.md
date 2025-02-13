@@ -239,6 +239,7 @@ UTD's Lost and Found system needs a digital upgrade to improve convenience. Inst
 
 ## Stretch Goals 🚀
 
+- In-app messaging feature
 - Real-time call support for answering questions?
   - Connect me to a real person
   - Any other questions that the chatbot can use
@@ -247,8 +248,8 @@ UTD's Lost and Found system needs a digital upgrade to improve convenience. Inst
   - Allow students and staff to upload photos of lost items ANYWHERE on campus
 - Map Integration
 - Social Media Integration
-- Location based notification
- - If you mark a location on the map or if you are frequently at a location and set that you lost something, if a new item is uploaded in that location, you get a notification
+- Location-based notification
+ - When you mark a location on the map, if a new item is uploaded in that location, you get a notification
 
 <br>
 
