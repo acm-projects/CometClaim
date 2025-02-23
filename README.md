@@ -4,7 +4,7 @@
 # <h1 align="center">CometClaim 💫</h1>
 
 <p align="center">
-UTD's Lost and Found system needs a digital upgrade to improve convenience. Instead of relying on physical visits or phone calls, CometClaim is an online platform where students and staff can easily upload and browse a virtual inventory of lost items, retrieve misplaced belongings, and query a chatbot for any questions from the comfort of their home before making a trip to the Lost and Found office.
+UTD's Lost and Found system needs a digital upgrade to improve convenience. Instead of relying on physical visits or phone calls, CometClaim is an online platform where students and staff can easily upload and browse a virtual inventory of lost items, retrieve misplaced belongings, and query a chatbot ffor any questions from the comfort of their home before making a trip to the Lost and Found office.
 </p>
 <br>
 
@@ -40,12 +40,12 @@ UTD's Lost and Found system needs a digital upgrade to improve convenience. Inst
 <details>
   
 **<summary>Front-end</summary>**
-- [World's Shortest Figma Course](https://www.youtube.com/watch?v=1pW_sk-2y40)
-- [Official React Documentation / Setup](https://tailwindcss.com/docs/guides/create-react-app)
-- [React Tutorial for Beginners](https://youtu.be/SqcY0GlETPk?si=7m4sb_bs-ksPQLkv)
-- [JS Mastery React JS Full Course 2023, 1 hour](https://www.youtube.com/watch?v=b9eMGE7QtTk&ab_channel=JavaScriptMastery)
-- [Official TailwindCSS Documentation / Setup](https://tailwindcss.com/docs/installation)
-- [Tailwind Tutorial for Beginners](https://www.youtube.com/watch?v=DenUCuq4G04)
+  - <a href="https://www.youtube.com/watch?v=Tn6-PIqc4UM">What is React?</a>
+  - <a href="https://www.youtube.com/watch?v=mrjy92pW0kM">React Native #1: Setup Visual Studio Code</a>
+  - <a href="https://reactnative.dev/docs/environment-setup">Setting up the Environment</a>
+  - <a href="https://reactnative.dev/docs/tutorial?language=javascript">Learn the Basics</a>
+  - <a href="https://www.youtube.com/playlist?list=PLC3y8-rFHvwhiQJD1di4eRVN30WWCXkg1">React Native Tutorial for Beginners</a>
+  - <a href="https://www.youtube.com/watch?v=6ZnfsJ6mM5c">React Native Tutorial for Beginners - Getting Started</a>
 
 </details>
 
