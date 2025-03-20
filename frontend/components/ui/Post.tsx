@@ -1,0 +1,259 @@
+import React from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  Pressable,
+} from "react-native";
+// import { Divider } from "react-native-elements";
+import { LinearGradient } from "expo-linear-gradient";
+import { PostType } from "@/data/posts"; // Import the PostType
+import { FontAwesome } from "@expo/vector-icons";
+
+interface PostProps {
+  post: PostType;
+}
+interface IconProps {
+  imgStyle: any;
+  imgUrl: string;
+}
+
+const Post: React.FC<PostProps> = ({ post }) => {
+  return (
+    <View style={{ marginTop: 20 }}>
+      {/* <Divider width={1} orientation="vertical" /> */}
+      <View style={styles.backPost}>
+        <PostHeader post={post} />
+        <PostDateAndLocation />
+        <PostImage post={post} />
+        <View style={{ marginHorizontal: 15, marginTop: 10 }}>
+          <PostFooter post={post} />
+        </View>
+      </View>
+    </View>
+  );
+};
+
+const PostHeader: React.FC<PostProps> = ({ post }) => {
+  return (
+    <View style={styles.headerView}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Image source={{ uri: post.profile_picture }} style={styles.story} />
+        <Text
+          style={{
+            color: "black",
+            marginLeft: 5,
+            fontWeight: "500",
+          }}
+        >
+          {post.user}
+        </Text>
+        <Text
+          style={{
+            color: "black",
+            marginLeft: 15,
+            fontWeight: "400",
+          }}
+        >
+          {post.time}
+        </Text>
+      </View>
+      <Text style={{ color: "black", fontWeight: "900", marginRight: 20 }}>
+        ...
+      </Text>
+    </View>
+  );
+};
+
+const PostDateLocationIcon = [
+  {
+    name: "Calendar",
+    imageUrl: "https://img.icons8.com/ios/50/calendar--v1.png",
+  },
+  {
+    name: "Location",
+    imageUrl: "https://img.icons8.com/ios/50/place-marker--v1.png",
+  },
+];
+
+const PostDateAndLocation: React.FC = () => (
+  <View style={styles.dateLocation}>
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 5,
+      }}
+    >
+      <Icon
+        imgStyle={styles.dateLocationIcon}
+        imgUrl={PostDateLocationIcon[0].imageUrl}
+      />
+      <Text
+        style={{
+          fontSize: 13,
+          color: "#666",
+          fontWeight: "500",
+          marginLeft: 20,
+        }}
+      >
+        Friday, Oct 25 2025
+      </Text>
+    </View>
+    <View style={{ flexDirection: "row", alignItems: "center", marginTop: 5 }}>
+      <Icon
+        imgStyle={styles.dateLocationIcon}
+        imgUrl={PostDateLocationIcon[1].imageUrl}
+      />
+      <Text
+        style={{
+          fontSize: 13,
+          color: "#666",
+          fontWeight: "500",
+          marginLeft: 20,
+        }}
+      >
+        ECSS 2.410
+      </Text>
+    </View>
+  </View>
+);
+
+const PostImage: React.FC<PostProps> = ({ post }) => (
+  <View style={styles.imagePost}>
+    <Image
+      source={{ uri: post.imageUrl }}
+      style={{
+        width: 370,
+        height: 370,
+        borderRadius: 15,
+      }}
+    />
+  </View>
+);
+
+const PostFooter: React.FC<PostProps> = ({ post }) => (
+  <View>
+    <Caption post={post} />
+    <View
+      style={{ justifyContent: "center", alignItems: "center", paddingTop: 10 }}
+    >
+      <LinearGradient
+        colors={["#FFDCB5", "#FC5E1A", "#FFDCB5"]}
+        locations={[0, 0.5, 1]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={[styles.gradientLine]}
+      />
+    </View>
+    <View style={styles.actionContainer}>
+      <Pressable style={styles.leftFooterIconsContainer}>
+        <FontAwesome name="comment-o" size={20} color="#666" />
+        <Text> </Text>
+        <Text style={styles.actionText}>Comment</Text>
+      </Pressable>
+
+      <Pressable style={styles.rightFooterIconsContainer}>
+        <FontAwesome name="share" size={20} color="#666" />
+        <Text> </Text>
+        <Text style={styles.actionText}>Share</Text>
+      </Pressable>
+    </View>
+  </View>
+);
+
+const Icon: React.FC<IconProps> = ({ imgStyle, imgUrl }) => (
+  <TouchableOpacity>
+    <Image style={imgStyle} source={{ uri: imgUrl }} />
+  </TouchableOpacity>
+);
+
+const Caption: React.FC<PostProps> = ({ post }) => (
+  <View>
+    <Text style={{ fontSize: 16, paddingBottom: 5, paddingLeft: 20 }}>
+      {post.caption}
+    </Text>
+  </View>
+);
+
+export default Post;
+
+const styles = StyleSheet.create({
+  story: {
+    width: 35,
+    height: 35,
+    borderRadius: 50,
+    marginLeft: 6,
+    borderWidth: 1.6,
+    borderColor: "#ff8501",
+  },
+  headerView: {
+    marginTop: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    margin: 5,
+    alignItems: "center",
+  },
+  dateLocation: {
+    width: "85%",
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 10,
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  dateLocationIcon: {
+    width: 22,
+    height: 22,
+    marginLeft: 10,
+  },
+  backPost: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    marginHorizontal: 10,
+    marginTop: 20,
+    paddingBottom: 10,
+    flexGrow: 1, // Allows the container to expand
+  },
+  imagePost: {
+    width: 370,
+    height: 375,
+    resizeMode: "cover",
+    alignSelf: "center",
+  },
+  footerIcon: {
+    width: 32,
+    height: 33,
+    marginLeft: 10,
+    marginTop: 10,
+  },
+  actionContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    borderTopColor: "#eee",
+  },
+  actionText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "500",
+  },
+  leftFooterIconsContainer: {
+    alignItems: "center",
+    flexDirection: "row",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  rightFooterIconsContainer: {
+    alignItems: "center",
+    flexDirection: "row",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  gradientLine: {
+    width: "90%",
+    height: 1,
+  },
+});
