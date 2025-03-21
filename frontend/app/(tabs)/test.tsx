@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, ScrollView, Image, Pressable } from 'react-native';
+import { View, Text, TextInput, Button, ScrollView, Image } from 'react-native';
 import * as ExpoFileSystem from 'expo-file-system'
-import * as ImagePicker from 'expo-image-picker'
+import * as ExpoImagePicker from 'expo-image-picker'
 import * as base64 from 'base64-js'
 import 'react-native-get-random-values'
 import Constants from 'expo-constants';
@@ -43,9 +43,11 @@ export default function AddItemForm() {
   });
 
   const [image, setImage] = useState("")
+  // const [cameraPermission, requestPermission] = ExpoImagePicker.useCameraPermissions()
+  
 
   const selectImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    let result = await ExpoImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images', 'videos'],
       allowsEditing: true,
       aspect: [4, 3],
@@ -58,6 +60,38 @@ export default function AddItemForm() {
       setImage(result.assets[0].uri)
     }
 
+  }
+
+  const takePhoto = async () => {
+    let cameraPermissions = await ExpoImagePicker.getCameraPermissionsAsync()
+    console.log(cameraPermissions)
+    if(!cameraPermissions.granted) {
+      cameraPermissions = await ExpoImagePicker.requestCameraPermissionsAsync()
+    }
+    
+    console.log(cameraPermissions)
+
+    if(cameraPermissions.granted) {
+      let result = await ExpoImagePicker.launchCameraAsync({
+        mediaTypes: ['images', 'videos'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+        cameraType: ExpoImagePicker.CameraType.back
+      })
+  
+      console.log(result)
+  
+      if(!result.canceled) {
+        console.log("BLASH: " + result.assets[0].uri)
+        setImage(result.assets[0].uri)
+      }
+      // console.log("imageeeeee: " + image)
+    } else {
+      console.log("camera permissions were denied")
+    }
+
+    
   }
 
   const uploadImage = async () => {
@@ -81,13 +115,17 @@ export default function AddItemForm() {
       const command = new PutObjectCommand(params as PutObjectCommandInput)
       const data = await s3Client.send(command)
 
-      setForm({...form, image_url: `https://cometclaim-image-bucket.s3.amazonaws.com/uploads/${fileName}`})
+      // setForm({...form, image_url: `https://cometclaim-image-bucket.s3.amazonaws.com/uploads/${fileName}`})
+      // setImage(`https://cometclaim-image-bucket.s3.amazonaws.com/uploads/${fileName}`)
+      // console.log("FORMFORMFORM: \n" + form)
+      // console.log("THIS IS THE IMAGE AT THIS VERY MOMENT: " + image)
       console.log("image uploaded successfully", data)
 
-      
+      return `https://cometclaim-image-bucket.s3.amazonaws.com/uploads/${fileName}`
 
     } catch (err) {
       console.error('Error uploading image', err)
+      return ''
     }
   }
 
@@ -97,13 +135,18 @@ export default function AddItemForm() {
 
   const handleSubmit = async () => {
     try {
-      await uploadImage()
+      const s3URL = await uploadImage()
+      // console.log("THIS IS THE FORM RIGHT NOW: \n" + JSON.stringify(form))
+      if (!s3URL) {
+        throw "Image failed to upload to S3"
+      }
+      
       const response = await fetch(`${apiUrl}/items/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({...form, image_url: s3URL}),
       });
       const data = await response.json();
       console.log('Item added:', data);
@@ -129,8 +172,10 @@ export default function AddItemForm() {
         </View>
       ))}
       <Button title="Select Image" onPress={selectImage} color={"red"} />
+      <Button title="Take Photo" onPress={takePhoto} color={"red"} />
       {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
       <Button title="Submit" onPress={handleSubmit} color="#1E90FF" />
+      <Button title="print test" onPress={() => {console.log("Image" + image)}} />
       <View style={{height:150}}></View>
     </ScrollView>
   );

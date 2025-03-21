@@ -54,6 +54,27 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="tortoise.fill" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="shareScreen"
+        options={{
+          title: 'Share',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="chevron.forward.circle.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          title: 'Notifications',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="bell.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="chatScreen"
+        options={{
+          title: 'Chat',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="bubble.fill" color={color} />,
+        }}
+      />
     </Tabs>
   );
 }
