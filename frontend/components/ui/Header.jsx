@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import React from "react";
+import { router } from "expo-router";
 
 const Header = () => {
   return (
@@ -10,7 +11,7 @@ const Header = () => {
         </Text>
       </TouchableOpacity>
       <View style={styles.iconContainer}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/Search")}>
           <Image
             source={{
               uri: "https://img.icons8.com/ios-filled/80/ffffff/search--v1.png",
@@ -18,7 +19,7 @@ const Header = () => {
             style={styles.icon}
           />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/notifications")}>
           <Image
             source={{
               uri: "https://img.icons8.com/fluency-systems-regular/90/ffffff/appointment-reminders--v1.png",

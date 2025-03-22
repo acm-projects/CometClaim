@@ -1,6 +1,7 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
 import { PostType } from "@/data/posts"; // Import the PostType
+import { router } from "expo-router";
 
 interface PostProps {
   post: PostType;
@@ -13,7 +14,10 @@ interface PostProps {
 const SmallPost: React.FC<PostProps> = ({ post }) => {
   return (
     <View style={{ marginBottom: 10 }}>
-      <TouchableOpacity style={styles.backPost}>
+      <TouchableOpacity
+        style={styles.backPost}
+        onPress={() => router.push("/YourPost")}
+      >
         <PostHeader post={post} />
         <PostImage post={post} />
         <PostFooter post={post} />

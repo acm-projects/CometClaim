@@ -12,6 +12,7 @@ import {
   Image,
 } from "react-native";
 import React from "react";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 
@@ -19,6 +20,7 @@ const LoginScreen = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const router = useRouter();
 
   //Validate username and passwords function
   const validateForm = () => {
@@ -76,14 +78,6 @@ const LoginScreen = () => {
         {errors.password ? (
           <Text style={styles.errorText}>{errors.password}</Text>
         ) : null}
-        {/* <Button
-          title="Login"
-          onPress={() => {
-            // navigation.navigate("HomeScreen");
-            handleSubmit;
-          }}
-          color="FFC480"
-        /> */}
         <TouchableOpacity
           style={{
             backgroundColor: "#FC5E1A",
@@ -92,7 +86,7 @@ const LoginScreen = () => {
             alignItems: "center",
           }}
           onPress={() => {
-            navigation.navigate("HomeScreen");
+            router.push("/(tabs)/HomeScreen");
             handleSubmit();
           }}
         >

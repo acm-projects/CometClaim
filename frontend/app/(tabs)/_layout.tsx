@@ -8,7 +8,7 @@ import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useRoute } from "@react-navigation/native";
-import LoginScreen from "@/app/(tabs)/loginScreen";
+import LoginScreen from "@/app/loginScreen";
 
 export default function TabLayout() {
   const route = useRoute();

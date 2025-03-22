@@ -35,8 +35,14 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="index" />
-        <Stack.Screen name="profile" />
+        <Stack.Screen name="loginScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="EditProfile" options={{ headerShown: false }} />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="Search" options={{ headerShown: false }} />
+        <Stack.Screen name="notifications" options={{ headerShown: false }} />
+        <Stack.Screen name="ShareScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="YourPost" options={{ headerShown: false }} />
+        {/* <Stack.Screen name="CommentScreen" options={{ headerShown: false }} /> */}
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

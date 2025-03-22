@@ -1,14 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 
-const EditProfile = () => {
-  return (
-    <View>
-      <Text>EditProfile</Text>
-    </View>
-  );
+const NotificationPage = () => {
+  return <View></View>;
 };
 
-export default EditProfile;
+export default NotificationPage;
 
 const styles = StyleSheet.create({});

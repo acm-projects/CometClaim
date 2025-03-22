@@ -11,16 +11,18 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { PostType } from "@/data/posts"; // Import the PostType
 import { FontAwesome } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 interface PostProps {
   post: PostType;
+  onShare?: () => void;
 }
 interface IconProps {
   imgStyle: any;
   imgUrl: string;
 }
 
-const Post: React.FC<PostProps> = ({ post }) => {
+const Post: React.FC<PostProps> = ({ post, onShare }) => {
   return (
     <View style={{ marginTop: 20 }}>
       {/* <Divider width={1} orientation="vertical" /> */}
@@ -29,7 +31,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
         <PostDateAndLocation />
         <PostImage post={post} />
         <View style={{ marginHorizontal: 15, marginTop: 10 }}>
-          <PostFooter post={post} />
+          <PostFooter post={post} onShare={onShare} />
         </View>
       </View>
     </View>
@@ -37,6 +39,9 @@ const Post: React.FC<PostProps> = ({ post }) => {
 };
 
 const PostHeader: React.FC<PostProps> = ({ post }) => {
+  const handleDropdownTriggerPress = (key: string) => {
+    console.log("dd trigger pressed: ", key);
+  };
   return (
     <View style={styles.headerView}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -60,9 +65,12 @@ const PostHeader: React.FC<PostProps> = ({ post }) => {
           {post.time}
         </Text>
       </View>
-      <Text style={{ color: "black", fontWeight: "900", marginRight: 20 }}>
-        ...
-      </Text>
+      <Pressable>
+        <Text style={{ color: "black", fontWeight: "900", marginRight: 20 }}>
+          ...
+        </Text>
+      </Pressable>
+      {/* <DropdownComponent /> */}
     </View>
   );
 };
@@ -134,7 +142,7 @@ const PostImage: React.FC<PostProps> = ({ post }) => (
   </View>
 );
 
-const PostFooter: React.FC<PostProps> = ({ post }) => (
+const PostFooter: React.FC<PostProps> = ({ post, onShare }) => (
   <View>
     <Caption post={post} />
     <View
@@ -149,13 +157,16 @@ const PostFooter: React.FC<PostProps> = ({ post }) => (
       />
     </View>
     <View style={styles.actionContainer}>
-      <Pressable style={styles.leftFooterIconsContainer}>
+      <Pressable
+        style={styles.leftFooterIconsContainer}
+        onPress={() => router.push("/CommentScreen")}
+      >
         <FontAwesome name="comment-o" size={20} color="#666" />
         <Text> </Text>
         <Text style={styles.actionText}>Comment</Text>
       </Pressable>
 
-      <Pressable style={styles.rightFooterIconsContainer}>
+      <Pressable style={styles.rightFooterIconsContainer} onPress={onShare}>
         <FontAwesome name="share" size={20} color="#666" />
         <Text> </Text>
         <Text style={styles.actionText}>Share</Text>

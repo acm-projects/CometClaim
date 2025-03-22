@@ -7,13 +7,13 @@ import {
   View,
   Text,
 } from "react-native";
-import Header from "@/components/ui/Header";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Divider } from "react-native-elements";
 import SmallPost from "@/components/ui/SmallPost";
 import { POSTS, PostType } from "@/data/posts";
+import { Link } from "expo-router";
 
 interface PostProps {
   post: PostType;
@@ -28,14 +28,16 @@ const ProfilePage: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.iconContainer}>
-        <TouchableOpacity>
-          <Image
-            source={{
-              uri: "https://img.icons8.com/external-tanah-basah-glyph-tanah-basah/96/external-edit-social-media-ui-tanah-basah-glyph-tanah-basah.png",
-            }}
-            style={styles.icon}
-          />
-        </TouchableOpacity>
+        <Link href="/EditProfile" asChild>
+          <TouchableOpacity>
+            <Image
+              source={{
+                uri: "https://img.icons8.com/external-tanah-basah-glyph-tanah-basah/96/external-edit-social-media-ui-tanah-basah-glyph-tanah-basah.png",
+              }}
+              style={styles.icon}
+            />
+          </TouchableOpacity>
+        </Link>
       </View>
       <ScrollView>
         <View style={{ alignItems: "center", marginVertical: 10 }}>

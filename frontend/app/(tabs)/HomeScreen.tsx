@@ -6,15 +6,29 @@ import {
   Pressable,
   SafeAreaView,
   ScrollView,
+  Modal,
 } from "react-native";
-import React from "react";
-import { StatusBar } from "expo-status-bar";
+import React, { useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import Header from "@/components/ui/Header";
 import Post from "@/components/ui/Post";
 import { POSTS, PostType } from "@/data/posts";
+import ShareScreen from "@/components/ui/ShareScreen"; // <- extract this into its own component
 
 const HomeScreen: React.FC = () => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<PostType | null>(null);
+
+  const openShareModal = (post: PostType) => {
+    setSelectedPost(post);
+    setModalVisible(true);
+  };
+
+  const closeShareModal = () => {
+    setModalVisible(false);
+    setSelectedPost(null);
+  };
+
   return (
     <LinearGradient
       style={styles.container}
@@ -26,9 +40,16 @@ const HomeScreen: React.FC = () => {
         <Header />
         <ScrollView style={{ flex: 1 }}>
           {POSTS.map((post: PostType, index: number) => (
-            <Post post={post} key={index} />
+            <Post
+              post={post}
+              key={index}
+              onShare={() => openShareModal(post)}
+            />
           ))}
         </ScrollView>
+        <Modal transparent={true} visible={modalVisible}>
+          <ShareScreen post={selectedPost} onClose={closeShareModal} />
+        </Modal>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -50,15 +71,15 @@ const styles = StyleSheet.create({
     // backgroundColor: "rgba(0,0,0,0.5)",
     marginBottom: 120,
   },
-  link: {
-    color: "white",
-    fontSize: 42,
-    fontWeight: "bold",
-    textAlign: "center",
-    textDecorationLine: "underline",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    padding: 4,
-  },
+  // link: {
+  //   color: "white",
+  //   fontSize: 42,
+  //   fontWeight: "bold",
+  //   textAlign: "center",
+  //   textDecorationLine: "underline",
+  //   backgroundColor: "rgba(0,0,0,0.5)",
+  //   padding: 4,
+  // },
   button: {
     height: 60,
     borderRadius: 20,
