@@ -13,7 +13,7 @@ interface Item {
   image_url?: string;
 }
 
-const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 
 export default function ItemsListPage() {
   const [items, setItems] = useState<Item[]>([]);
