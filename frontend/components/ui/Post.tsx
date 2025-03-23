@@ -11,25 +11,59 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { PostType } from "@/data/posts"; // Import the PostType
 import { FontAwesome } from "@expo/vector-icons";
+import { router } from "expo-router";
+import Constants from "expo-constants";
+import { useEffect, useState } from "react";
 
 interface PostProps {
   post: PostType;
+  onShare?: () => void;
 }
 interface IconProps {
   imgStyle: any;
   imgUrl: string;
 }
 
-const Post: React.FC<PostProps> = ({ post }) => {
+interface Item {
+  item_id: string;
+  category: string;
+  date_reported: string;
+  description: string;
+  location: string;
+  reporter_id: string;
+  status: string;
+  image_url?: string;
+}
+
+const Post: React.FC<PostProps> = ({ post, onShare }) => {
+  const apiUrl = Constants.expoConfig?.extra?.apiUrl;
+  const [items, setItems] = useState<Item[]>([]);
+
+  useEffect(() => {
+    const getItems = async () => {
+      const res = await fetch(`${apiUrl}/items`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+      setItems(JSON.parse(data.body));
+      console.log(data);
+    };
+    getItems();
+  }, []);
+
   return (
     <View style={{ marginTop: 20 }}>
       {/* <Divider width={1} orientation="vertical" /> */}
       <View style={styles.backPost}>
         <PostHeader post={post} />
         <PostDateAndLocation />
-        <PostImage post={post} />
+        {/* <PostImage post={post} /> */}
+        {items.length > 0 && <PostImage post={post} item={items[0]} />}
         <View style={{ marginHorizontal: 15, marginTop: 10 }}>
-          <PostFooter post={post} />
+          <PostFooter post={post} onShare={onShare} />
         </View>
       </View>
     </View>
@@ -37,6 +71,9 @@ const Post: React.FC<PostProps> = ({ post }) => {
 };
 
 const PostHeader: React.FC<PostProps> = ({ post }) => {
+  const handleDropdownTriggerPress = (key: string) => {
+    console.log("dd trigger pressed: ", key);
+  };
   return (
     <View style={styles.headerView}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -60,9 +97,12 @@ const PostHeader: React.FC<PostProps> = ({ post }) => {
           {post.time}
         </Text>
       </View>
-      <Text style={{ color: "black", fontWeight: "900", marginRight: 20 }}>
-        ...
-      </Text>
+      <Pressable>
+        <Text style={{ color: "black", fontWeight: "900", marginRight: 20 }}>
+          ...
+        </Text>
+      </Pressable>
+      {/* <DropdownComponent /> */}
     </View>
   );
 };
@@ -121,20 +161,34 @@ const PostDateAndLocation: React.FC = () => (
   </View>
 );
 
-const PostImage: React.FC<PostProps> = ({ post }) => (
+const PostImage: React.FC<{ post: PostType; item: Item }> = ({
+  post,
+  item,
+}) => (
   <View style={styles.imagePost}>
-    <Image
+    {/* <Image
       source={{ uri: post.imageUrl }}
       style={{
         width: 370,
         height: 370,
         borderRadius: 15,
       }}
-    />
+    /> */}
+    {item.image_url && (
+      <Image
+        source={{ uri: item.image_url }}
+        style={{
+          width: 370,
+          height: 370,
+          borderRadius: 15,
+        }}
+        alt="TESTING"
+      />
+    )}
   </View>
 );
 
-const PostFooter: React.FC<PostProps> = ({ post }) => (
+const PostFooter: React.FC<PostProps> = ({ post, onShare }) => (
   <View>
     <Caption post={post} />
     <View
@@ -149,13 +203,16 @@ const PostFooter: React.FC<PostProps> = ({ post }) => (
       />
     </View>
     <View style={styles.actionContainer}>
-      <Pressable style={styles.leftFooterIconsContainer}>
+      <Pressable
+        style={styles.leftFooterIconsContainer}
+        onPress={() => router.push("/CommentScreen")}
+      >
         <FontAwesome name="comment-o" size={20} color="#666" />
         <Text> </Text>
         <Text style={styles.actionText}>Comment</Text>
       </Pressable>
 
-      <Pressable style={styles.rightFooterIconsContainer}>
+      <Pressable style={styles.rightFooterIconsContainer} onPress={onShare}>
         <FontAwesome name="share" size={20} color="#666" />
         <Text> </Text>
         <Text style={styles.actionText}>Share</Text>
