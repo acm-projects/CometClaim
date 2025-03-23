@@ -10,7 +10,7 @@ export function ChatMessage(props: ChatMessageProps) {
 
 
     return (
-        <View>
+        <View style={styles.messageView}>
             <Text style={styles.userText}>{props.user}</Text>
             <Text style={styles.messageText}>{props.message}</Text>
         </View>
@@ -19,9 +19,15 @@ export function ChatMessage(props: ChatMessageProps) {
 
 const styles = StyleSheet.create({
     userText: {
-        color: 'gray'
+        color: 'gray',
+        fontStyle: 'italic'
     },
     messageText: {
-        color: 'white'
+        color: 'white',
+        marginLeft: '5%'
+    },
+    messageView: {
+        marginVertical: '5%',
+        marginLeft: '2%'
     }
 })

@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import Checkbox from 'expo-checkbox'
 import { ShareRow } from "@/components/ShareRow";
+import { Link } from "expo-router";
 
 export default function ShareScreenPage () {
 
@@ -107,6 +108,9 @@ export default function ShareScreenPage () {
                 </View>
             </Modal>
             <Button title="Share" onPress={() => setModalVisible(true)}/>
+            <Link href="/commentsScreen">
+            <Text>take me to the comments screen</Text>
+            </Link>
             <Pressable>
                 <Text style={styles.shareButton}>HELLO</Text>
             </Pressable>
