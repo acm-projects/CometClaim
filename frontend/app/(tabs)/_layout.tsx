@@ -49,36 +49,48 @@ export default function TabLayout() {
       <Tabs.Screen
         name="test"
         options={{
-          title: 'Test',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="smiley.fill" color={color} />,
+          title: "Test",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="smiley.fill" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="itemsList"
         options={{
-          title: 'Items',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="tortoise.fill" color={color} />,
+          title: "Items",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="tortoise.fill" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="shareScreen"
         options={{
-          title: 'Share',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="chevron.forward.circle.fill" color={color} />,
+          title: "Share",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol
+              size={28}
+              name="chevron.forward.circle.fill"
+              color={color}
+            />
+          ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="notifications"
         options={{
           title: 'Notifications',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="bell.fill" color={color} />,
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="chatScreen"
         options={{
-          title: 'Chat',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="bubble.fill" color={color} />,
+          title: "Chat",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="bubble.fill" color={color} />
+          ),
         }}
       />
       <Tabs.Screen

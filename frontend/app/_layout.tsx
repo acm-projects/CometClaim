@@ -18,8 +18,8 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    Poppins: require('../assets/fonts/Poppins-Regular.ttf')
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    Poppins: require("../assets/fonts/Poppins-Regular.ttf"),
   });
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export default function RootLayout() {
         <Stack.Screen name="EditProfile" options={{ headerShown: false }} />
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="Search" options={{ headerShown: false }} />
-        <Stack.Screen name="notifications" options={{ headerShown: false }} />
+        {/* <Stack.Screen name="notifications" options={{ headerShown: false }} /> */}
         <Stack.Screen name="ShareScreen" options={{ headerShown: false }} />
         <Stack.Screen name="YourPost" options={{ headerShown: false }} />
         {/* <Stack.Screen name="CommentScreen" options={{ headerShown: false }} /> */}

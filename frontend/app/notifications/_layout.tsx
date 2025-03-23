@@ -1,35 +1,22 @@
 import { Tabs } from "expo-router";
-import { Platform, Text, View, SafeAreaView } from "react-native";
+import React from "react";
+import { Platform, ScrollView, Text, View, SafeAreaView } from "react-native";
+
 import { HapticTab } from "@/components/HapticTab";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet } from "react-native";
-import { router } from "expo-router";
-import { TouchableOpacity } from "react-native";
 
-export default function NotificationsLayout() {
+export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
     <SafeAreaView style={{ backgroundColor: "white", height: "100%" }}>
       <View style={{ height: "8.6%" }}>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          {/* Add back button */}
-          <TouchableOpacity
-            style={{ position: "absolute", left: 15 }}
-            onPress={() => router.back()}
-          >
-            <Text style={{ fontSize: 16, color: "#FC5E1A" }}>Back</Text>
-          </TouchableOpacity>
-
+        <View style={{ flex: 1, justifyContent: "center" }}>
           <Text
             style={{
               color: "black",
@@ -74,6 +61,8 @@ export default function NotificationsLayout() {
           tabBarPosition: "top",
           tabBarStyle: Platform.select({
             ios: {
+              // Use a transparent background on iOS to show the blur effect
+              // position: 'absolute',
               paddingTop: 0,
               justifyContent: "center",
               alignItems: "center",
@@ -115,13 +104,10 @@ export default function NotificationsLayout() {
             ),
           }}
         />
-        <Tabs.Screen
-          name="indexNoti"
-          options={{
-            href: null,
-          }}
-        />
       </Tabs>
+      {/* <View style={{height: 10, backgroundColor: 'white'}}>
+          
+      </View> */}
     </SafeAreaView>
   );
 }
@@ -147,5 +133,6 @@ const styles = StyleSheet.create({
     width: 120,
     textAlign: "center",
     marginVertical: 5,
+    // marginHorizontal: 10
   },
 });

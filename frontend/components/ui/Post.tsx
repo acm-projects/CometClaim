@@ -36,7 +36,7 @@ interface Item {
 }
 
 const Post: React.FC<PostProps> = ({ post, onShare }) => {
-  const apiUrl = Constants.expoConfig?.extra?.apiUrl;
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
   const [items, setItems] = useState<Item[]>([]);
 
   useEffect(() => {

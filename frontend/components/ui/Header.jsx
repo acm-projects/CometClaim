@@ -19,7 +19,9 @@ const Header = () => {
             style={styles.icon}
           />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push("/notifications")}>
+        <TouchableOpacity
+          onPress={() => router.push("/notifications/communityNotifications")}
+        >
           <Image
             source={{
               uri: "https://img.icons8.com/fluency-systems-regular/90/ffffff/appointment-reminders--v1.png",
