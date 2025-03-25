@@ -9,6 +9,8 @@ import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useRoute } from "@react-navigation/native";
 import LoginScreen from "@/app/loginScreen";
+import { FontAwesome6 } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 
 export default function TabLayout() {
   const route = useRoute();
@@ -77,13 +79,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      {/* <Tabs.Screen
-        name="notifications"
-        options={{
-          title: 'Notifications',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="bell.fill" color={color} />,
-        }}
-      /> */}
       <Tabs.Screen
         name="chatScreen"
         options={{
@@ -94,11 +89,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="AddItemScreen"
+        options={{
+          title: "Add",
+          tabBarIcon: ({ color }) => (
+            <AntDesign size={28} name="pluscircleo" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="ProfilePage"
         options={{
           title: "Profile",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <FontAwesome6 name="user-circle" size={28} color={color} />
           ),
         }}
       />
