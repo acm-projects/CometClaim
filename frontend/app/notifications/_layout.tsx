@@ -1,14 +1,22 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Platform, ScrollView, Text, View, SafeAreaView } from "react-native";
+import {
+  Platform,
+  ScrollView,
+  Text,
+  View,
+  SafeAreaView,
+  TouchableOpacity,
+  Pressable,
+} from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet } from "react-native";
+import { router, Link } from "expo-router";
+import { Entypo, Feather, Ionicons } from "@expo/vector-icons";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -16,7 +24,20 @@ export default function TabLayout() {
   return (
     <SafeAreaView style={{ backgroundColor: "white", height: "100%" }}>
       <View style={{ height: "8.6%" }}>
-        <View style={{ flex: 1, justifyContent: "center" }}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "row",
+          }}
+        >
+          <Pressable
+            style={{ position: "absolute", left: 15 }}
+            onPress={() => router.back()}
+          >
+            <Entypo name="chevron-left" size={32} color="black" />
+          </Pressable>
           <Text
             style={{
               color: "black",

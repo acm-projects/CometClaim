@@ -38,7 +38,7 @@ const HomeScreen: React.FC = () => {
     >
       <SafeAreaView style={{ flex: 1 }}>
         <Header />
-        <ScrollView style={{ flex: 1 }}>
+        <ScrollView style={{ flex: 1, marginBottom: 50 }}>
           {POSTS.map((post: PostType, index: number) => (
             <Post
               post={post}

@@ -29,7 +29,7 @@ const Header = () => {
             style={styles.icon}
           />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/messages")}>
           <View style={styles.unreadBadge}>
             <Text style={styles.unreadBadgeText}>1</Text>
           </View>

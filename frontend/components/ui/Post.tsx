@@ -205,7 +205,7 @@ const PostFooter: React.FC<PostProps> = ({ post, onShare }) => (
     <View style={styles.actionContainer}>
       <Pressable
         style={styles.leftFooterIconsContainer}
-        onPress={() => router.push("/CommentScreen")}
+        onPress={() => router.push("/commentsScreen")}
       >
         <FontAwesome name="comment-o" size={20} color="#666" />
         <Text> </Text>

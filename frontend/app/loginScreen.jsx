@@ -49,10 +49,10 @@ const LoginScreen = () => {
       keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
       style={styles.container}
     >
-      <Image
+      {/* <Image
         source={"./assets/images/CometClaim-Logo.png"}
         style={styles.image}
-      ></Image>
+      ></Image> */}
       <Text style={styles.title}>Login or Sign Up</Text>
       <View style={styles.form}>
         <Text style={styles.label}>Username</Text>
