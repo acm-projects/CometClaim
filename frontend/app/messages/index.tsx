@@ -42,6 +42,12 @@ const messages: Message[] = [
     preview: "No worries! I can stop by...",
     timestamp: "Sun",
   },
+  {
+    id: "5",
+    name: "Mohammad Mehrab",
+    preview: "Hello from the client",
+    timestamp: "Today",
+  },
 ];
 
 export default function MessagesScreen() {
