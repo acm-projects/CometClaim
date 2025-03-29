@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,11 +6,17 @@ import {
   Image,
   TouchableOpacity,
   Pressable,
+  Modal,
+  Animated,
+  Easing,
+  Dimensions,
+  PanResponder,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { FontAwesome } from "@expo/vector-icons";
+import { AntDesign, FontAwesome } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
+import * as Haptics from 'expo-haptics'
 
 type PostProps = {
   item: Item;
@@ -19,6 +25,7 @@ type PostProps = {
 
 type PostHeaderProps = {
   user: User;
+  item: Item;
   datetime: string;
 }
 
@@ -94,7 +101,7 @@ export function Post(props: PostProps) {
     <View style={{ marginTop: 20 }}>
       {/* <Divider width={1} orientation="vertical" /> */}
       <View style={styles.backPost}>
-        <PostHeader datetime={props.item.date_reported} user={user} />
+        <PostHeader datetime={props.item.date_reported} user={user} item={props.item}/>
         <PostDateAndLocation datetime={props.item.date_reported} location={props.item.location}/>
         {/* <PostImage post={post} /> */}
         <PostImage image_url={props.item.image_url} />
@@ -109,6 +116,104 @@ export function Post(props: PostProps) {
 
 
 function PostHeader(props: PostHeaderProps) {
+
+  const screenHeight = Dimensions.get('window').height
+
+  const [modalVisible, setModalVisible] = useState(false)
+
+  const slideAnim = useRef(new Animated.Value(screenHeight)).current
+
+  const slideUp = () => {
+    setModalVisible(true);
+
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 200,
+      // easing: Easing.out(Easing.exp),
+      useNativeDriver: true
+    }).start()
+  }
+
+  const slideDown = () => {
+    Animated.timing(slideAnim, {
+      toValue: screenHeight,
+      duration: 200,
+      // easing: Easing.in(Easing.exp),
+      useNativeDriver: true
+    }).start()
+  }
+
+  const fadeAnim = useRef(new Animated.Value(0)).current
+
+  const fadeIn = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start()
+  }
+
+  const fadeOut = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start()
+  }
+
+  const openModal = () => {
+    setModalVisible(true); 
+    slideUp()
+    fadeIn()
+  }
+
+  const closeModal = () => {
+    slideDown()
+    fadeOut()
+    setTimeout(() => {
+      setModalVisible(false); 
+    }, 500);
+  }
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: (e, gestureState) => {
+        if(gestureState.dy > 0) {
+          slideAnim.setValue(gestureState.dy)
+        } else if(gestureState.dy < 0 && gestureState.dy > -10) {
+          slideAnim.setValue(gestureState.dy)
+        }
+      },
+      onPanResponderRelease(e, gestureState) {
+          if(gestureState.dy > 100) {
+            closeModal()
+          } else {
+            Animated.spring(slideAnim, {
+              toValue: 0,
+              useNativeDriver: true,
+            }).start()
+          }
+      },
+    })
+  ).current
+
+  const markItemAsFound = () => {
+    const sendFoundRequest = async () => {
+      await fetch(`${process.env.EXPO_PUBLIC_API_URL}/items/${props.item.item_id}`, {
+        method: 'PATCH',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          status: "found"
+        })
+      })
+    }
+    sendFoundRequest()
+  }
+
 
   const handleDropdownTriggerPress = (key: string) => {
     console.log("dd trigger pressed: ", key);
@@ -161,11 +266,38 @@ function PostHeader(props: PostHeaderProps) {
           {datetimeToHowLongAgo(props.datetime)}
         </Text>
       </View>
-      <Pressable>
+      <Pressable onPress={() => openModal()}>
         <Text style={{ color: "black", fontWeight: "900", marginRight: 20 }}>
           ...
         </Text>
       </Pressable>
+      <Modal
+        animationType="none"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          closeModal()
+        }}
+        >
+          <Animated.View style={{height: '100%', opacity: fadeAnim, backgroundColor: '#000000AA'}}>
+            <Pressable style={{flex: 1}} onPress={closeModal}>
+
+            </Pressable>
+            <Animated.View {...panResponder.panHandlers} style={{borderRadius: 20, height: '80%', transform: [{translateY: slideAnim}], marginTop: 'auto', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff'}}>
+              <View style={{height: 100, width: 100}}>
+                <Pressable style={{flex: 1, justifyContent: 'center', alignItems: 'center'}} onPress={() => {Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy); markItemAsFound();}}>
+                  <AntDesign name='checkcircle' size={90} color={'#f27c1b'} />
+                </Pressable>
+              </View>
+              <View style={{height: 30, backgroundColor: '#f27c1b', borderRadius: 10, width: 80}}>
+                <Pressable style={{flex: 1, justifyContent: 'center', alignItems: 'center'}} onPress={() => closeModal()}>
+                  <Text>Close</Text>
+                </Pressable>
+              </View>
+              
+            </Animated.View>
+          </Animated.View>
+      </Modal>
     </View>
   );
 };
