@@ -7,24 +7,45 @@ import {
   TouchableOpacity,
   Pressable,
 } from "react-native";
-// import { Divider } from "react-native-elements";
 import { LinearGradient } from "expo-linear-gradient";
-import { PostType } from "@/data/posts"; // Import the PostType
 import { FontAwesome } from "@expo/vector-icons";
 import { router } from "expo-router";
-import Constants from "expo-constants";
 import { useEffect, useState } from "react";
 
-interface PostProps {
-  post: PostType;
-  onShare?: () => void;
+type PostProps = {
+  item: Item;
+  onShare: () => void;
 }
-interface IconProps {
+
+type PostHeaderProps = {
+  user: User;
+  datetime: string;
+}
+
+type PostDateAndLocationProps = {
+  datetime: string;
+  location: string;
+}
+
+type PostImageProps = {
+  image_url?: string;
+}
+
+type PostFooterProps = {
+  description: string;
+  onShare: () => void;
+}
+
+type IconProps = {
   imgStyle: any;
   imgUrl: string;
 }
 
-interface Item {
+type CaptionProps = {
+  caption: string;
+}
+
+export type Item = {
   item_id: string;
   category: string;
   date_reported: string;
@@ -35,49 +56,92 @@ interface Item {
   image_url?: string;
 }
 
-const Post: React.FC<PostProps> = ({ post, onShare }) => {
-  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-  const [items, setItems] = useState<Item[]>([]);
+export type User = {
+  user_id: string;
+  user_email: string;
+  user_name: string;
+  user_phone: string;
+  user_profile_picture: string;
+}
+
+const apiUrl = process.env.EXPO_PUBLIC_API_URL
+
+const defaultUser: User = {
+  user_id: "123",
+  user_email: "default@example.com",
+  user_name: "default",
+  user_phone: "000-000-0000",
+  user_profile_picture: "https://s3.amazonaws.com/37assets/svn/765-default-avatar.png"
+}
+
+
+export function Post(props: PostProps) {
+
+  const [user, setUser] = useState<any>(defaultUser)
 
   useEffect(() => {
-    const getItems = async () => {
-      const res = await fetch(`${apiUrl}/items`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await res.json();
-      setItems(JSON.parse(data.body));
-      console.log(data);
-    };
-    getItems();
-  }, []);
+    async function getUserData() {
+      const res = await fetch(`${apiUrl}/users/${props.item.reporter_id}`)
+      const data = await res.json()
+      if(data.body) {
+        setUser(JSON.parse(data.body))
+      }
+    }
+    getUserData()
+  }, [])
 
   return (
     <View style={{ marginTop: 20 }}>
       {/* <Divider width={1} orientation="vertical" /> */}
       <View style={styles.backPost}>
-        <PostHeader post={post} />
-        <PostDateAndLocation />
+        <PostHeader datetime={props.item.date_reported} user={user} />
+        <PostDateAndLocation datetime={props.item.date_reported} location={props.item.location}/>
         {/* <PostImage post={post} /> */}
-        {items.length > 0 && <PostImage post={post} item={items[0]} />}
+        <PostImage image_url={props.item.image_url} />
         <View style={{ marginHorizontal: 15, marginTop: 10 }}>
-          <PostFooter post={post} onShare={onShare} />
+          <PostFooter description={props.item.description} onShare={props.onShare} />
         </View>
       </View>
     </View>
   );
 };
 
-const PostHeader: React.FC<PostProps> = ({ post }) => {
+
+
+function PostHeader(props: PostHeaderProps) {
+
   const handleDropdownTriggerPress = (key: string) => {
     console.log("dd trigger pressed: ", key);
   };
+
+  function datetimeToHowLongAgo(datetime: string) {
+    const timeDifferenceInMilliseconds = Date.now() - Date.parse(datetime)
+    
+    const timeDifferenceInSeconds = Math.floor(timeDifferenceInMilliseconds / 1000)
+    if(timeDifferenceInSeconds < 60) return `${timeDifferenceInSeconds}s`
+    
+    const timeDifferenceInMinutes = Math.floor(timeDifferenceInSeconds / 60)
+    if(timeDifferenceInMinutes < 60) return `${timeDifferenceInMinutes}m`
+
+    const timeDifferenceInHours = Math.floor(timeDifferenceInMinutes / 60)
+    if(timeDifferenceInHours < 24) return `${timeDifferenceInHours}h`
+
+    const timeDifferenceInDays = Math.floor(timeDifferenceInHours / 24)
+    if(timeDifferenceInDays < 31) return `${timeDifferenceInDays}d`
+
+    const timeDifferenceInMonths = Math.floor(timeDifferenceInDays / 31)
+    if(timeDifferenceInMonths < 12) return `${timeDifferenceInMonths}mo`
+
+    const timeDifferenceInYears = Math.floor(timeDifferenceInMonths / 12)
+    return `${timeDifferenceInYears}y`
+  }
+
+  
+
   return (
     <View style={styles.headerView}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Image source={{ uri: post.profile_picture }} style={styles.story} />
+        <Image source={{ uri: props.user.user_profile_picture }} style={styles.story} />
         <Text
           style={{
             color: "black",
@@ -85,7 +149,7 @@ const PostHeader: React.FC<PostProps> = ({ post }) => {
             fontWeight: "500",
           }}
         >
-          {post.user}
+          {props.user.user_name}
         </Text>
         <Text
           style={{
@@ -94,7 +158,7 @@ const PostHeader: React.FC<PostProps> = ({ post }) => {
             fontWeight: "400",
           }}
         >
-          {post.time}
+          {datetimeToHowLongAgo(props.datetime)}
         </Text>
       </View>
       <Pressable>
@@ -102,23 +166,27 @@ const PostHeader: React.FC<PostProps> = ({ post }) => {
           ...
         </Text>
       </Pressable>
-      {/* <DropdownComponent /> */}
     </View>
   );
 };
 
-const PostDateLocationIcon = [
-  {
-    name: "Calendar",
-    imageUrl: "https://img.icons8.com/ios/50/calendar--v1.png",
-  },
-  {
-    name: "Location",
-    imageUrl: "https://img.icons8.com/ios/50/place-marker--v1.png",
-  },
-];
 
-const PostDateAndLocation: React.FC = () => (
+function PostDateAndLocation(props: PostDateAndLocationProps) {
+  const getDateString = (datetime: string) => {
+    const dateOptions: Intl.DateTimeFormatOptions = {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }
+
+    const postDate = new Date(props.datetime)
+
+    return postDate.toLocaleDateString('en-US', dateOptions)
+
+  }
+  
+  return (
   <View style={styles.dateLocation}>
     <View
       style={{
@@ -129,7 +197,7 @@ const PostDateAndLocation: React.FC = () => (
     >
       <Icon
         imgStyle={styles.dateLocationIcon}
-        imgUrl={PostDateLocationIcon[0].imageUrl}
+        imgUrl={"https://img.icons8.com/ios/50/calendar--v1.png"}
       />
       <Text
         style={{
@@ -139,13 +207,13 @@ const PostDateAndLocation: React.FC = () => (
           marginLeft: 20,
         }}
       >
-        Friday, Oct 25 2025
+        {getDateString(props.datetime)}
       </Text>
     </View>
     <View style={{ flexDirection: "row", alignItems: "center", marginTop: 5 }}>
       <Icon
         imgStyle={styles.dateLocationIcon}
-        imgUrl={PostDateLocationIcon[1].imageUrl}
+        imgUrl={"https://img.icons8.com/ios/50/place-marker--v1.png"}
       />
       <Text
         style={{
@@ -155,42 +223,33 @@ const PostDateAndLocation: React.FC = () => (
           marginLeft: 20,
         }}
       >
-        ECSS 2.410
+        {props.location}
       </Text>
     </View>
   </View>
-);
+  );
+}
 
-const PostImage: React.FC<{ post: PostType; item: Item }> = ({
-  post,
-  item,
-}) => (
+function PostImage(props: PostImageProps) {
+  return (
   <View style={styles.imagePost}>
-    {/* <Image
-      source={{ uri: post.imageUrl }}
+    <Image
+      source={{ uri: props.image_url ? props.image_url : "https://media.istockphoto.com/id/1409329028/vector/no-picture-available-placeholder-thumbnail-icon-illustration-design.jpg?s=612x612&w=0&k=20&c=_zOuJu755g2eEUioiOUdz_mHKJQJn-tDgIAhQzyeKUQ=" }}
       style={{
         width: 370,
         height: 370,
         borderRadius: 15,
       }}
-    /> */}
-    {item.image_url && (
-      <Image
-        source={{ uri: item.image_url }}
-        style={{
-          width: 370,
-          height: 370,
-          borderRadius: 15,
-        }}
-        alt="TESTING"
-      />
-    )}
+      alt="TESTING"
+    />
   </View>
-);
+  )
+}
 
-const PostFooter: React.FC<PostProps> = ({ post, onShare }) => (
+function PostFooter(props: PostFooterProps) {
+  return (
   <View>
-    <Caption post={post} />
+    <Caption caption={props.description} />
     <View
       style={{ justifyContent: "center", alignItems: "center", paddingTop: 10 }}
     >
@@ -212,30 +271,33 @@ const PostFooter: React.FC<PostProps> = ({ post, onShare }) => (
         <Text style={styles.actionText}>Comment</Text>
       </Pressable>
 
-      <Pressable style={styles.rightFooterIconsContainer} onPress={onShare}>
+      <Pressable style={styles.rightFooterIconsContainer} onPress={props.onShare}>
         <FontAwesome name="share" size={20} color="#666" />
         <Text> </Text>
         <Text style={styles.actionText}>Share</Text>
       </Pressable>
     </View>
   </View>
-);
+  )
+}
 
-const Icon: React.FC<IconProps> = ({ imgStyle, imgUrl }) => (
-  <TouchableOpacity>
-    <Image style={imgStyle} source={{ uri: imgUrl }} />
-  </TouchableOpacity>
-);
+function Icon(props: IconProps) {
+  return (
+    <TouchableOpacity>
+      <Image style={props.imgStyle} source={{ uri: props.imgUrl }} />
+    </TouchableOpacity>
+  );
+}
 
-const Caption: React.FC<PostProps> = ({ post }) => (
-  <View>
-    <Text style={{ fontSize: 16, paddingBottom: 5, paddingLeft: 20 }}>
-      {post.caption}
-    </Text>
-  </View>
-);
-
-export default Post;
+function Caption(props: CaptionProps) {
+  return (
+    <View>
+      <Text style={{ fontSize: 16, paddingBottom: 5, paddingLeft: 20 }}>
+        {props.caption}
+      </Text>
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   story: {
