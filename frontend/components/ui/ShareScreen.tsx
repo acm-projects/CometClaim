@@ -18,13 +18,14 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import Checkbox from "expo-checkbox";
 import { ShareRow } from "@/components/ShareRow";
 import { PostType } from "@/data/posts"; // Import the PostType
+import { Item } from "./Post";
 
 interface ShareScreenProps {
-  post: PostType | null;
+  item: Item | null;
   onClose: () => void;
 }
 
-export default function ShareScreenPage({ post, onClose }: ShareScreenProps) {
+export default function ShareScreenPage({ item, onClose }: ShareScreenProps) {
   const [message, setMessage] = useState("");
 
   return (

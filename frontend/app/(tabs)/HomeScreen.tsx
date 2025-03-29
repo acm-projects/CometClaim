@@ -8,26 +8,42 @@ import {
   ScrollView,
   Modal,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import Header from "@/components/ui/Header";
-import Post from "@/components/ui/Post";
+import { Post, Item } from "@/components/ui/Post";
 import { POSTS, PostType } from "@/data/posts";
-import ShareScreen from "@/components/ui/ShareScreen"; // <- extract this into its own component
+import ShareScreen from "@/components/ui/ShareScreen"; // <- extract this into its own component 
+
+
 
 const HomeScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPost, setSelectedPost] = useState<PostType | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
-  const openShareModal = (post: PostType) => {
-    setSelectedPost(post);
+  const openShareModal = (item: Item) => {
+    setSelectedItem(item);
     setModalVisible(true);
   };
 
   const closeShareModal = () => {
     setModalVisible(false);
-    setSelectedPost(null);
+    setSelectedItem(null);
   };
+
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL
+
+  const [items, setItems] = useState<Item[]>([])
+
+  useEffect(() => {
+    async function getItems() {
+      const res = await fetch(`${apiUrl}/items`)
+      const data = await res.json()
+      setItems(JSON.parse(data.body))
+    }
+    getItems()
+  }, [])
+
 
   return (
     <LinearGradient
@@ -38,17 +54,17 @@ const HomeScreen: React.FC = () => {
     >
       <SafeAreaView style={{ flex: 1 }}>
         <Header />
-        <ScrollView style={{ flex: 1, marginBottom: 50 }}>
-          {POSTS.map((post: PostType, index: number) => (
+        <ScrollView style={{ flex: 1 }}>
+          {items.map((item: Item, index: number) => (
             <Post
-              post={post}
+              item={item}
               key={index}
-              onShare={() => openShareModal(post)}
+              onShare={() => openShareModal(item)}
             />
           ))}
         </ScrollView>
         <Modal transparent={true} visible={modalVisible}>
-          <ShareScreen post={selectedPost} onClose={closeShareModal} />
+          <ShareScreen item={selectedItem} onClose={closeShareModal} />
         </Modal>
       </SafeAreaView>
     </LinearGradient>
