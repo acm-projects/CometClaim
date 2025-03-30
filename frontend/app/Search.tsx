@@ -9,13 +9,14 @@ import {
   ScrollView,
   Platform,
   KeyboardAvoidingView,
+  Pressable,
 } from "react-native";
 import React from "react";
 import { useState } from "react";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import FilterAccordion from "@/components/ui/FilterAccordion";
-import { X } from "react-native-feather";
+import { Entypo } from "@expo/vector-icons";
 
 const locationOptions = [
   { id: "ecsn", label: "ECSN" },
@@ -99,36 +100,37 @@ const Search = () => {
   const clearSearch = () => {
     setSearchQuery("");
   };
+  const [messageInput, setMessageInput] = useState<string>("");
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <LinearGradient
-        style={styles.container}
-        colors={["#FFC480", "#FC5E1A"]}
-        start={{ x: 0.5, y: 0.8 }}
+        colors={["#FFDCB5", "#FC5E1A"]}
+        start={{ x: 0.5, y: 1.5 }}
         end={{ x: 0.5, y: 0 }}
+        style={{ paddingTop: 20 }}
       >
-        <SafeAreaView>
-          <View style={styles.viewContainer}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              style={{ paddingRight: 10 }}
-            >
-              <Image
-                source={{
-                  uri: "https://img.icons8.com/ios-filled/70/ffffff/back.png",
-                }}
-                style={styles.icon}
-              />
-            </TouchableOpacity>
-            <SearchHeader />
-          </View>
-        </SafeAreaView>
+        <View style={styles.inputContainer}>
+          <Pressable
+            style={{ marginLeft: "0.5%" }}
+            onPress={() => router.back()}
+          >
+            <Entypo name="chevron-left" size={32} color="white" />
+          </Pressable>
+          <TextInput
+            style={styles.input}
+            value={messageInput}
+            onChangeText={setMessageInput}
+            placeholder="Search"
+            placeholderTextColor="#DD8843"
+            inlineImageLeft="search_icon"
+          />
+        </View>
       </LinearGradient>
       <View style={styles.searchWords}>
-        <ScrollView style={{ flexGrow: 1 }}>
+        <ScrollView style={{}}>
           <FilterAccordion
             title="Location"
             options={locationOptions}
@@ -152,35 +154,6 @@ const Search = () => {
     </KeyboardAvoidingView>
   );
 };
-
-const SearchHeader: React.FC = () => (
-  <SafeAreaView style={{ flex: 1 }}>
-    <TextInput
-      placeholder="Search"
-      clearButtonMode="always"
-      placeholderTextColor="#121212"
-      style={styles.searchBox}
-      autoCorrect={false}
-      // value={searchQuery}
-      // onChangeText={(query) => handleSearch(query)}
-    />
-  </SafeAreaView>
-  // <View style={styles.searchInputContainer}>
-  //   <Search width={20} height={20} color="#666" style={styles.searchIcon} />
-  //   <TextInput
-  //     style={styles.searchInput}
-  //     placeholder="Search"
-  //     value={searchQuery}
-  //     onChangeText={setSearchQuery}
-  //     placeholderTextColor="#666"
-  //   />
-  //   {searchQuery.length > 0 && (
-  //     <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
-  //       <X width={20} height={20} color="#666" />
-  //     </TouchableOpacity>
-  //   )}
-  // </View>
-);
 
 export default Search;
 
@@ -206,28 +179,50 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 300,
     borderRadius: 15,
-    flexGrow: 1,
+    flex: 1,
     backgroundColor: "#FFDCB5", // Background color
-    // color: "#000000", // Text color
   },
   icon: {
     // flex: 1,
     width: 25,
     height: 25,
     resizeMode: "contain",
-    marginRight: 20,
+    marginLeft: 10,
   },
   searchWords: {
-    flex: 6,
+    flex: 1,
     backgroundColor: "white",
-    // borderTopLeftRadius: 20,
-    // borderTopRightRadius: 20,
-    marginTop: -20, // Creates an overlapping effect
-    paddingTop: 10,
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: -2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 3,
+    // marginTop: // Creates an overlapping effect
+    // paddingTop: 10,
     elevation: 5,
+  },
+  headerContainer: {
+    marginTop: 50,
+    margin: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    height: 40,
+  },
+  input: {
+    flex: 1,
+    height: 45,
+    borderWidth: 1,
+    borderColor: "#FFDAA3",
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    backgroundColor: "#FFDAA3",
+    marginRight: 10,
+    fontSize: 15,
+    color: "#333",
+    marginLeft: 25,
+    fontWeight: 500,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    marginTop: 30,
   },
 });

@@ -46,6 +46,8 @@ export default function RootLayout() {
         <Stack.Screen name="YourPost" options={{ headerShown: false }} />
         <Stack.Screen name="messages/index" options={{ headerShown: false }} />
         <Stack.Screen name="messages/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="ChatScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="seePost" options={{ headerShown: false }} />
 
         {/* <Stack.Screen name="CommentScreen" options={{ headerShown: false }} /> */}
       </Stack>

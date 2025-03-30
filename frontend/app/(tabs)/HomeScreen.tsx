@@ -14,10 +14,20 @@ import Header from "@/components/ui/Header";
 import Post from "@/components/ui/Post";
 import { POSTS, PostType } from "@/data/posts";
 import ShareScreen from "@/components/ui/ShareScreen"; // <- extract this into its own component
+// import ChatbotButton from "@/components/ui/ChatbotButton";
+import { router } from "expo-router";
+import { FloatingAction } from "react-native-floating-action";
+import { ChatMessage } from "@/components/ChatMessage";
+import ChatScreen from "../chatScreenTest";
+import ChatbotButton from "@/components/ui/ChatbotButton";
 
 const HomeScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPost, setSelectedPost] = useState<PostType | null>(null);
+
+  const handleButtonPress = () => {
+    router.push("/ChatScreen");
+  };
 
   const openShareModal = (post: PostType) => {
     setSelectedPost(post);
@@ -51,6 +61,7 @@ const HomeScreen: React.FC = () => {
           <ShareScreen post={selectedPost} onClose={closeShareModal} />
         </Modal>
       </SafeAreaView>
+      <ChatbotButton />
     </LinearGradient>
   );
 };

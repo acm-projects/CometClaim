@@ -17,7 +17,6 @@ import { router } from "expo-router";
 const YourPostHeader: React.FC = () => {
   return (
     <LinearGradient
-      style={styles.container}
       colors={["#FFDCB5", "#FC5E1A"]}
       start={{ x: 0.5, y: 1.5 }}
       end={{ x: 0.5, y: 0 }}
@@ -51,12 +50,6 @@ const YourPostHeader: React.FC = () => {
 export default YourPostHeader;
 
 const styles = StyleSheet.create({
-  container: {
-    // flexDirection: "row",
-    // flexGrow: 1,
-    // alignContent: "center",
-    // justifyContent: "center",
-  },
   icon: {
     width: 30,
     height: 30,

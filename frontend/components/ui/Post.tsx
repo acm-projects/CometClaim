@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   Pressable,
+  Touchable,
 } from "react-native";
 // import { Divider } from "react-native-elements";
 import { LinearGradient } from "expo-linear-gradient";
@@ -57,7 +58,10 @@ const Post: React.FC<PostProps> = ({ post, onShare }) => {
   return (
     <View style={{ marginTop: 20 }}>
       {/* <Divider width={1} orientation="vertical" /> */}
-      <View style={styles.backPost}>
+      <Pressable
+        style={styles.backPost}
+        onPress={() => router.push("/seePost")}
+      >
         <PostHeader post={post} />
         <PostDateAndLocation />
         {/* <PostImage post={post} /> */}
@@ -65,7 +69,7 @@ const Post: React.FC<PostProps> = ({ post, onShare }) => {
         <View style={{ marginHorizontal: 15, marginTop: 10 }}>
           <PostFooter post={post} onShare={onShare} />
         </View>
-      </View>
+      </Pressable>
     </View>
   );
 };
@@ -76,7 +80,7 @@ const PostHeader: React.FC<PostProps> = ({ post }) => {
   };
   return (
     <View style={styles.headerView}>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <TouchableOpacity style={{ flexDirection: "row", alignItems: "center" }}>
         <Image source={{ uri: post.profile_picture }} style={styles.story} />
         <Text
           style={{
@@ -96,7 +100,7 @@ const PostHeader: React.FC<PostProps> = ({ post }) => {
         >
           {post.time}
         </Text>
-      </View>
+      </TouchableOpacity>
       <Pressable>
         <Text style={{ color: "black", fontWeight: "900", marginRight: 20 }}>
           ...
@@ -166,14 +170,6 @@ const PostImage: React.FC<{ post: PostType; item: Item }> = ({
   item,
 }) => (
   <View style={styles.imagePost}>
-    {/* <Image
-      source={{ uri: post.imageUrl }}
-      style={{
-        width: 370,
-        height: 370,
-        borderRadius: 15,
-      }}
-    /> */}
     {item.image_url && (
       <Image
         source={{ uri: item.image_url }}
