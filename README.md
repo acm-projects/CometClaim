@@ -311,3 +311,5 @@ UTD's Lost and Found system needs a digital upgrade to improve convenience. Inst
 - Neeharika Dasaraju
 - Jason Luu - Project Manager
 - Suraj Khosla - Industry Mentor
+
+- ![image](https://drive.google.com/uc?export=view&id=1ScHWq3ZK2JO1rqmCB1a60ch8cGM7HNDD)
