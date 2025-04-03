@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
-import { signUp, confirmSignUp, signIn, signOut } from './Signup';
+import { signUp, confirmSignUp, signIn, signOut } from './(tabs)/Signup';
 const App: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
