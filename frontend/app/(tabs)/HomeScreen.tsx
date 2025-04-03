@@ -13,9 +13,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import Header from "@/components/ui/Header";
 import { Post, Item } from "@/components/ui/Post";
 import { POSTS, PostType } from "@/data/posts";
-import ShareScreen from "@/components/ui/ShareScreen"; // <- extract this into its own component 
-
-
+import ShareScreen from "@/components/ui/ShareScreen"; // <- extract this into its own component
+import ChatbotButton from "@/components/ui/ChatbotButton";
 
 const HomeScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -31,19 +30,18 @@ const HomeScreen: React.FC = () => {
     setSelectedItem(null);
   };
 
-  const apiUrl = process.env.EXPO_PUBLIC_API_URL
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-  const [items, setItems] = useState<Item[]>([])
+  const [items, setItems] = useState<Item[]>([]);
 
   useEffect(() => {
     async function getItems() {
-      const res = await fetch(`${apiUrl}/items`)
-      const data = await res.json()
-      setItems(JSON.parse(data.body))
+      const res = await fetch(`${apiUrl}/items`);
+      const data = await res.json();
+      setItems(JSON.parse(data.body));
     }
-    getItems()
-  }, [])
-
+    getItems();
+  }, []);
 
   return (
     <LinearGradient
@@ -67,6 +65,7 @@ const HomeScreen: React.FC = () => {
           <ShareScreen item={selectedItem} onClose={closeShareModal} />
         </Modal>
       </SafeAreaView>
+      <ChatbotButton />
     </LinearGradient>
   );
 };
