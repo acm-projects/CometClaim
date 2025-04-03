@@ -179,7 +179,7 @@
 //   },
 // });
 
-import { Tabs, router } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { Platform, Image, Pressable, StyleSheet } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -206,6 +206,8 @@ interface TabBarIconProps {
 const BOUNCE_DURATION = 200;
 
 export default function TabLayout() {
+  const router = useRouter();
+
   const colorScheme = useColorScheme();
 
   // Create the shared value at the component level

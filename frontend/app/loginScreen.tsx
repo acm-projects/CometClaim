@@ -19,12 +19,12 @@ import { NavigationContainer, useNavigation } from "@react-navigation/native";
 const LoginScreen = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({ username: "", password: "" });
   const router = useRouter();
 
   //Validate username and passwords function
   const validateForm = () => {
-    let errors = {};
+    let errors = { username: "", password: "" };
     if (!username) errors.username = "Username is required";
     if (!password) errors.password = "Password is required";
 
@@ -38,7 +38,7 @@ const LoginScreen = () => {
       console.log("Submitted", username, password);
       setUsername("");
       setPassword("");
-      setErrors({});
+      setErrors({ username: "", password: "" });
     }
   };
   const navigation = useNavigation();

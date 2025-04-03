@@ -1,10 +1,13 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
-import LoginScreen from "@/app/loginScreen";
+import Login from "@/app/loginScreen";
 import HomeScreen from "./app/(tabs)/HomeScreen";
+import LoginScreen from "@/app/loginScreen";
+import ProfilePage from "./app/(tabs)/ProfilePage";
+import Search from "@/app/Search";
 
 const App = () => {
-  return <LoginScreen />;
+  return <HomeScreen />;
 };
 
 export default App;
