@@ -9,13 +9,18 @@ import {
   ScrollView,
   Platform,
   KeyboardAvoidingView,
+  Pressable,
+  FlatList,
+  ActivityIndicator,
 } from "react-native";
-import React from "react";
-import { useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import FilterAccordion from "@/components/ui/FilterAccordion";
-import { X } from "react-native-feather";
+import { Entypo } from "@expo/vector-icons";
+// import { SearchableFlatList } from "react-native-searchable-list";
+import { sampleItems, type Item } from "@/data/sampleData";
+import ItemCard from "@/components/ui/ItemCard";
 
 const locationOptions = [
   { id: "ecsn", label: "ECSN" },
@@ -57,20 +62,74 @@ const colorOptions = [
 ];
 
 const Search = () => {
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
   const [searchQuery, setSearchQuery] = useState("");
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
-  const [selectedLocations, setSelectedLocations] = useState<string[]>([
-    "ecsn",
-    "ecss",
-    "ecsw",
-  ]);
-  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([
-    "airpods",
-    "keys",
-  ]);
-  const [selectedColors, setSelectedColors] = useState<string[]>(["orange"]);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+
+  // State for filtered items
+  const [items, setItems] = useState<Item[]>([]);
+
+  // Apply filters when dependencies change
+  // useEffect(() => {
+  //   async function getItems() {
+  //     const res = await fetch(`${apiUrl}/items`);
+  //     const data = await res.json();
+  //     setItems(JSON.parse(data.body));
+  //   }
+  //   getItems();
+  // }, []);
+
+  const [filteredItems, setFilteredItems] = useState<Item[]>(sampleItems);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Filter items based on search query and selected filters
+  const filterItems = useCallback(() => {
+    setIsLoading(true);
+
+    // Start with all items
+    let results = [...sampleItems];
+
+    // Filter by search query
+    if (searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase().trim();
+      results = results.filter(
+        (item) =>
+          item.category.toLowerCase().includes(query) ||
+          item.description.toLowerCase().includes(query) ||
+          item.keywords.some((keyword) => keyword.toLowerCase().includes(query))
+      );
+    }
+
+    // Filter by selected locations
+    if (selectedLocations.length > 0) {
+      results = results.filter((item) =>
+        selectedLocations.includes(item.location)
+      );
+    }
+
+    // Filter by selected keywords
+    if (selectedKeywords.length > 0) {
+      results = results.filter((item) =>
+        item.keywords.some((keyword) => selectedKeywords.includes(keyword))
+      );
+    }
+
+    // Filter by selected colors
+    if (selectedColors.length > 0) {
+      results = results.filter((item) => selectedColors.includes(item.color));
+    }
+
+    // Update filtered items
+    setFilteredItems(results);
+    setIsLoading(false);
+  }, [searchQuery, selectedLocations, selectedKeywords, selectedColors]);
 
   const toggleLocationOption = (optionId: string) => {
     setSelectedLocations((prev) =>
@@ -96,91 +155,135 @@ const Search = () => {
     );
   };
 
+  // Clear search and filters
   const clearSearch = () => {
     setSearchQuery("");
+    setSelectedLocations([]);
+    setSelectedKeywords([]);
+    setSelectedColors([]);
   };
+
+  // Toggle filter visibility
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+
+  // Render item for FlatList
+  const renderItem = ({ item }: { item: Item }) => <ItemCard item={item} />;
+  const [messageInput, setMessageInput] = useState<string>("");
+  // Render empty state
+  const renderEmptyState = () => (
+    <View style={styles.emptyState}>
+      <Image
+        source={{ uri: "https://img.icons8.com/ios-filled/100/search--v1.png" }}
+        style={styles.emptyStateIcon}
+      />
+      <Text style={styles.emptyStateTitle}>No items found</Text>
+      <Text style={styles.emptyStateText}>
+        Try adjusting your search or filters to find what you're looking for.
+      </Text>
+      <TouchableOpacity style={styles.clearButton} onPress={clearSearch}>
+        <Text style={styles.clearButtonText}>Clear All Filters</Text>
+      </TouchableOpacity>
+    </View>
+  );
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <LinearGradient
-        style={styles.container}
-        colors={["#FFC480", "#FC5E1A"]}
-        start={{ x: 0.5, y: 0.8 }}
+        colors={["#FFDCB5", "#FC5E1A"]}
+        start={{ x: 0.5, y: 1.5 }}
         end={{ x: 0.5, y: 0 }}
+        style={{ paddingTop: 20 }}
       >
-        <SafeAreaView>
-          <View style={styles.viewContainer}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              style={{ paddingRight: 10 }}
-            >
-              <Image
-                source={{
-                  uri: "https://img.icons8.com/ios-filled/70/ffffff/back.png",
-                }}
-                style={styles.icon}
-              />
-            </TouchableOpacity>
-            <SearchHeader />
-          </View>
-        </SafeAreaView>
+        <View style={styles.inputContainer}>
+          <Pressable
+            style={{ marginLeft: "0.5%" }}
+            onPress={() => router.back()}
+          >
+            <Entypo name="chevron-left" size={32} color="white" />
+          </Pressable>
+          <TextInput
+            style={styles.input}
+            value={messageInput}
+            onChangeText={setMessageInput}
+            placeholder="Search"
+            placeholderTextColor="#DD8843"
+            inlineImageLeft="search_icon"
+          />
+          <TouchableOpacity onPress={toggleFilters} style={styles.filterButton}>
+            <Image
+              source={{
+                uri: "https://img.icons8.com/ios-filled/50/DD8843/filter--v1.png",
+              }}
+              style={styles.filterIcon}
+            />
+            {(selectedLocations.length > 0 ||
+              selectedKeywords.length > 0 ||
+              selectedColors.length > 0) && <View style={styles.filterBadge} />}
+          </TouchableOpacity>
+        </View>
       </LinearGradient>
+
       <View style={styles.searchWords}>
-        <ScrollView style={{ flexGrow: 1 }}>
-          <FilterAccordion
-            title="Location"
-            options={locationOptions}
-            selectedOptions={selectedLocations}
-            onToggleOption={toggleLocationOption}
-          />
-          <FilterAccordion
-            title="Keywords"
-            options={keywordOptions}
-            selectedOptions={selectedKeywords}
-            onToggleOption={toggleKeywordOption}
-          />
-          <FilterAccordion
-            title="Color"
-            options={colorOptions}
-            selectedOptions={selectedColors}
-            onToggleOption={toggleColorOption}
-          />
-        </ScrollView>
+        {showFilters ? (
+          <ScrollView style={styles.filtersContainer}>
+            <View style={styles.filterHeader}>
+              <Text style={styles.filterTitle}>Filters</Text>
+              <TouchableOpacity onPress={clearSearch}>
+                <Text style={styles.clearFiltersText}>Clear All</Text>
+              </TouchableOpacity>
+            </View>
+            <FilterAccordion
+              title="Location"
+              options={locationOptions}
+              selectedOptions={selectedLocations}
+              onToggleOption={toggleLocationOption}
+            />
+            <FilterAccordion
+              title="Keywords"
+              options={keywordOptions}
+              selectedOptions={selectedKeywords}
+              onToggleOption={toggleKeywordOption}
+            />
+            <FilterAccordion
+              title="Color"
+              options={colorOptions}
+              selectedOptions={selectedColors}
+              onToggleOption={toggleColorOption}
+            />
+
+            <TouchableOpacity
+              style={styles.applyFiltersButton}
+              onPress={toggleFilters}
+            >
+              <Text style={styles.applyFiltersText}>Apply Filters</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        ) : (
+          <>
+            {isLoading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#FC5E1A" />
+              </View>
+            ) : (
+              <FlatList
+                data={filteredItems}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.item_id}
+                contentContainerStyle={styles.listContainer}
+                ListEmptyComponent={renderEmptyState}
+                showsVerticalScrollIndicator={false}
+              />
+            )}
+          </>
+        )}
       </View>
     </KeyboardAvoidingView>
   );
 };
-
-const SearchHeader: React.FC = () => (
-  <SafeAreaView style={{ flex: 1 }}>
-    <TextInput
-      placeholder="Search"
-      clearButtonMode="always"
-      placeholderTextColor="#121212"
-      style={styles.searchBox}
-      autoCorrect={false}
-      // value={searchQuery}
-      // onChangeText={(query) => handleSearch(query)}
-    />
-  </SafeAreaView>
-  // <View style={styles.searchInputContainer}>
-  //   <Search width={20} height={20} color="#666" style={styles.searchIcon} />
-  //   <TextInput
-  //     style={styles.searchInput}
-  //     placeholder="Search"
-  //     value={searchQuery}
-  //     onChangeText={setSearchQuery}
-  //     placeholderTextColor="#666"
-  //   />
-  //   {searchQuery.length > 0 && (
-  //     <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
-  //       <X width={20} height={20} color="#666" />
-  //     </TouchableOpacity>
-  //   )}
-  // </View>
-);
 
 export default Search;
 
@@ -206,28 +309,149 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 300,
     borderRadius: 15,
-    flexGrow: 1,
+    flex: 1,
     backgroundColor: "#FFDCB5", // Background color
-    // color: "#000000", // Text color
   },
   icon: {
     // flex: 1,
     width: 25,
     height: 25,
     resizeMode: "contain",
-    marginRight: 20,
+    marginLeft: 10,
   },
   searchWords: {
-    flex: 6,
+    flex: 1,
     backgroundColor: "white",
-    // borderTopLeftRadius: 20,
-    // borderTopRightRadius: 20,
-    marginTop: -20, // Creates an overlapping effect
-    paddingTop: 10,
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: -2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 3,
+    // marginTop: // Creates an overlapping effect
+    // paddingTop: 10,
     elevation: 5,
+  },
+  headerContainer: {
+    marginTop: 50,
+    margin: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    height: 40,
+  },
+  input: {
+    flex: 1,
+    height: 45,
+    borderWidth: 1,
+    borderColor: "#FFDAA3",
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    backgroundColor: "#FFDAA3",
+    marginRight: 10,
+    fontSize: 15,
+    color: "#333",
+    marginLeft: 25,
+    fontWeight: 500,
+  },
+  filterButton: {
+    marginRight: 10,
+    position: "relative",
+  },
+  filterIcon: {
+    width: 24,
+    height: 24,
+    resizeMode: "contain",
+  },
+  filterBadge: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#FC5E1A",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    marginTop: 30,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    marginTop: 100,
+  },
+  emptyStateIcon: {
+    width: 80,
+    height: 80,
+    marginBottom: 20,
+    opacity: 0.5,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 8,
+    color: "#333",
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  clearButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: "#FC5E1A",
+    borderRadius: 8,
+  },
+  clearButtonText: {
+    color: "white",
+    fontWeight: "500",
+  },
+  filtersContainer: {
+    flex: 1,
+    backgroundColor: "white",
+    paddingTop: 10,
+  },
+  filterHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  filterTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+  },
+  clearFiltersText: {
+    fontSize: 14,
+    color: "#FC5E1A",
+    fontWeight: "500",
+  },
+  applyFiltersButton: {
+    backgroundColor: "#FC5E1A",
+    marginHorizontal: 16,
+    marginVertical: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  applyFiltersText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  listContainer: {
+    paddingVertical: 8,
+    minHeight: "100%",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

@@ -58,6 +58,8 @@ interface FormData {
   description: string;
   status: string;
   image_url?: string;
+  keywords: string[];
+  color: string;
 }
 
 const AddItemScreen = () => {
@@ -71,6 +73,8 @@ const AddItemScreen = () => {
     location: "",
     description: "",
     status: "",
+    keywords: [""],
+    color: "",
   });
 
   const [image, setImage] = useState("");
@@ -145,10 +149,6 @@ const AddItemScreen = () => {
       const command = new PutObjectCommand(params as PutObjectCommandInput);
       const data = await s3Client.send(command);
 
-      // setForm({...form, image_url: `https://cometclaim-image-bucket.s3.amazonaws.com/uploads/${fileName}`})
-      // setImage(`https://cometclaim-image-bucket.s3.amazonaws.com/uploads/${fileName}`)
-      // console.log("FORMFORMFORM: \n" + form)
-      // console.log("THIS IS THE IMAGE AT THIS VERY MOMENT: " + image)
       console.log("image uploaded successfully", data);
 
       return `https://${bucketName}.s3.amazonaws.com/uploads/${fileName}`;
@@ -319,7 +319,11 @@ const AddItemScreen = () => {
               <TextInput
                 placeholder={`Enter ${key.replace("_", " ")}`}
                 placeholderTextColor="#888"
-                value={form[key as keyof FormData]}
+                value={
+                  Array.isArray(form[key as keyof FormData])
+                    ? (form[key as keyof FormData] as string[]).join(", ")
+                    : (form[key as keyof FormData] as string)
+                }
                 onChangeText={(value) =>
                   handleChange(key as keyof FormData, value)
                 }
