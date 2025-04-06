@@ -192,7 +192,11 @@ const AddItemScreen = () => {
         location: "",
         description: "",
         status: "",
+        keywords: [""],
+        color: "",
       })
+
+      setImage("")
 
       router.navigate('/(tabs)/HomeScreen' as RelativePathString)
 
