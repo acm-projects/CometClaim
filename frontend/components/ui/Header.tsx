@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import React from "react";
-import { router } from "expo-router";
+import { RelativePathString, router } from "expo-router";
 
 const Header = () => {
   return (
@@ -11,7 +11,7 @@ const Header = () => {
         </Text>
       </TouchableOpacity>
       <View style={styles.iconContainer}>
-        <TouchableOpacity onPress={() => router.push("/Search")}>
+        <TouchableOpacity onPress={() => router.push("/Search" as RelativePathString)}>
           <Image
             source={{
               uri: "https://img.icons8.com/ios-filled/80/ffffff/search--v1.png",
@@ -20,7 +20,7 @@ const Header = () => {
           />
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => router.push("/notifications/communityNotifications")}
+          onPress={() => router.push("/notifications/communityNotifications" as RelativePathString)}
         >
           <Image
             source={{
@@ -29,7 +29,7 @@ const Header = () => {
             style={styles.icon}
           />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push("/messages")}>
+        <TouchableOpacity onPress={() => router.push("/messages" as RelativePathString)}>
           <View style={styles.unreadBadge}>
             <Text style={styles.unreadBadgeText}>1</Text>
           </View>

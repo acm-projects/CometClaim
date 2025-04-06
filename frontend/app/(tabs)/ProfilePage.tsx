@@ -8,19 +8,31 @@ import {
   Text,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Divider } from "react-native-elements";
 import SmallPost from "@/components/ui/SmallPost";
-import { POSTS, PostType } from "@/data/posts";
-import { Link } from "expo-router";
+import { Link, RelativePathString, useFocusEffect } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { defaultUser, Post, User } from "@/types";
 
-interface PostProps {
-  post: PostType;
-}
+const apiUrl = process.env.EXPO_PUBLIC_API_URL
 
 const ProfilePage: React.FC = () => {
   const navigation = useNavigation();
+  
+  const [userInfo, setUserInfo] = useState<User>(defaultUser)
+
+  useFocusEffect(useCallback(() => {
+    const updateUserInfo = async () => {
+      const userId = await AsyncStorage.getItem('userId')
+      const res = await fetch(`${apiUrl}/users/${userId}`)
+      const data = await res.json()
+      // console.log("thing", JSON.parse(data.body))
+      setUserInfo(JSON.parse(data.body))  
+    }
+    updateUserInfo()
+  }, []))
 
   // const handleNavigation = () => {
   //   // navigation.navigate("EditProfile");
@@ -28,7 +40,7 @@ const ProfilePage: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.iconContainer}>
-        <Link href="/EditProfile" asChild>
+        <Link href={"/EditProfile" as RelativePathString} asChild>
           <TouchableOpacity>
             <Image
               source={{
@@ -43,7 +55,7 @@ const ProfilePage: React.FC = () => {
         <View style={{ alignItems: "center", marginVertical: 10 }}>
           <Image
             source={{
-              uri: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+              uri: userInfo.profile_picture ? userInfo.profile_picture : defaultUser.profile_picture,
             }}
             style={{
               height: 170,
@@ -57,21 +69,18 @@ const ProfilePage: React.FC = () => {
         </View>
         <Divider width={1} orientation="vertical" />
         <View style={{ flexDirection: "column", margin: 15 }}>
-          <Text>Username</Text>
+          <Text>{userInfo.username}</Text>
           <Text
             style={{ fontSize: 18, margin: 1, marginTop: 5, marginBottom: 5 }}
           >
-            Full Name
+            {userInfo.full_name}
           </Text>
         </View>
         <Divider width={1} orientation="vertical" />
         <View style={{ flexDirection: "column", margin: 15 }}>
-          <Text style={styles.textInfo}>Phone: (434) 423-7563</Text>
+          <Text style={styles.textInfo}>Phone: {userInfo.phone_number}</Text>
           <Text style={styles.textInfo}>
-            Email: phantienduc17072005@gmail.com
-          </Text>
-          <Text style={styles.textInfo}>
-            Location: 989 Loop Rd, Richardson, TX 75080
+            Email: {userInfo.email}
           </Text>
         </View>
         <View
@@ -87,15 +96,16 @@ const ProfilePage: React.FC = () => {
           >
             Posts
           </Text>
-          <View
+          <ScrollView
+            horizontal
             style={{
               flexDirection: "row",
             }}
           >
-            {POSTS.map((post: PostType, index: number) => (
-              <SmallPost post={post} key={index} />
+            {userInfo.posts && userInfo.posts.map((post: Post, index: number) => (
+              <SmallPost {...post} key={index} />
             ))}
-          </View>
+          </ScrollView>
         </View>
       </ScrollView>
     </SafeAreaView>

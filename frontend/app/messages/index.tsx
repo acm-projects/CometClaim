@@ -1,7 +1,7 @@
 import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Entypo } from "@expo/vector-icons";
-import { Link, router } from "expo-router";
+import { Link, RelativePathString, router } from "expo-router";
 import { UserMessage } from "@/components/ui/UserMessages";
 
 // Define the message type
@@ -54,7 +54,7 @@ export default function MessagesScreen() {
   // Navigate to the DM screen with the user's information
   const navigateToDM = (user: Message) => {
     router.push({
-      pathname: "/messages/[id]",
+      pathname: "/messages/[id]" as RelativePathString,
       params: {
         id: user.id,
         name: user.name,

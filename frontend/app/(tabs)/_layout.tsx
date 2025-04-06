@@ -1,4 +1,4 @@
-import { Tabs, useRouter } from "expo-router";
+import { RelativePathString, Tabs, useRouter } from "expo-router";
 import { Platform, Image, Pressable, StyleSheet } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -82,7 +82,7 @@ export default function TabLayout() {
                   }
                 })
               );
-              router.push("/(tabs)/AddItemScreen");
+              router.push("/(tabs)/AddItemScreen" as RelativePathString);
             };
             return (
               <Animated.View

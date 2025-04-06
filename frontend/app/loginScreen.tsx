@@ -12,19 +12,22 @@ import {
   Image,
 } from "react-native";
 import React from "react";
-import { useRouter } from "expo-router";
+import { RelativePathString, useRouter } from "expo-router";
 import { useState } from "react";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 
 const LoginScreen = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({
+    username: "",
+    password: ""
+  });
   const router = useRouter();
 
   //Validate username and passwords function
   const validateForm = () => {
-    let errors = {};
+    let errors: any = {};
     if (!username) errors.username = "Username is required";
     if (!password) errors.password = "Password is required";
 
@@ -38,7 +41,10 @@ const LoginScreen = () => {
       console.log("Submitted", username, password);
       setUsername("");
       setPassword("");
-      setErrors({});
+      setErrors({
+        username: "",
+        password: ""
+      });
     }
   };
   const navigation = useNavigation();
@@ -86,7 +92,7 @@ const LoginScreen = () => {
             alignItems: "center",
           }}
           onPress={() => {
-            router.push("/(tabs)/HomeScreen");
+            router.push("/(tabs)/HomeScreen" as RelativePathString);
             handleSubmit();
           }}
         >

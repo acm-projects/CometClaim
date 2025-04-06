@@ -10,19 +10,35 @@ export const signUp = (username: string, email: string, password: string, fullNa
     return new Promise((resolve, reject) => {
         const attributes = [
             new CognitoUserAttribute({ Name: 'email', Value: email }), 
-            new CognitoUserAttribute({ Name: 'preferred_username', Value: username }), 
-            new CognitoUserAttribute({ Name: 'name', Value: fullName }) 
+            new CognitoUserAttribute({ Name: 'given_name', Value: username }), 
+            new CognitoUserAttribute({ Name: 'family_name', Value: fullName }) 
         ];
         // Ensure username is not in email format
         if (username.includes('@')) {
             reject("Username should not be in email format.");
             return;
         }
-        userPool.signUp(username, password, attributes, [], (err, result) => {
+        userPool.signUp(email, password, attributes, [], async (err, result) => {
             if (err) {
                 console.error("Signup Error:", err);
                 reject(err.message || JSON.stringify(err));
             } else {
+                const apiUrl = process.env.EXPO_PUBLIC_API_URL
+                const response = await fetch(`${apiUrl}/users`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    username: username,
+                    full_name: fullName,
+                    email: email,
+                    profile_picture: "",
+                    posts: [],
+                    phone_number: "",
+                    comments: []
+                  }),
+                });
                 resolve('Signup successful! Check your email for the confirmation code.');
             }
         });

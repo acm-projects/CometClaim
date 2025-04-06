@@ -14,9 +14,10 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { RelativePathString, router } from "expo-router";
 import { useEffect, useState } from "react";
 import * as Haptics from 'expo-haptics'
+import { defaultUser, User } from "@/types";
 
 type PostProps = {
   item: Item;
@@ -63,23 +64,11 @@ export type Item = {
   image_url?: string;
 }
 
-export type User = {
-  user_id: string;
-  user_email: string;
-  user_name: string;
-  user_phone: string;
-  user_profile_picture: string;
-}
+
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL
 
-const defaultUser: User = {
-  user_id: "123",
-  user_email: "default@example.com",
-  user_name: "default",
-  user_phone: "000-000-0000",
-  user_profile_picture: "https://s3.amazonaws.com/37assets/svn/765-default-avatar.png"
-}
+
 
 
 export function Post(props: PostProps) {
@@ -92,6 +81,7 @@ export function Post(props: PostProps) {
       const data = await res.json()
       if(data.body) {
         setUser(JSON.parse(data.body))
+        // console.log("user is", data.body)
       }
     }
     getUserData()
@@ -246,7 +236,7 @@ function PostHeader(props: PostHeaderProps) {
   return (
     <View style={styles.headerView}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Image source={{ uri: props.user.user_profile_picture }} style={styles.story} />
+        <Image source={{ uri: props.user.profile_picture ? props.user.profile_picture : defaultUser.profile_picture }} style={styles.story} />
         <Text
           style={{
             color: "black",
@@ -254,7 +244,7 @@ function PostHeader(props: PostHeaderProps) {
             fontWeight: "500",
           }}
         >
-          {props.user.user_name}
+          {props.user.username}
         </Text>
         <Text
           style={{
@@ -396,7 +386,7 @@ function PostFooter(props: PostFooterProps) {
     <View style={styles.actionContainer}>
       <Pressable
         style={styles.leftFooterIconsContainer}
-        onPress={() => router.push("/commentsScreen")}
+        onPress={() => router.push("/commentsScreen" as RelativePathString)}
       >
         <FontAwesome name="comment-o" size={20} color="#666" />
         <Text> </Text>
