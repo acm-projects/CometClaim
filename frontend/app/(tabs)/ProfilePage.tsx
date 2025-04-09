@@ -1,7 +1,4 @@
 "use client";
-
-import type React from "react";
-import { useState } from "react";
 import {
   StyleSheet,
   Image,
@@ -24,11 +21,36 @@ import Animated, {
   Extrapolation,
 } from "react-native-reanimated";
 
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useCallback, useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { Divider } from "react-native-elements";
+import SmallPost from "@/components/ui/SmallPost";
+import { Link, RelativePathString, useFocusEffect } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { defaultUser, Post, User } from "@/types";
+
+const apiUrl = process.env.EXPO_PUBLIC_API_URL
+
 const ProfilePage: React.FC = () => {
   const scrollY = useSharedValue(0);
   const [activeSection, setActiveSection] = useState<
     "posts" | "found" | "lost"
   >("posts");
+  
+  const [userInfo, setUserInfo] = useState<User>(defaultUser)
+
+  useFocusEffect(useCallback(() => {
+    const updateUserInfo = async () => {
+      const userId = await AsyncStorage.getItem('userId')
+      const res = await fetch(`${apiUrl}/users/${userId}`)
+      const data = await res.json()
+      // console.log("thing", JSON.parse(data.body))
+      setUserInfo(JSON.parse(data.body))  
+    }
+    updateUserInfo()
+  }, []))
 
   // User data - in a real app, this would come from a user context or API
   const userData = {

@@ -8,38 +8,78 @@ import {
   ScrollView,
   TextInput,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import YourPostHeader from "@/components/ui/YourPostHeader";
-import { PostType } from "@/data/posts";
-import { POSTS } from "@/data/posts";
 import { LinearGradient } from "expo-linear-gradient";
+import { defaultUser, Post, User } from "@/types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-interface PostProps {
-  post: PostType;
-}
-interface IconProps {
+type IconProps = {
   imgStyle: any;
   imgUrl: string;
 }
 
-const YourPost: React.FC<PostProps> = ({ post }) => {
+type PostProps = {
+  post: Post;
+  author: User;
+}
+
+const apiUrl = process.env.EXPO_PUBLIC_API_URL
+
+const YourPost: React.FC<Post> = (post) => {
+
+  const [postAuthor, setPostAuthor] = useState<User>(defaultUser)
+  
+
+  useEffect(() => {
+    async function getPostAuthor() {
+      const res = await fetch(`${apiUrl}/users/${post.reporter_id}`)
+      const data = await res.json()
+      setPostAuthor(JSON.parse(data.body))
+    }
+    getPostAuthor()
+  }, [])
+
   return (
     <View style={{ backgroundColor: "white", flex: 1 }}>
       <YourPostHeader />
       <ScrollView>
-        <PostTop post={POSTS[0]} />
-        <PostDateAndLocation />
-        <PostImage post={POSTS[0]} />
-        <PostFooter post={POSTS[0]} />
+        <PostTop post={post} author={postAuthor} />
+        <PostDateAndLocation {...post} />
+        <PostImage {...post} />
+        <PostFooter {...post} />
       </ScrollView>
     </View>
   );
 };
-const PostTop: React.FC<PostProps> = ({ post }) => {
+const PostTop: React.FC<PostProps> = ({post, author}) => {
+
+  function datetimeToHowLongAgo(datetime: string) {
+    const timeDifferenceInMilliseconds = Date.now() - Date.parse(datetime)
+    
+    const timeDifferenceInSeconds = Math.floor(timeDifferenceInMilliseconds / 1000)
+    if(timeDifferenceInSeconds < 60) return `${timeDifferenceInSeconds}s`
+    
+    const timeDifferenceInMinutes = Math.floor(timeDifferenceInSeconds / 60)
+    if(timeDifferenceInMinutes < 60) return `${timeDifferenceInMinutes}m`
+
+    const timeDifferenceInHours = Math.floor(timeDifferenceInMinutes / 60)
+    if(timeDifferenceInHours < 24) return `${timeDifferenceInHours}h`
+
+    const timeDifferenceInDays = Math.floor(timeDifferenceInHours / 24)
+    if(timeDifferenceInDays < 31) return `${timeDifferenceInDays}d`
+
+    const timeDifferenceInMonths = Math.floor(timeDifferenceInDays / 31)
+    if(timeDifferenceInMonths < 12) return `${timeDifferenceInMonths}mo`
+
+    const timeDifferenceInYears = Math.floor(timeDifferenceInMonths / 12)
+    return `${timeDifferenceInYears}y`
+  }
+
   return (
     <View style={styles.headerView}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Image source={{ uri: post.profile_picture }} style={styles.story} />
+        <Image source={{ uri: author.profile_picture || defaultUser.profile_picture }} style={styles.story} />
         <Text
           style={{
             color: "black",
@@ -47,7 +87,7 @@ const PostTop: React.FC<PostProps> = ({ post }) => {
             fontWeight: "500",
           }}
         >
-          {post.user}
+          {author.username}
         </Text>
         <Text
           style={{
@@ -56,7 +96,7 @@ const PostTop: React.FC<PostProps> = ({ post }) => {
             fontWeight: "400",
           }}
         >
-          {post.time}
+          {datetimeToHowLongAgo(post.date_reported)}
         </Text>
       </View>
       <Text
@@ -90,7 +130,7 @@ const PostDateLocationIcon = [
   },
 ];
 
-const PostDateAndLocation: React.FC = () => (
+const PostDateAndLocation: React.FC<Post> = (post) => (
   <View style={styles.dateLocation}>
     <View
       style={{
@@ -111,7 +151,12 @@ const PostDateAndLocation: React.FC = () => (
           marginLeft: 20,
         }}
       >
-        Friday, Oct 25 2025
+        {(new Date(post.date_reported)).toLocaleDateString('en-US', {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        })}
       </Text>
     </View>
     <View style={{ flexDirection: "row", alignItems: "center", marginTop: 5 }}>
@@ -133,10 +178,10 @@ const PostDateAndLocation: React.FC = () => (
   </View>
 );
 
-const PostImage: React.FC<PostProps> = ({ post }) => (
+const PostImage: React.FC<Post> = (post) => (
   <View style={styles.imagePost}>
     <Image
-      source={{ uri: post.imageUrl }}
+      source={{ uri: post.image_url }}
       style={{
         width: "100%",
         height: 370,
@@ -145,19 +190,19 @@ const PostImage: React.FC<PostProps> = ({ post }) => (
   </View>
 );
 
-const Caption: React.FC<PostProps> = ({ post }) => (
+const Caption: React.FC<Post> = (post: Post) => (
   <View>
     <Text
       style={{ fontSize: 16, paddingBottom: 5, paddingLeft: 20, marginTop: 10 }}
     >
-      {post.caption}
+      {post.description}
     </Text>
   </View>
 );
 
-const PostFooter: React.FC<PostProps> = ({ post }) => (
+const PostFooter: React.FC<Post> = (post) => (
   <View>
-    <Caption post={post} />
+    <Caption {...post} />
   </View>
 );
 

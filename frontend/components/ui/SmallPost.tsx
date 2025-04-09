@@ -1,36 +1,52 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import React from "react";
-import { PostType } from "@/data/posts"; // Import the PostType
-import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { RelativePathString, router } from "expo-router";
+import { defaultUser, Post, User } from "@/types";
 
 interface PostProps {
-  post: PostType;
+  post: Post;
+  author: User;
 }
 // interface IconProps {
 //   imgStyle: any;
 //   imgUrl: string;
 // }
 
-const SmallPost: React.FC<PostProps> = ({ post }) => {
+const apiUrl = process.env.EXPO_PUBLIC_API_URL
+
+const SmallPost: React.FC<Post> = (post) => {
+
+  const [postAuthor, setPostAuthor] = useState<User>(defaultUser)
+    
+  
+  useEffect(() => {
+    async function getPostAuthor() {
+      const res = await fetch(`${apiUrl}/users/${post.reporter_id}`)
+      const data = await res.json()
+      setPostAuthor(data)
+    }
+    getPostAuthor()
+  }, [])
+
   return (
     <View style={{ marginBottom: 10 }}>
       <TouchableOpacity
         style={styles.backPost}
-        onPress={() => router.push("/YourPost")}
+        onPress={() => router.push(`/posts/${post.item_id}` as RelativePathString)}
       >
-        <PostHeader post={post} />
-        <PostImage post={post} />
-        <PostFooter post={post} />
+        <PostHeader post={post} author={postAuthor} />
+        <PostImage post={post} author={postAuthor} />
+        <PostFooter post={post} author={postAuthor} />
       </TouchableOpacity>
     </View>
   );
 };
 
-const PostHeader: React.FC<PostProps> = ({ post }) => {
+const PostHeader: React.FC<PostProps> = ({ post, author }) => {
   return (
     <View style={styles.headerView}>
       <View style={{ flexDirection: "row" }}>
-        <Image source={{ uri: post.profile_picture }} style={styles.story} />
+        <Image source={{ uri: author.profile_picture }} style={styles.story} />
         <Text
           style={{
             color: "black",
@@ -38,7 +54,7 @@ const PostHeader: React.FC<PostProps> = ({ post }) => {
             fontWeight: "400",
           }}
         >
-          {post.user}
+          {author.username}
         </Text>
       </View>
     </View>
@@ -48,7 +64,7 @@ const PostHeader: React.FC<PostProps> = ({ post }) => {
 const PostImage: React.FC<PostProps> = ({ post }) => (
   <View style={styles.imagePost}>
     <Image
-      source={{ uri: post.imageUrl }}
+      source={{ uri: post.image_url }}
       style={{
         width: 170,
         aspectRatio: 1,
@@ -60,13 +76,13 @@ const PostImage: React.FC<PostProps> = ({ post }) => (
 
 const PostFooter: React.FC<PostProps> = ({ post }) => (
   <View>
-    <Caption post={post} />
+    <Caption {...post} />
   </View>
 );
 
-const Caption: React.FC<PostProps> = ({ post }) => (
+const Caption: React.FC<Post> = (post) => (
   <View>
-    <Text style={{ fontSize: 13, margin: 10 }}>{post.caption}</Text>
+    <Text style={{ fontSize: 13, margin: 10 }}>{post.description}</Text>
   </View>
 );
 

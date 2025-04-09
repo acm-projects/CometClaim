@@ -8,12 +8,12 @@ import {
   ScrollView,
   Modal,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import Header from "@/components/ui/Header";
 import { Post, Item } from "@/components/ui/Post";
-import { POSTS, PostType } from "@/data/posts";
 import ShareScreen from "@/components/ui/ShareScreen"; // <- extract this into its own component
+import { useFocusEffect } from "expo-router";
 import ChatbotButton from "@/components/ui/ChatbotButton";
 
 const HomeScreen: React.FC = () => {
@@ -34,14 +34,16 @@ const HomeScreen: React.FC = () => {
 
   const [items, setItems] = useState<Item[]>([]);
 
-  useEffect(() => {
-    async function getItems() {
-      const res = await fetch(`${apiUrl}/items`);
-      const data = await res.json();
-      setItems(JSON.parse(data.body));
-    }
-    getItems();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      async function getItems() {
+        const res = await fetch(`${apiUrl}/items`);
+        const data = await res.json();
+        setItems(JSON.parse(data.body));
+      }
+      getItems();
+    }, [])
+  );
 
   return (
     // <LinearGradient
@@ -55,7 +57,10 @@ const HomeScreen: React.FC = () => {
     >
       <SafeAreaView style={{ flex: 1 }}>
         <Header />
-        <ScrollView style={{ flex: 1 }}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 70 }}
+        >
           {items.map((item: Item, index: number) => (
             <Post
               item={item}

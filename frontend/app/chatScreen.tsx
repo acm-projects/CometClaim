@@ -13,7 +13,7 @@ import {
   Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import fetchAnswerFromOpenAI from "./openaiAPI";
+import { fetchAnswerFromOpenAI } from "./openaiAPI";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, Entypo } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -27,9 +27,51 @@ type Message = {
   text: string;
 };
 const ChatScreen: React.FC = () => {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [socket, setSocket] = useState<WebSocket | null>();
   const [message, setMessage] = useState("");
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const scrollViewRef = useRef<ScrollView>(null);
+  // const websocketApiUrl = Constants.expoConfig?.extra?.websocketApiUrl
+  const websocketApiUrl = process.env.EXPO_PUBLIC_WS_API_URL;
+
+  useEffect(() => {
+    let socket: WebSocket;
+    if (websocketApiUrl) {
+      socket = new WebSocket(websocketApiUrl);
+
+      setSocket(socket);
+      socket.onopen = (event) => {
+        console.log("Connected!");
+        console.log(event);
+        socket.send(
+          JSON.stringify({
+            action: "sendMessage",
+            username: "mohammad",
+            message: "Hello from the client!",
+          })
+        );
+      };
+
+      socket.onmessage = (event) => {
+        const messageObj = JSON.parse(event.data);
+        console.log("Message from server:", messageObj);
+        setMessages((prevMessages) => [...prevMessages, messageObj]);
+      };
+
+      socket.onclose = () => {
+        console.log("Disconnected");
+      };
+
+      return () => {
+        console.log("Closing connetion...");
+        socket.close();
+      };
+    } else {
+      console.log("yeah the websocket url aint loading");
+    }
+  }, []);
+
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
   }, [chatHistory]);

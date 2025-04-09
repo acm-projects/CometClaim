@@ -15,9 +15,10 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { RelativePathString, router } from "expo-router";
 import { useEffect, useState } from "react";
 import * as Haptics from "expo-haptics";
+import { defaultUser, User } from "@/types";
 
 type PostProps = {
   item: Item;
@@ -93,6 +94,7 @@ export function Post(props: PostProps) {
       const data = await res.json();
       if (data.body) {
         setUser(JSON.parse(data.body));
+        // console.log("user is", data.body)
       }
     }
     getUserData();
@@ -270,7 +272,7 @@ function PostHeader(props: PostHeaderProps) {
           }
         >
           <Image
-            source={{ uri: props.user.user_profile_picture }}
+            source={{ uri: props.user.profile_picture }}
             style={styles.story}
           />
           <Text
@@ -280,7 +282,7 @@ function PostHeader(props: PostHeaderProps) {
               fontWeight: "500",
             }}
           >
-            {props.user.user_name}
+            {props.user.username}
           </Text>
         </Pressable>
         <Text
@@ -484,7 +486,7 @@ function PostFooter(props: PostFooterProps) {
       <View style={styles.actionContainer}>
         <Pressable
           style={styles.leftFooterIconsContainer}
-          onPress={() => router.push("/commentsScreen")}
+          onPress={() => router.push("/commentsScreen" as RelativePathString)}
         >
           <FontAwesome name="comment-o" size={20} color="#666" />
           <Text> </Text>

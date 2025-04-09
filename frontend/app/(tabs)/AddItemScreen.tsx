@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,12 +10,15 @@ import {
   Pressable,
   Image,
   Platform,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import * as ExpoFileSystem from "expo-file-system";
 import * as ExpoImagePicker from "expo-image-picker";
 import * as base64 from "base64-js";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { RelativePathString, useRouter } from "expo-router";
 import { Entypo } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
@@ -25,12 +28,21 @@ import {
   PutObjectCommand,
   PutObjectCommandInput,
 } from "@aws-sdk/client-s3";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const bucketName = "cometclaim-image-bucket";
+const bucketName = "cometclaim-images-utd";
 const bucketRegion = "us-east-1";
 const accessKeyId = process.env.EXPO_PUBLIC_AWS_ACCESS_KEY_ID;
-const secretAccessKey = process.env.EXPO_PUBLIC_SECRET_ACCESS_KEY;
+const secretAccessKey = process.env.EXPO_PUBLIC_AWS_SECRET_ACCESS_KEY;
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
+
+
+type UserInfo = {
+  username: string;
+  email: string;
+  fullName: string;
+}
 
 export const s3Client = new S3Client({
   region: bucketRegion,
@@ -42,10 +54,8 @@ export const s3Client = new S3Client({
 
 interface FormData {
   item: string;
-  date_reported: string;
   location: string;
   description: string;
-  reporter_id: string;
   status: string;
   image_url?: string;
   keywords: string[];
@@ -53,12 +63,15 @@ interface FormData {
 }
 
 const AddItemScreen = () => {
+  const router = useRouter()
+  const [itemName, setItemName] = useState("");
+  const [location, setLocation] = useState("");
+  const [notes, setNotes] = useState("");
+
   const [form, setForm] = useState<FormData>({
     item: "",
-    date_reported: "",
     location: "",
     description: "",
-    reporter_id: "",
     status: "",
     keywords: [""],
     color: "",
@@ -147,7 +160,7 @@ const AddItemScreen = () => {
 
       console.log("image uploaded successfully", data);
 
-      return `https://cometclaim-image-bucket.s3.amazonaws.com/uploads/${fileName}`;
+      return `https://${bucketName}.s3.amazonaws.com/uploads/${fileName}`;
     } catch (err) {
       console.error("Error uploading image", err);
       return "";
@@ -167,6 +180,8 @@ const AddItemScreen = () => {
       if (!s3URL) {
         throw "Image failed to upload to S3";
       }
+
+      const reporterId = await AsyncStorage.getItem('userId')
       const submissionData = { ...form };
       if (s3URL) {
         submissionData.image_url = s3URL;
@@ -176,33 +191,53 @@ const AddItemScreen = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ...form, image_url: s3URL }),
+        body: JSON.stringify({
+           ...form, 
+           image_url: s3URL, 
+           date_reported: (new Date()).toLocaleString('sv', {timeZone: 'CST'}).replace(' ', 'T'), 
+           reporter_id: reporterId
+          }),
       });
 
       const data = await response.json();
       console.log("Item added:", data);
+
+      setForm({
+        item: "",
+        location: "",
+        description: "",
+        status: "",
+        keywords: [""],
+        color: "",
+      })
+
+      setImage("")
+
+      router.navigate('/(tabs)/HomeScreen' as RelativePathString)
+
     } catch (error) {
       console.error("Error adding item:", error);
-    } finally {
+    }
+    finally {
       setIsUploading(false);
     }
   };
-  const handleDateChange = (event: any, date?: Date) => {
-    setShowDatePicker(Platform.OS === "ios"); // Keep open for iOS, auto-close for Android
-    if (date) {
-      setSelectedDate(date);
-      handleChange("date_reported", date.toLocaleDateString("en-GB")); // Formats as dd/mm/yyyy
-    }
-    setShowDatePicker(false);
-  };
+  // const handleDateChange = (event: any, date?: Date) => {
+  //   setShowDatePicker(Platform.OS === "ios"); // Keep open for iOS, auto-close for Android
+  //   if (date) {
+  //     setSelectedDate(date);
+  //     handleChange("date_reported", date.toLocaleDateString("en-GB")); // Formats as dd/mm/yyyy
+  //   }
+  //   setShowDatePicker(false);
+  // };
 
-  const handleTextChange = (input: string) => {
-    // Basic date validation (dd/mm/yyyy format)
-    const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
-    if (dateRegex.test(input)) {
-      handleChange("date_reported", input);
-    }
-  };
+  // const handleTextChange = (input: string) => {
+  //   // Basic date validation (dd/mm/yyyy format)
+  //   const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+  //   if (dateRegex.test(input)) {
+  //     handleChange("date_reported", input);
+  //   }
+  // };
 
   return (
     <View style={styles.container}>
