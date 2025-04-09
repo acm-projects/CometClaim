@@ -11,35 +11,41 @@ const Header = () => {
         </Text>
       </TouchableOpacity>
       <View style={styles.iconContainer}>
-        <TouchableOpacity onPress={() => router.push("/Search")}>
-          <Image
-            source={{
-              uri: "https://img.icons8.com/ios-filled/80/ffffff/search--v1.png",
-            }}
-            style={styles.icon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => router.push("/notifications/communityNotifications")}
-        >
-          <Image
-            source={{
-              uri: "https://img.icons8.com/fluency-systems-regular/90/ffffff/appointment-reminders--v1.png",
-            }}
-            style={styles.icon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push("/messages")}>
-          <View style={styles.unreadBadge}>
-            <Text style={styles.unreadBadgeText}>1</Text>
-          </View>
-          <Image
-            source={{
-              uri: "https://img.icons8.com/fluency-systems-regular/80/ffffff/speech-bubble-with-dots--v1.png",
-            }}
-            style={styles.icon}
-          />
-        </TouchableOpacity>
+        <View style={styles.iconBorder}>
+          <TouchableOpacity onPress={() => router.push("/Search")}>
+            <Image
+              source={{
+                uri: "https://img.icons8.com/ios-filled/90/000000/search--v1.png",
+              }}
+              style={styles.icon}
+            />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.iconBorder}>
+          <TouchableOpacity
+            onPress={() => router.push("/notifications/communityNotifications")}
+          >
+            <Image
+              source={{
+                uri: "https://img.icons8.com/fluency-systems-regular/100/000000/appointment-reminders--v1.png",
+              }}
+              style={styles.icon}
+            />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.iconBorder}>
+          <TouchableOpacity onPress={() => router.push("/messages")}>
+            <View style={styles.unreadBadge}>
+              <Text style={styles.unreadBadgeText}>1</Text>
+            </View>
+            <Image
+              source={{
+                uri: "https://img.icons8.com/fluency-systems-regular/90/000000/speech-bubble-with-dots--v1.png",
+              }}
+              style={styles.icon}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -54,14 +60,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     marginHorizontal: 20,
-    marginTop: 15,
+    marginTop: 10,
+    paddingBottom: 8,
   },
   iconContainer: {
     flexDirection: "row",
+    marginRight: -10,
   },
   title: {
-    color: "white",
-    fontSize: 25,
+    color: "#FC5E1A",
+    fontSize: 30,
     fontWeight: "bold",
     textAlign: "left",
     paddingLeft: 20,
@@ -69,10 +77,10 @@ const styles = StyleSheet.create({
     marginBottom: 120,
   },
   icon: {
-    width: 30,
-    height: 30,
-    marginLeft: 10,
+    width: 40,
+    height: 40,
     resizeMode: "center",
+    // color: "#fff",
   },
   unreadBadge: {
     backgroundColor: "#63F636",
@@ -89,5 +97,13 @@ const styles = StyleSheet.create({
   unreadBadgeText: {
     color: "white",
     fontWeight: 600,
+  },
+  iconBorder: {
+    width: 40,
+    height: 40,
+    borderRadius: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 6,
   },
 });

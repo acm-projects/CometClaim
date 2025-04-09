@@ -1,5 +1,5 @@
 import type React from "react";
-import { TouchableOpacity, StyleSheet, View } from "react-native";
+import { TouchableOpacity, StyleSheet, View, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
@@ -27,10 +27,14 @@ const ChatbotButton: React.FC<ChatbotButtonProps> = ({
         activeOpacity={0.7}
       >
         <View style={styles.iconContainer}>
-          <Ionicons
+          {/* <Ionicons
             name="chatbubble-ellipses"
             size={size * 0.5}
             color="white"
+          /> */}
+          <Image
+            source={require("@/assets/images/CometClaim-Logo.png")}
+            style={{ height: 50, width: 50 }}
           />
         </View>
       </TouchableOpacity>

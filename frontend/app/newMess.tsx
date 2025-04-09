@@ -6,26 +6,16 @@ import {
   Pressable,
   Image,
   TextInput,
-  Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Entypo } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
 import NewMessage from "@/components/ui/UserMessages";
-import { UserMessage } from "@/components/ui/UserMessages";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import filter from "lodash.filter";
 
-// Define the message type
-interface Message {
-  id: string;
-  name: string;
-  preview: string;
-  timestamp?: string;
-  unread?: boolean;
-  avatar?: string;
-}
-
+// Define the user type
 interface User {
   user_id: string;
   username: string;
@@ -37,51 +27,9 @@ interface User {
   comments?: any[];
 }
 
-// Define messages data
-const messages: Message[] = [
-  {
-    id: "1",
-    name: "Jeremy Dough",
-    preview: "Are you available next Wednesday?",
-    timestamp: "10:30 AM",
-    unread: true,
-  },
-  {
-    id: "2",
-    name: "Jane Steward",
-    preview: "We can meet after my CS2336 class...",
-    timestamp: "Yesterday",
-  },
-  {
-    id: "3",
-    name: "FAQ Chatbot",
-    preview: "What date did you lose the item?",
-    timestamp: "Mon",
-    avatar: "https://img.icons8.com/color/96/000000/chatbot.png",
-  },
-  {
-    id: "4",
-    name: "Jordan Rodriguez",
-    preview: "No worries! I can stop by...",
-    timestamp: "Sun",
-  },
-  {
-    id: "5",
-    name: "Mohammad Mehrab",
-    preview: "Hello from the client",
-    timestamp: "Today",
-  },
-];
-
 const API_URL = process.env.EXPO_PUBLIC_API_URL; // Replace with your actual API URL
 
 export default function MessagesScreen() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState<User[]>([]);
-  const [error, setError] = useState<Error | null>(null);
-  const [fullData, setFullData] = useState<User[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>("");
-
   // Navigate to the DM screen with the user's information
   const navigateToDM = (user: {
     id: string;
@@ -97,37 +45,11 @@ export default function MessagesScreen() {
       },
     });
   };
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    if (query === "") {
-      // If query is empty, show all users
-      setData(fullData);
-      return;
-    }
-    const formattedQuery = query.toLowerCase();
-    const filteredData = filter(fullData, (user) => {
-      return contains(user, formattedQuery);
-    });
-    setData(filteredData);
-  };
-
-  const contains = (user: User, query: string): boolean => {
-    if (user.username.toLowerCase().includes(query)) {
-      return true;
-    }
-    if (user.full_name && user.full_name.toLowerCase().includes(query)) {
-      return true;
-    }
-    if (user.email.toLowerCase().includes(query)) {
-      return true;
-    }
-    // Check if phone number contains the query (if available)
-    if (user.phone_number && user.phone_number.includes(query)) {
-      return true;
-    }
-    return false;
-  };
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<User[]>([]);
+  const [error, setError] = useState<Error | null>(null);
+  const [fullData, setFullData] = useState<User[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     setIsLoading(true);
@@ -165,6 +87,39 @@ export default function MessagesScreen() {
     );
   }
 
+  // Error handling state
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query === "") {
+      // If query is empty, show all users
+      setData(fullData);
+      return;
+    }
+    const formattedQuery = query.toLowerCase();
+    const filteredData = filter(fullData, (user) => {
+      return contains(user, formattedQuery);
+    });
+    setData(filteredData);
+  };
+
+  // Function to check if the user matches the search query
+  const contains = (user: User, query: string): boolean => {
+    if (user.username.toLowerCase().includes(query)) {
+      return true;
+    }
+    if (user.full_name && user.full_name.toLowerCase().includes(query)) {
+      return true;
+    }
+    if (user.email.toLowerCase().includes(query)) {
+      return true;
+    }
+    // Check if phone number contains the query (if available)
+    if (user.phone_number && user.phone_number.includes(query)) {
+      return true;
+    }
+    return false;
+  };
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -172,55 +127,70 @@ export default function MessagesScreen() {
         locations={[0, 1]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
-        style={{ minHeight: 95, height: "11.3%", width: "100%" }}
+        style={{
+          minHeight: 95,
+          height: "11.3%",
+          width: "100%",
+        }}
       >
         <View
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            alignItems: "center",
-            paddingTop: "10%",
-            paddingHorizontal: "2%",
-          }}
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          {/* Left section - Back button */}
-          <View style={{ flex: 1, alignItems: "flex-start" }}>
-            <Pressable style={{ padding: 5 }} onPress={() => router.back()}>
+          <View
+            style={{
+              width: "100%",
+              marginTop: "10%",
+              alignSelf: "flex-start",
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <Pressable
+              style={{ marginLeft: "2%" }}
+              onPress={() => router.back()}
+            >
               <Entypo name="chevron-left" size={32} color="white" />
             </Pressable>
-          </View>
-
-          {/* Middle section - Title */}
-          <View style={{ flex: 2, alignItems: "center" }}>
-            <Text style={{ color: "white", fontWeight: "700", fontSize: 18 }}>
-              Messages
-            </Text>
-          </View>
-
-          {/* Right section - Edit icon */}
-          <View style={{ flex: 1, alignItems: "flex-end", paddingRight: 10 }}>
-            <Pressable onPress={() => router.push("/newMess")}>
-              <Image
-                source={{
-                  uri: "https://img.icons8.com/external-anggara-glyph-anggara-putra/120/ffffff/external-edit-user-interface-anggara-glyph-anggara-putra.png",
+            <View
+              style={{
+                position: "absolute",
+                width: "100%",
+                flexDirection: "column",
+              }}
+            >
+              <Text
+                style={{
+                  alignSelf: "center",
+                  color: "white",
+                  fontWeight: "700",
+                  fontSize: 18,
                 }}
-                style={{ width: 30, height: 30, resizeMode: "center" }}
-              />
-            </Pressable>
+              >
+                New Message
+              </Text>
+            </View>
           </View>
         </View>
       </LinearGradient>
-
       <View style={styles.inputContainer}>
+        <Text
+          style={{
+            marginLeft: 10,
+            fontSize: 16,
+            fontWeight: 500,
+            color: "#A6A6A6",
+          }}
+        >
+          To:{" "}
+        </Text>
         <TextInput
           style={styles.input}
           value={searchQuery}
           onChangeText={(query) => handleSearch(query)}
-          placeholder="Search for users"
+          placeholder="Search"
           placeholderTextColor="#A6A6A6"
         />
       </View>
-
       <FlatList
         data={data}
         keyExtractor={(item) => item.user_id}
@@ -260,12 +230,11 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 45,
-    borderRadius: 20,
     borderWidth: 1,
-    backgroundColor: "#F5F5F5",
-    borderColor: "#F5F5F5",
+    borderColor: "#fff",
     paddingHorizontal: 15,
     fontSize: 16,
     fontWeight: 500,
+    marginLeft: -10,
   },
 });

@@ -1,3 +1,4 @@
+// Post.tsx
 import React, { useRef } from "react";
 import {
   StyleSheet,
@@ -30,6 +31,7 @@ type PostHeaderProps = {
 };
 
 type PostDateAndLocationProps = {
+  status: string;
   datetime: string;
   location: string;
 };
@@ -109,6 +111,7 @@ export function Post(props: PostProps) {
           item={props.item}
         />
         <PostDateAndLocation
+          status={props.item.status}
           datetime={props.item.date_reported}
           location={props.item.location}
         />
@@ -257,19 +260,29 @@ function PostHeader(props: PostHeaderProps) {
   return (
     <View style={styles.headerView}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Image
-          source={{ uri: props.user.user_profile_picture }}
-          style={styles.story}
-        />
-        <Text
-          style={{
-            color: "black",
-            marginLeft: 5,
-            fontWeight: "500",
-          }}
+        <Pressable
+          style={{ flexDirection: "row", alignItems: "center" }}
+          onPress={() =>
+            router.push({
+              pathname: "/UsersProfile",
+              params: { userId: props.user.user_id },
+            })
+          }
         >
-          {props.user.user_name}
-        </Text>
+          <Image
+            source={{ uri: props.user.user_profile_picture }}
+            style={styles.story}
+          />
+          <Text
+            style={{
+              color: "black",
+              marginLeft: 5,
+              fontWeight: "500",
+            }}
+          >
+            {props.user.user_name}
+          </Text>
+        </Pressable>
         <Text
           style={{
             color: "black",
@@ -377,6 +390,21 @@ function PostDateAndLocation(props: PostDateAndLocationProps) {
           marginTop: 5,
         }}
       >
+        <View
+          style={{
+            backgroundColor: props.status === "lost" ? "#CB3131" : "#419D44",
+            paddingVertical: 8,
+            paddingHorizontal: 16,
+            marginLeft: 10,
+            marginRight: 15,
+            borderRadius: 20,
+            alignSelf: "flex-start",
+          }}
+        >
+          <Text style={{ color: "white", fontWeight: "600", fontSize: 12 }}>
+            {props.status === "lost" ? "Lost" : "Found"}
+          </Text>
+        </View>
         <Icon
           imgStyle={styles.dateLocationIcon}
           imgUrl={"https://img.icons8.com/ios/50/calendar--v1.png"}
@@ -524,12 +552,19 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   backPost: {
-    backgroundColor: "white",
+    backgroundColor: "#fff",
     borderRadius: 20,
     marginHorizontal: 10,
     marginTop: 20,
     paddingBottom: 10,
     flexGrow: 1, // Allows the container to expand
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
   },
   imagePost: {
     width: 370,

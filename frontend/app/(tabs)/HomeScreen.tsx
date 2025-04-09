@@ -44,11 +44,14 @@ const HomeScreen: React.FC = () => {
   }, []);
 
   return (
-    <LinearGradient
-      style={styles.container}
-      colors={["#FFDCB5", "#FC5E1A"]}
-      start={{ x: 0.5, y: 0.5 }}
-      end={{ x: 0.5, y: 0 }}
+    // <LinearGradient
+    //   style={styles.container}
+    //   colors={["#FFDCB5", "#FC5E1A"]}
+    //   start={{ x: 0.5, y: 0.5 }}
+    //   end={{ x: 0.5, y: 0 }}
+    // >
+    <View
+      style={{ flex: 1, flexDirection: "column", backgroundColor: "#FFFAF8" }}
     >
       <SafeAreaView style={{ flex: 1 }}>
         <Header />
@@ -66,7 +69,8 @@ const HomeScreen: React.FC = () => {
         </Modal>
       </SafeAreaView>
       <ChatbotButton />
-    </LinearGradient>
+      {/* // </LinearGradient> */}
+    </View>
   );
 };
 
@@ -86,15 +90,6 @@ const styles = StyleSheet.create({
     // backgroundColor: "rgba(0,0,0,0.5)",
     marginBottom: 120,
   },
-  // link: {
-  //   color: "white",
-  //   fontSize: 42,
-  //   fontWeight: "bold",
-  //   textAlign: "center",
-  //   textDecorationLine: "underline",
-  //   backgroundColor: "rgba(0,0,0,0.5)",
-  //   padding: 4,
-  // },
   button: {
     height: 60,
     borderRadius: 20,

@@ -41,13 +41,6 @@ const ChatScreen: React.FC = () => {
     return match ? match.answer : null;
   };
   const handleSendMessage = async () => {
-    if (!message.trim()) return;
-    // Add user message
-    setChatHistory((prevHistory) => [
-      ...prevHistory,
-      { type: "user", text: message },
-    ]);
-    setMessage("");
     // Check if there is a predefined answer
     const predefinedAnswer = getPredefinedAnswer(message);
     if (predefinedAnswer) {
@@ -67,7 +60,7 @@ const ChatScreen: React.FC = () => {
   };
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
-      <LinearGradient
+      {/* <LinearGradient
         colors={["#FC5E1A", "#FFC480"]}
         locations={[0, 1]}
         start={{ x: 0, y: 0 }}
@@ -116,10 +109,34 @@ const ChatScreen: React.FC = () => {
             </View>
           </View>
         </View>
-      </LinearGradient>
+      </LinearGradient> */}
+
+      <View style={styles.header}>
+        <TouchableOpacity style={{ margin: 15 }} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="#FC5E1A" />
+        </TouchableOpacity>
+        <View
+          style={{
+            position: "absolute",
+            width: "100%",
+            flexDirection: "column",
+          }}
+        >
+          <Text
+            style={{
+              alignSelf: "center",
+              color: "#000",
+              fontWeight: "700",
+              fontSize: 18,
+            }}
+          >
+            ChatBot
+          </Text>
+        </View>
+      </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1, backgroundColor: "#f7f7f7" }}
+        style={{ flex: 1, backgroundColor: "#f7f7f7", marginBottom: 30 }}
       >
         <ScrollView ref={scrollViewRef} style={styles.chatContainer}>
           {chatHistory.map((msg, index) => (
@@ -130,7 +147,14 @@ const ChatScreen: React.FC = () => {
                 msg.type === "user" ? styles.userMessage : styles.botMessage,
               ]}
             >
-              <Text style={styles.messageText}>{msg.text}</Text>
+              <Text
+                style={[
+                  styles.messageText,
+                  msg.type === "user" ? styles.userMessage : styles.botMessage,
+                ]}
+              >
+                {msg.text}
+              </Text>
             </View>
           ))}
         </ScrollView>
@@ -167,12 +191,26 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 10,
   },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: "5%",
+    paddingBottom: "5%",
+    backgroundColor: "#fff",
+    marginLeft: 10,
+    borderBottomWidth: 1,
+    borderColor: "#eee",
+    width: "100%",
+    marginTop: "5%",
+    alignSelf: "flex-start",
+  },
   userMessage: {
     alignSelf: "flex-end",
-    backgroundColor: "#0084FF",
+    backgroundColor: "#FC5E1A",
   },
   botMessage: {
     alignSelf: "flex-start",
+    color: "#000",
     backgroundColor: "#E4E6EB",
   },
   messageText: {
