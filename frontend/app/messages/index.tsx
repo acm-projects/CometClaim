@@ -3,10 +3,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Entypo } from "@expo/vector-icons";
 import { Link, RelativePathString, router } from "expo-router";
 import { UserMessage } from "@/components/ui/UserMessages";
+import { useEffect, useState } from "react";
+import { User } from "@/types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define the message type
-interface Message {
-  id: string;
+interface ChatPreview {
+  chat_id: string;
+  user_ids: string[];
   name: string;
   preview: string;
   timestamp?: string;
@@ -14,54 +18,124 @@ interface Message {
   avatar?: string;
 }
 
+const apiUrl = process.env.EXPO_PUBLIC_API_URL
+
 // Define messages data
-const messages: Message[] = [
-  {
-    id: "1",
-    name: "Jeremy Dough",
-    preview: "Are you available next Wednesday?",
-    timestamp: "10:30 AM",
-    unread: true,
-  },
-  {
-    id: "2",
-    name: "Jane Steward",
-    preview: "We can meet after my CS2336 class...",
-    timestamp: "Yesterday",
-  },
-  {
-    id: "3",
-    name: "FAQ Chatbot",
-    preview: "What date did you lose the item?",
-    timestamp: "Mon",
-    avatar: "https://img.icons8.com/color/96/000000/chatbot.png",
-  },
-  {
-    id: "4",
-    name: "Jordan Rodriguez",
-    preview: "No worries! I can stop by...",
-    timestamp: "Sun",
-  },
-  {
-    id: "5",
-    name: "Mohammad Mehrab",
-    preview: "Hello from the client",
-    timestamp: "Today",
-  },
-];
+// const messages: ChatPreview[] = [
+//   {
+//     chat_id: '1',
+//     user_ids: ["1"],
+//     name: "Jeremy Dough",
+//     preview: "Are you available next Wednesday?",
+//     timestamp: "10:30 AM",
+//     unread: true,
+//   },
+//   {
+//     chat_id: '1',
+//     user_ids: ["2"],
+//     name: "Jane Steward",
+//     preview: "We can meet after my CS2336 class...",
+//     timestamp: "Yesterday",
+//   },
+//   {
+//     chat_id: '1',
+//     user_ids: ["3"],
+//     name: "FAQ Chatbot",
+//     preview: "What date did you lose the item?",
+//     timestamp: "Mon",
+//     avatar: "https://img.icons8.com/color/96/000000/chatbot.png",
+//   },
+//   {
+//     chat_id: '1',
+//     user_ids: ["4"],
+//     name: "Jordan Rodriguez",
+//     preview: "No worries! I can stop by...",
+//     timestamp: "Sun",
+//   },
+//   {
+//     chat_id: '1',
+//     user_ids: ["5"],
+//     name: "Mohammad Mehrab",
+//     preview: "Hello from the client",
+//     timestamp: "Today",
+//   },
+// ];
 
 export default function MessagesScreen() {
   // Navigate to the DM screen with the user's information
-  const navigateToDM = (user: Message) => {
+  const navigateToDM = (user: ChatPreview) => {
+    console.log("test")
     router.push({
-      pathname: "/messages/[id]" as RelativePathString,
+      pathname: "/messages/[chat_id]" as RelativePathString,
       params: {
-        id: user.id,
+        chat_id: user.chat_id,
+        ids: user.user_ids,
         name: user.name,
         avatar: user.avatar || "",
       },
     });
   };
+
+  const [chatList, setChatList] = useState<ChatPreview[]>([])
+  const [currentUserId, setCurrentUserId] = useState("")
+
+  useEffect(() => {
+    async function getCurrentUserId() {
+      const userId = await AsyncStorage.getItem('userId')
+      if (userId) setCurrentUserId(userId)
+    }
+    getCurrentUserId()
+  }, [])
+
+  useEffect(() => {
+    async function getChats() {
+      const res = await fetch(`${apiUrl}/users/${currentUserId}/chats`, {
+        method: 'GET'
+      })
+
+      const data = await res.json()
+
+      const chatIds = JSON.parse(data.body).map((obj: {user_id: string; chat_id: string; }) => obj.chat_id)
+
+      console.log('chats of user:', chatIds)
+
+      const chatList: ChatPreview[] = []
+      
+      for(const chatId of chatIds) {
+
+        const res = await fetch(`${apiUrl}/chats/${chatId}`, {
+          method: 'GET'
+        })
+
+        const data = await res.json()
+
+        console.log(JSON.parse(data.body))
+
+        const chatInfo = JSON.parse(data.body)
+
+        const chatPreview = {
+          chat_id: chatInfo.chat_id,
+          user_ids: chatInfo.chat_members,
+          name: chatInfo.chat_name,
+          preview: chatInfo.last_message?.message || "blank",
+          timestamp: chatInfo.last_message?.timestamp || "ts"
+        }
+
+        chatList.push(chatPreview)
+
+      }
+
+      console.log('chat list:', chatList)
+      setChatList(chatList)
+
+    }
+    
+    if(currentUserId) {
+      console.log(currentUserId)
+      getChats()
+    }
+  }, [currentUserId])
+
 
   return (
     <View style={styles.container}>
@@ -117,8 +191,8 @@ export default function MessagesScreen() {
       </LinearGradient>
 
       <FlatList
-        data={messages}
-        keyExtractor={(item) => item.id}
+        data={chatList}
+        keyExtractor={(item) => item.chat_id}
         renderItem={({ item }) => (
           <UserMessage
             name={item.name}

@@ -296,9 +296,11 @@ import {
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { defaultUser, User, Message } from "@/types";
 
 // Define the Message type
-interface Message {
+interface ChatMessage {
   id?: string;
   text?: string;
   message?: string; // For compatibility with WebSocket messages
@@ -307,22 +309,63 @@ interface Message {
   timestamp?: string;
 }
 
+type DMInfo = {
+  chat_id: string;
+  recipient_ids: string[];
+  chat_name: string;
+  chat_profile_picture: string;
+  recipient_ids_to_names?: object;
+}
+
+const apiUrl = process.env.EXPO_PUBLIC_API_URL
+
 const DMScreen = () => {
-  // Get the user ID and name from the URL params
-  const { id, name, avatar } = useLocalSearchParams();
-  const userId = typeof id === "string" ? id : "1";
-  const userName = typeof name === "string" ? name : "User";
-  const userAvatar = typeof avatar === "string" ? avatar : "";
+
+  const [dmInfo, setDmInfo] = useState<DMInfo>()
+
+  const searchParams = useLocalSearchParams();
+
+  // console.log(id, name, avatar)
 
   // State for messages and input
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageInput, setMessageInput] = useState<string>("");
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [currentUsername, setCurrentUsername] = useState<string>("user1"); // Your username
+
+  const [currentUserId, setCurrentUserId] = useState<string|null>(null)
+
   const scrollViewRef = useRef<ScrollView>(null);
 
   // WebSocket URL from environment variables
   const websocketApiUrl = process.env.EXPO_PUBLIC_WS_API_URL;
+
+  useEffect(() => {
+    const { chat_id, ids, name, avatar } = searchParams;
+    console.log(chat_id, ids, name, avatar)
+    if(typeof chat_id === 'string' && (typeof ids === 'object' || typeof ids === 'string') && typeof name === 'string' && typeof avatar === 'string') {
+      const dm_info: DMInfo = {
+        chat_id: chat_id,
+        recipient_ids: typeof ids === 'object' ? ids : ids.split(','),
+        chat_name: name,
+        chat_profile_picture: avatar
+      }
+      
+      setDmInfo(dm_info)
+
+      console.log('dm info', dm_info)
+    }
+  }, [])
+
+  useEffect(() => {
+    async function getUserId() {
+      const userId = await AsyncStorage.getItem('userId')
+      const username = await AsyncStorage.getItem('username')
+      setCurrentUserId(userId)
+      if(username) setCurrentUsername(username)
+    }
+    getUserId()
+  }, [])
 
   // Initialize WebSocket connection
   useEffect(() => {
@@ -331,19 +374,28 @@ const DMScreen = () => {
       return;
     }
 
-    const newSocket = new WebSocket(websocketApiUrl);
+    if(!currentUserId) {
+      console.log("current user id hasnt loaded yet")
+      return;
+    } else {
+      console.log(currentUserId)
+    }
+    
+
+    const newSocket = new WebSocket(`${websocketApiUrl}?user_id=${currentUserId}`);
     setSocket(newSocket);
 
-    newSocket.onopen = () => {
+    newSocket.onopen = (event) => {
       console.log("WebSocket Connected!");
+      console.log('event', event)
       // Join the conversation with the specific user
-      newSocket.send(
-        JSON.stringify({
-          action: "joinConversation",
-          conversationId: userId,
-          username: currentUsername,
-        })
-      );
+      // newSocket.send(
+      //   JSON.stringify({
+      //     action: "joinConversation",
+      //     conversationId: userId,
+      //     username: currentUsername,
+      //   })
+      // );
     };
 
     newSocket.onmessage = (event) => {
@@ -376,7 +428,7 @@ const DMScreen = () => {
       console.log("Closing WebSocket connection...");
       newSocket.close();
     };
-  }, [userId]); // Reconnect when userId changes
+  }, [dmInfo, currentUserId]); // Reconnect when userId changes
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -385,49 +437,89 @@ const DMScreen = () => {
     }, 100);
   }, [messages]);
 
-  // Load initial messages for this conversation
-  const loadInitialMessages = () => {
+  const loadInitialMessages = async () => {
+
+    const res = await fetch(`${apiUrl}/chats/${dmInfo?.chat_id}/messages`, {
+      method: 'GET'
+    })
+
+    const data = await res.json()
+
+    const initialMessages = JSON.parse(data.body)
+
     // This could be an API call to get message history
     // For now, we'll use some sample messages
-    const initialMessages: Message[] = [
-      {
-        id: "1",
-        message: `Hello ${currentUsername}!`,
-        username: userName,
-        sender: "receiver",
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-      },
-      {
-        id: "2",
-        message: `Hi ${userName}, how are you?`,
-        username: currentUsername,
-        sender: "sender",
-        timestamp: new Date(Date.now() - 3000000).toISOString(),
-      },
-    ];
+    // const initialMessages: Message[] = [
+    //   {
+    //     id: "1",
+    //     message: `Hello ${currentUsername}!`,
+    //     username: recipient.username,
+    //     sender: "receiver",
+    //     timestamp: new Date(Date.now() - 3600000).toISOString(),
+    //   },
+    //   {
+    //     id: "2",
+    //     message: `Hi ${recipient.username}, how are you?`,
+    //     username: currentUsername,
+    //     sender: "sender",
+    //     timestamp: new Date(Date.now() - 3000000).toISOString(),
+    //   },
+    // ];
 
-    setMessages(initialMessages);
+    // const initialMessages = []
+
+    const reformattedInitialMessages = initialMessages.map((message: Message) => ({
+      id: message.message_id,
+      message: message.message,
+      username: message.username,
+      sender: message.sender_id === currentUserId ? 'sender' : 'receiver',
+      timestamp: new Date(parseInt(message.timestamp) - 3000000).toISOString()
+    } as ChatMessage)) as ChatMessage[]
+
+    reformattedInitialMessages.reverse()
+
+    console.log(reformattedInitialMessages)
+
+    setMessages(reformattedInitialMessages);
   };
 
   // Send a message via WebSocket
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!messageInput.trim()) return;
 
     if (socket && socket.readyState === WebSocket.OPEN) {
       // Create message object
       const messageObj = {
         action: "sendMessage",
-        conversationId: userId,
+        senderId: currentUserId,
+        recipientIds: dmInfo?.recipient_ids || [],
         username: currentUsername,
         message: messageInput,
-        timestamp: new Date().toISOString(),
       };
+
+      const res = await fetch(`${apiUrl}/chats/${dmInfo?.chat_id}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sender_id: currentUserId,
+          message: messageInput,
+          username: currentUsername
+        })
+      })
+
+      const data = await res.json()
+
+      console.log(data)
+
+      console.log(messageObj)
 
       // Send to WebSocket server
       socket.send(JSON.stringify(messageObj));
 
       // Add to local messages (optimistic update)
-      const newMessage: Message = {
+      const newMessage: ChatMessage = {
         id: Date.now().toString(),
         message: messageInput,
         username: currentUsername,
@@ -441,7 +533,7 @@ const DMScreen = () => {
     } else {
       console.log("WebSocket not connected");
       // Fallback for when WebSocket is not available
-      const newMessage: Message = {
+      const newMessage: ChatMessage = {
         id: Date.now().toString(),
         message: messageInput,
         username: currentUsername,
@@ -456,7 +548,7 @@ const DMScreen = () => {
   };
 
   // Render a message bubble
-  const renderMessage = ({ item }: { item: Message }) => (
+  const renderMessage = ({ item }: { item: ChatMessage }) => (
     <View
       style={[
         styles.messageBubble,
@@ -508,15 +600,15 @@ const DMScreen = () => {
             <Ionicons name="arrow-back" size={24} color="#FC5E1A" />
           </TouchableOpacity>
 
-          {userAvatar ? (
-            <Image source={{ uri: userAvatar }} style={styles.profileImage} />
+          {dmInfo?.chat_profile_picture ? (
+            <Image source={{ uri: dmInfo?.chat_profile_picture }} style={styles.profileImage} />
           ) : (
             <View style={styles.defaultAvatar}>
-              <Text style={styles.avatarText}>{userName.charAt(0)}</Text>
+              <Text style={styles.avatarText}>{dmInfo?.chat_name.charAt(0)}</Text>
             </View>
           )}
 
-          <Text style={styles.headerText}>{userName}</Text>
+          <Text style={styles.headerText}>{dmInfo?.chat_name}</Text>
         </View>
 
         {/* Messages List */}

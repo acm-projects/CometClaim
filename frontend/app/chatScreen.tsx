@@ -28,8 +28,9 @@ export default function ChatScreen() {
       socket = new WebSocket(websocketApiUrl);
 
       setSocket(socket);
-      socket.onopen = () => {
+      socket.onopen = (event) => {
         console.log("Connected!");
+        console.log(event)
         socket.send(
           JSON.stringify({
             action: "sendMessage",

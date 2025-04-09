@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { signUp, confirmSignUp, signIn, signOut } from './(tabs)/Signup';
+import { signUp, confirmSignUp, signIn, signOut } from './Signup';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { jwtDecode } from 'jwt-decode'
 import { Link, RelativePathString } from 'expo-router';
@@ -84,10 +84,15 @@ const App: React.FC = () => {
     setIsAuthenticated(false);
     Alert.alert('Logged out successfully');
   };
+  const handleDismissKeyboard = () => {
+    if(Platform.OS !== 'web') {
+      Keyboard.dismiss()
+    }
+  }
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={handleDismissKeyboard}>
       <KeyboardAvoidingView 
-        style={styles.container}
+        style={{...styles.container}}
         behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <Text style={styles.title}>AWS Cognito Auth</Text>
         {isAuthenticated ? (
@@ -149,7 +154,7 @@ const App: React.FC = () => {
               placeholder="Email"
               value={email}
               onChangeText={setEmail}
-              style={styles.input}
+              style={{...styles.input, pointerEvents: 'auto'}}
               autoCapitalize="none"
               placeholderTextColor={'gray'}
             />
