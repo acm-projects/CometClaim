@@ -17,7 +17,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Checkbox from "expo-checkbox";
 import { ShareRow } from "@/components/ShareRow";
-import { PostType } from "@/data/posts"; // Import the PostType
 import { Item } from "./Post";
 
 interface ShareScreenProps {

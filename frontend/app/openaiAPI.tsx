@@ -3,7 +3,7 @@ import axios from 'axios';
 const OPENAI_URL = process.env.EXPO_PUBLIC_OPENAI_URL as string;
 const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY as string;
 
-const fetchAnswerFromOpenAI = async (question: string) => {
+export const fetchAnswerFromOpenAI = async (question: string) => {
   try {
     const response = await axios.post(
       OPENAI_URL,
@@ -31,5 +31,3 @@ const fetchAnswerFromOpenAI = async (question: string) => {
     return 'Sorry, I am not able to answer that. Please contact lostandfound@utdallas.edu.';
   }
 };
-
-export default fetchAnswerFromOpenAI;

@@ -25,6 +25,28 @@ export type Post = {
   status: string;
 }
 
+export type Chat = {
+  chat_id: string;
+  chat_members: string[];
+  created_at: string;
+  chat_name: string;
+}
+
+export type ChatMembership = {
+  user_id: string;
+  chat_id: string;
+  joined_at: string;
+}
+
+export type Message = {
+  chat_id: string;
+  message_id: string;
+  sender_id: string;
+  message: string;
+  timestamp: string;
+  username: string;
+}
+
 export const defaultUser: User = {
   user_id: "123",
   email: "default@example.com",

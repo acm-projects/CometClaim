@@ -1,9 +1,9 @@
 import { CognitoUserPool, CognitoUser, AuthenticationDetails, CognitoUserSession, CognitoUserAttribute } from 'amazon-cognito-identity-js';
 
 const userPool = new CognitoUserPool({
-    UserPoolId: process.env.EXPO_PUBLIC_USER_POOL_ID || 'defaultUserPoolId', 
-    ClientId: process.env.EXPO_PUBLIC_CLIENT_ID || 'defaultClientId',      
-  });
+  UserPoolId: process.env.EXPO_PUBLIC_USER_POOL_ID || 'defaultUserPoolId', 
+  ClientId: process.env.EXPO_PUBLIC_CLIENT_ID || 'defaultClientId',      
+});
 
 export const signUp = (username: string, email: string, password: string, fullName: string): Promise<string> => {
     console.log("Clicked");
@@ -44,20 +44,21 @@ export const signUp = (username: string, email: string, password: string, fullNa
         });
     });
 };
-  export const confirmSignUp = (username: string, code: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const user = new CognitoUser({ Username: username, Pool: userPool });
-      console.log(user)
-      console.log(code)
-      user.confirmRegistration(code, true, (err, result) => {
-        if (err) {
-          reject(err.message || JSON.stringify(err));
-        } else {
-          resolve('Account confirmed! You can now log in.');
-        }
-      });
+
+export const confirmSignUp = (username: string, code: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const user = new CognitoUser({ Username: username, Pool: userPool });
+    console.log(user)
+    console.log(code)
+    user.confirmRegistration(code, true, (err, result) => {
+      if (err) {
+        reject(err.message || JSON.stringify(err));
+      } else {
+        resolve('Account confirmed! You can now log in.');
+      }
     });
-  };
+  });
+};
 /**
  * Sign in user to Cognito
  */
