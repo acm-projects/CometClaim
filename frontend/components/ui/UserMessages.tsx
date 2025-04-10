@@ -9,6 +9,34 @@ interface UserMessageProps {
   avatar?: string;
   onPress?: () => void;
 }
+interface NewMessageProps {
+  name: string;
+  avatar?: string;
+  onPress?: () => void;
+}
+
+const NewMessage: React.FC<NewMessageProps> = ({ name, avatar, onPress }) => {
+  return (
+    <TouchableOpacity style={styles.container} onPress={onPress}>
+      <View style={styles.avatarContainer}>
+        {avatar ? (
+          <Image source={{ uri: avatar }} style={styles.avatar} />
+        ) : (
+          <View style={styles.defaultAvatar}>
+            <Text style={styles.avatarText}>{name.charAt(0)}</Text>
+          </View>
+        )}
+      </View>
+      <View style={styles.contentContainer}>
+        <View style={styles.headerRow}>
+          <Text style={[styles.name]}>{name}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+export default NewMessage;
 
 export const UserMessage: React.FC<UserMessageProps> = ({
   name,

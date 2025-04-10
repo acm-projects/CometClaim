@@ -1,7 +1,9 @@
+//PostsGrid.tsx
+
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 import {
   View,
   Text,
@@ -9,7 +11,6 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
-  Dimensions,
 } from "react-native";
 import { router } from "expo-router";
 import type { PostTypeUser } from "@/data/userPosts";
@@ -17,9 +18,14 @@ import type { PostTypeUser } from "@/data/userPosts";
 interface PostsGridProps {
   posts: PostTypeUser[];
   title?: string;
+  ListHeaderComponent?: ReactNode;
 }
 
-const PostsGrid: React.FC<PostsGridProps> = ({ posts, title = "Posts" }) => {
+const PostsGrid: React.FC<PostsGridProps> = ({
+  posts,
+  title = "Posts",
+  ListHeaderComponent,
+}) => {
   const [activeTab, setActiveTab] = useState<"all" | "found" | "lost">("all");
 
   const filteredPosts =
@@ -27,13 +33,7 @@ const PostsGrid: React.FC<PostsGridProps> = ({ posts, title = "Posts" }) => {
       ? posts
       : posts.filter((post) => post.type === activeTab);
 
-  const renderItem = ({
-    item,
-    index,
-  }: {
-    item: PostTypeUser;
-    index: number;
-  }) => (
+  const renderItem = ({ item }: { item: PostTypeUser }) => (
     <TouchableOpacity
       style={styles.postItem}
       onPress={() =>
@@ -62,75 +62,84 @@ const PostsGrid: React.FC<PostsGridProps> = ({ posts, title = "Posts" }) => {
     </TouchableOpacity>
   );
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
-        <View style={styles.tabs}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === "all" && styles.activeTab]}
-            onPress={() => setActiveTab("all")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === "all" && styles.activeTabText,
-              ]}
+  // Create a custom header that combines the provided ListHeaderComponent with our tabs
+  const HeaderComponent = () => (
+    <>
+      {/* Include the provided ListHeaderComponent (avatar, stats, etc.) */}
+      {ListHeaderComponent}
+
+      {/* Our custom container with title and tabs */}
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>{title}</Text>
+          <View style={styles.tabs}>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === "all" && styles.activeTab]}
+              onPress={() => setActiveTab("all")}
             >
-              All
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === "found" && styles.activeTab]}
-            onPress={() => setActiveTab("found")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === "found" && styles.activeTabText,
-              ]}
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === "all" && styles.activeTabText,
+                ]}
+              >
+                All
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === "found" && styles.activeTab]}
+              onPress={() => setActiveTab("found")}
             >
-              Found
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === "lost" && styles.activeTab]}
-            onPress={() => setActiveTab("lost")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === "lost" && styles.activeTabText,
-              ]}
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === "found" && styles.activeTabText,
+                ]}
+              >
+                Found
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === "lost" && styles.activeTab]}
+              onPress={() => setActiveTab("lost")}
             >
-              Lost
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === "lost" && styles.activeTabText,
+                ]}
+              >
+                Lost
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
+    </>
+  );
 
-      {filteredPosts.length > 0 ? (
-        <FlatList
-          data={filteredPosts}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
-          numColumns={2}
-          contentContainerStyle={styles.gridContainer}
-          columnWrapperStyle={styles.columnWrapper}
-        />
-      ) : (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No {activeTab} posts yet</Text>
-        </View>
-      )}
+  // Combine our content container with EmptyComponent
+  const EmptyComponent = () => (
+    <View style={styles.container}>
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No {activeTab} posts yet</Text>
+      </View>
     </View>
   );
-};
 
-// const { width } = Dimensions.get("window");
-// // Adjust the item width calculation to ensure items fit properly
-// // Add more padding and reduce the item width
-// const itemWidth = (width - 64) / 2; // Increased horizontal padding
+  return (
+    <FlatList
+      data={filteredPosts}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.id.toString()}
+      numColumns={2}
+      contentContainerStyle={styles.listContainer}
+      columnWrapperStyle={styles.columnWrapper}
+      ListHeaderComponent={HeaderComponent}
+      ListEmptyComponent={EmptyComponent}
+    />
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -139,7 +148,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginHorizontal: 20,
     marginTop: 20,
-    marginBottom: 30,
+    marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -148,6 +157,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 2,
+  },
+  listContainer: {
+    paddingBottom: 30,
   },
   header: {
     marginBottom: 16,
@@ -189,12 +201,10 @@ const styles = StyleSheet.create({
     color: "#FC5E1A",
     fontWeight: "500",
   },
-  gridContainer: {
-    paddingBottom: 16,
-  },
   columnWrapper: {
-    justifyContent: "space-between", // Ensure even spacing between items
-    marginBottom: 10, // Add vertical spacing between rows
+    justifyContent: "space-between",
+    marginHorizontal: 20,
+    marginBottom: 10,
   },
   postItem: {
     width: 170,
@@ -247,6 +257,28 @@ const styles = StyleSheet.create({
   emptyText: {
     color: "#999",
     fontSize: 14,
+  },
+  editButtonContainer: {
+    alignSelf: "flex-end",
+    marginRight: 20,
+    marginTop: 40,
+    marginBottom: 10,
+  },
+  editButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
 });
 

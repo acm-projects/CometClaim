@@ -36,13 +36,11 @@ const accessKeyId = process.env.EXPO_PUBLIC_AWS_ACCESS_KEY_ID;
 const secretAccessKey = process.env.EXPO_PUBLIC_AWS_SECRET_ACCESS_KEY;
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-
-
 type UserInfo = {
   username: string;
   email: string;
   fullName: string;
-}
+};
 
 export const s3Client = new S3Client({
   region: bucketRegion,
@@ -63,7 +61,7 @@ interface FormData {
 }
 
 const AddItemScreen = () => {
-  const router = useRouter()
+  const router = useRouter();
   const [itemName, setItemName] = useState("");
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
@@ -78,6 +76,8 @@ const AddItemScreen = () => {
   });
 
   const [image, setImage] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+
   // const [cameraPermission, requestPermission] = ExpoImagePicker.useCameraPermissions()
 
   const selectImage = async () => {
@@ -127,9 +127,16 @@ const AddItemScreen = () => {
       console.log("camera permissions were denied");
     }
   };
+  const removeImage = () => {
+    setImage("");
+  };
 
   const uploadImage = async () => {
+    if (!image) {
+      return "";
+    }
     try {
+      setIsUploading(true);
       const fileURI = image;
       const fileName = fileURI.split("/").pop();
       const fileType = "image/jpeg";
@@ -155,6 +162,8 @@ const AddItemScreen = () => {
     } catch (err) {
       console.error("Error uploading image", err);
       return "";
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -170,20 +179,26 @@ const AddItemScreen = () => {
         throw "Image failed to upload to S3";
       }
 
-      const reporterId = await AsyncStorage.getItem('userId')
-
+      const reporterId = await AsyncStorage.getItem("userId");
+      const submissionData = { ...form };
+      if (s3URL) {
+        submissionData.image_url = s3URL;
+      }
       const response = await fetch(`${apiUrl}/items/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-           ...form, 
-           image_url: s3URL, 
-           date_reported: (new Date()).toLocaleString('sv', {timeZone: 'CST'}).replace(' ', 'T'), 
-           reporter_id: reporterId
-          }),
+          ...form,
+          image_url: s3URL,
+          date_reported: new Date()
+            .toLocaleString("sv", { timeZone: "CST" })
+            .replace(" ", "T"),
+          reporter_id: reporterId,
+        }),
       });
+
       const data = await response.json();
       console.log("Item added:", data);
 
@@ -194,14 +209,15 @@ const AddItemScreen = () => {
         status: "",
         keywords: [""],
         color: "",
-      })
+      });
 
-      setImage("")
+      setImage("");
 
-      router.navigate('/(tabs)/HomeScreen' as RelativePathString)
-
+      router.navigate("/(tabs)/HomeScreen" as RelativePathString);
     } catch (error) {
       console.error("Error adding item:", error);
+    } finally {
+      setIsUploading(false);
     }
   };
   // const handleDateChange = (event: any, date?: Date) => {
@@ -223,9 +239,10 @@ const AddItemScreen = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <LinearGradient
           colors={["#FC5E1A", "#FFC480"]}
           locations={[0, 1]}
@@ -251,7 +268,10 @@ const AddItemScreen = () => {
             >
               <Pressable
                 style={{ marginLeft: "2%" }}
-                onPress={() => router.back()}
+                // onPress={() => router.back()}
+                onPress={() =>
+                  router.push("/(tabs)/HomeScreen" as RelativePathString)
+                }
               >
                 <Entypo name="chevron-left" size={32} color="white" />
               </Pressable>
@@ -276,81 +296,225 @@ const AddItemScreen = () => {
             </View>
           </View>
         </LinearGradient>
-        <ScrollView style={{ padding: 20, backgroundColor: "#ffffff", flex: 1 }}>
-          <View style={styles.imageContainer}>
-            {image && (
-              <Image
-                source={{ uri: image }}
-                style={{ width: "100%", height: 370 }}
-              />
-            )}
-          </View>
-          <View style={{ flexDirection: "row" }}>
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#FC5E1A",
-                padding: 12,
-                borderRadius: 10,
-                alignItems: "center",
-                margin: 8,
-              }}
-              onPress={selectImage}
-            >
-              <Text style={{ color: "white", fontWeight: "bold" }}>Photos</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#FC5E1A",
-                padding: 12,
-                borderRadius: 10,
-                alignItems: "center",
-                margin: 8,
-              }}
-              onPress={takePhoto}
-            >
-              <Text style={{ color: "white", fontWeight: "bold" }}>Camera</Text>
-            </TouchableOpacity>
-          </View>
-          {Object.keys(form).map((key) => (
-            <View key={key} style={{ marginBottom: 10, marginTop: 10 }}>
-              <Text
-                style={{ fontWeight: "bold", marginBottom: 5, color: "#000" }}
-              >
-                {key.replace("_", " ").toUpperCase()}
-              </Text>
-              
-              <TextInput
-                placeholder={`Enter ${key.replace("_", " ")}`}
-                placeholderTextColor="#888"
-                value={
-                  Array.isArray(form[key as keyof FormData])
-                    ? (form[key as keyof FormData] as string[]).join(", ")
-                    : (form[key as keyof FormData] as string)
-                }
-                onChangeText={(value) =>
-                  handleChange(key as keyof FormData, value)
-                }
-                style={{
-                  borderWidth: 1,
-                  padding: 10,
-                  borderRadius: 10,
-                  backgroundColor: "#fff",
-                  borderColor: "green",
-                  height: 50,
-                }}
-              />
-              
+        <ScrollView
+          style={{ padding: 20, backgroundColor: "#ffffff", flex: 1 }}
+        >
+          {/* Image section - with clear indication that it's optional */}
+          <View style={styles.imageSection}>
+            <Text style={styles.sectionTitle}>
+              Add Image <Text style={styles.optionalText}>(Optional)</Text>
+            </Text>
+            <View style={styles.imageContainer}>
+              {image ? (
+                <>
+                  <Image
+                    source={{ uri: image }}
+                    style={{ width: "100%", height: 370, borderRadius: 10 }}
+                  />
+                  {/* Remove image button */}
+                  <TouchableOpacity
+                    style={styles.removeImageButton}
+                    onPress={removeImage}
+                  >
+                    <Entypo name="cross" size={24} color="white" />
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <View style={styles.noImagePlaceholder}>
+                  <Entypo name="image" size={48} color="#ccc" />
+                  <Text style={styles.placeholderText}>No image selected</Text>
+                </View>
+              )}
             </View>
-          ))}
+
+            <View style={styles.imageButtonsContainer}>
+              <TouchableOpacity
+                style={styles.imageButton}
+                onPress={selectImage}
+              >
+                <Entypo name="images" size={20} color="white" />
+                <Text style={styles.buttonText}>Gallery</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.imageButton} onPress={takePhoto}>
+                <Entypo name="camera" size={20} color="white" />
+                <Text style={styles.buttonText}>Camera</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Form Fields */}
+          <View style={styles.formSection}>
+            <Text style={styles.sectionTitle}>
+              Item Details <Text style={styles.requiredText}>*</Text>
+            </Text>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>
+                Item Name <Text style={styles.requiredText}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="Enter item name"
+                placeholderTextColor="#888"
+                value={form.item}
+                onChangeText={(value) => handleChange("item", value)}
+                style={styles.input}
+              />
+            </View>
+
+            {/* <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>
+              Date Reported <Text style={styles.requiredText}>*</Text>
+            </Text>
+            <TouchableOpacity
+              onPress={() => setShowDatePicker(true)}
+              style={styles.input}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text style={{ color: form.date_reported ? "#000" : "#888" }}>
+                  {form.date_reported || "dd/mm/yyyy"}
+                </Text>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={selectedDate}
+                    mode="date"
+                    display="default"
+                    onChange={handleDateChange}
+                    style={{
+                      backgroundColor: "#00674F",
+                      margin: 5,
+                      position: "absolute",
+                      right: 0,
+                      borderRadius: 10,
+                    }}
+                  />
+                )}
+              </View>
+            </TouchableOpacity>
+          </View> */}
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>
+                Location <Text style={styles.requiredText}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="Enter location"
+                placeholderTextColor="#888"
+                value={form.location}
+                onChangeText={(value) => handleChange("location", value)}
+                style={styles.input}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>
+                Description <Text style={styles.requiredText}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="Enter description"
+                placeholderTextColor="#888"
+                value={form.description}
+                onChangeText={(value) => handleChange("description", value)}
+                style={[
+                  styles.input,
+                  { height: 100, textAlignVertical: "top" },
+                ]}
+                multiline
+                numberOfLines={4}
+              />
+            </View>
+
+            {/* <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Reporter ID</Text>
+            <TextInput
+              placeholder="Enter reporter ID"
+              placeholderTextColor="#888"
+              value={form.reporter_id}
+              onChangeText={(value) => handleChange("reporter_id", value)}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+          </View> */}
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Status</Text>
+              <View style={styles.segmentedControlContainer}>
+                <View style={styles.segmentedControl}>
+                  <TouchableOpacity
+                    style={[
+                      styles.segmentOption,
+                      form.status === "Lost" && styles.activeSegment,
+                      { borderTopLeftRadius: 8, borderBottomLeftRadius: 8 },
+                    ]}
+                    onPress={() => handleChange("status", "Lost")}
+                  >
+                    <Text
+                      style={[
+                        styles.segmentText,
+                        form.status === "Lost" && styles.activeSegmentText,
+                      ]}
+                    >
+                      Lost
+                    </Text>
+                  </TouchableOpacity>
+                  <View style={styles.divider} />
+                  <TouchableOpacity
+                    style={[
+                      styles.segmentOption,
+                      form.status === "Found" && styles.activeSegment,
+                      { borderTopRightRadius: 8, borderBottomRightRadius: 8 },
+                    ]}
+                    onPress={() => handleChange("status", "Found")}
+                  >
+                    <Text
+                      style={[
+                        styles.segmentText,
+                        form.status === "Found" && styles.activeSegmentText,
+                      ]}
+                    >
+                      Found
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Keywords</Text>
+              <TextInput
+                placeholder="Enter keywords (comma separated)"
+                placeholderTextColor="#888"
+                value={form.keywords.join(", ")}
+                onChangeText={(value) => handleChange("keywords", value)}
+                style={styles.input}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Color</Text>
+              <TextInput
+                placeholder="Enter color"
+                placeholderTextColor="#888"
+                value={form.color}
+                onChangeText={(value) => handleChange("color", value)}
+                style={styles.input}
+              />
+            </View>
+          </View>
         </ScrollView>
-        <View style={styles.inputContainer}>
-          <TouchableOpacity style={styles.postButton} onPress={handleSubmit}>
-            <Text style={styles.postButtonText}>Post</Text>
+
+        <View style={styles.bottomContainer}>
+          <TouchableOpacity
+            style={[styles.postButton, isUploading && styles.disabledButton]}
+            onPress={handleSubmit}
+            disabled={isUploading}
+          >
+            <Text style={styles.postButtonText}>
+              {isUploading ? "Posting..." : "Post Item"}
+            </Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-
     </TouchableWithoutFeedback>
   );
 };
@@ -358,56 +522,104 @@ const AddItemScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // paddingTop: 16,
     backgroundColor: "#f7f7f7",
     marginBottom: 80,
   },
-  scrollView: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 16,
-    color: "#333",
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "bold",
-    marginBottom: 4,
-    color: "#333",
-  },
-  messageBubbleLeft: {
-    backgroundColor: "#e0e0e0",
-    borderRadius: 20,
-    padding: 8,
-    maxWidth: "75%",
-    marginBottom: 8,
-  },
-  messageText: {
-    fontSize: 14,
-    color: "#333",
-  },
-  input: {
-    height: 45,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    paddingHorizontal: 12,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
     marginBottom: 12,
-    backgroundColor: "#fff",
+    color: "#333",
   },
-  notesInput: {
-    height: 100,
-    textAlignVertical: "top",
+  optionalText: {
+    fontSize: 14,
+    fontWeight: "normal",
+    color: "#888",
+    fontStyle: "italic",
   },
-  inputContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
+  requiredText: {
+    color: "#FC5E1A",
+    fontWeight: "bold",
+  },
+  imageSection: {
+    marginBottom: 24,
   },
   imageContainer: {
     width: "100%",
+    borderRadius: 10,
+    overflow: "hidden",
+    marginBottom: 12,
+    position: "relative",
+    height: 370,
+  },
+  noImagePlaceholder: {
+    height: "100%",
+    backgroundColor: "#f1f1f1",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderStyle: "dashed",
+  },
+  placeholderText: {
+    color: "#888",
+    marginTop: 8,
+  },
+  removeImageButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  imageButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  imageButton: {
+    flex: 1,
+    backgroundColor: "#FC5E1A",
+    padding: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginHorizontal: 5,
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+    marginLeft: 8,
+  },
+  formSection: {
+    marginBottom: 20,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontWeight: "bold",
+    marginBottom: 5,
+    color: "#333",
+  },
+  input: {
+    borderWidth: 1,
+    padding: 12,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    borderColor: "#ccc",
+    height: 50,
+  },
+  bottomContainer: {
+    padding: 16,
+    backgroundColor: "white",
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
   },
   postButton: {
     backgroundColor: "#FC5E1A",
@@ -415,10 +627,48 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
   },
+  disabledButton: {
+    backgroundColor: "#FFA07A",
+  },
   postButtonText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  segmentedControlContainer: {
+    alignItems: "center",
+    marginTop: 5,
+  },
+  segmentedControl: {
+    flexDirection: "row",
+    borderWidth: 1,
+    borderColor: "#FC5E1A",
+    borderRadius: 8,
+    // overflow: "hidden",
+    width: "100%",
+  },
+  segmentOption: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    alignItems: "center",
+    backgroundColor: "white",
+    // borderColor: "#FC5E1A",
+  },
+  divider: {
+    width: 1,
+    height: "100%",
+    backgroundColor: "#FC5E1A",
+  },
+  activeSegment: {
+    backgroundColor: "#FC5E1A",
+  },
+  segmentText: {
+    fontWeight: "bold",
+    color: "#FC5E1A",
+  },
+  activeSegmentText: {
+    color: "white",
   },
 });
 

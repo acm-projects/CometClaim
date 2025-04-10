@@ -1,5 +1,5 @@
 import { RelativePathString, Tabs, useRouter } from "expo-router";
-import { Platform, Image, Pressable, StyleSheet } from "react-native";
+import { Platform, Image, Pressable, StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -29,13 +29,16 @@ export default function TabLayout() {
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
+  const WhiteBackground = () => (
+    <View style={{ flex: 1, backgroundColor: "#FFFFFF" }} />
+  );
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
+        tabBarBackground: WhiteBackground,
         tabBarStyle: Platform.select({
           ios: {
             position: "absolute",

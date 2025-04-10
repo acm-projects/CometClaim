@@ -4,7 +4,6 @@ import {
   Image,
   TouchableOpacity,
   SafeAreaView,
-  ScrollView,
   View,
   Text,
   StatusBar,
@@ -17,13 +16,11 @@ import PostsGrid from "@/components/ui/PostsGrid";
 import { USERPOSTS } from "@/data/userPosts";
 import Animated, {
   useSharedValue,
-  useAnimatedScrollHandler,
   useAnimatedStyle,
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
 
-const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -33,26 +30,28 @@ import { Link, RelativePathString, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { defaultUser, Post, User } from "@/types";
 
-const apiUrl = process.env.EXPO_PUBLIC_API_URL
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 const ProfilePage: React.FC = () => {
   const scrollY = useSharedValue(0);
   const [activeSection, setActiveSection] = useState<
     "posts" | "found" | "lost"
   >("posts");
-  
-  const [userInfo, setUserInfo] = useState<User>(defaultUser)
 
-  useFocusEffect(useCallback(() => {
-    const updateUserInfo = async () => {
-      const userId = await AsyncStorage.getItem('userId')
-      const res = await fetch(`${apiUrl}/users/${userId}`)
-      const data = await res.json()
-      // console.log("thing", JSON.parse(data.body))
-      setUserInfo(JSON.parse(data.body))  
-    }
-    updateUserInfo()
-  }, []))
+  const [userInfo, setUserInfo] = useState<User>(defaultUser);
+
+  useFocusEffect(
+    useCallback(() => {
+      const updateUserInfo = async () => {
+        const userId = await AsyncStorage.getItem("userId");
+        const res = await fetch(`${apiUrl}/users/${userId}`);
+        const data = await res.json();
+        // console.log("thing", JSON.parse(data.body))
+        setUserInfo(JSON.parse(data.body));
+      };
+      updateUserInfo();
+    }, [])
+  );
 
   // User data - in a real app, this would come from a user context or API
   const userData = {
@@ -72,12 +71,6 @@ const ProfilePage: React.FC = () => {
     lost: USERPOSTS.filter((post) => post.type === "lost").length,
   };
 
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
-    },
-  });
-
   const avatarStyle = useAnimatedStyle(() => {
     const scale = interpolate(
       scrollY.value,
@@ -95,10 +88,9 @@ const ProfilePage: React.FC = () => {
     setActiveSection(type);
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-
+  // Create the profile header component to be passed to PostsGrid
+  const ProfileHeader = () => (
+    <View style={{ marginTop: -20 }}>
       {/* Edit button */}
       <View style={styles.editButtonContainer}>
         <TouchableOpacity
@@ -108,55 +100,53 @@ const ProfilePage: React.FC = () => {
           <MaterialIcons name="edit" size={20} color="#FC5E1A" />
         </TouchableOpacity>
       </View>
-
-      <AnimatedScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        onScroll={scrollHandler}
-        scrollEventThrottle={16}
-      >
-        {/* Profile avatar and name */}
-        <View style={styles.profileContainer}>
-          <Animated.View style={[styles.avatarContainer, avatarStyle]}>
-            <Image source={{ uri: userInfo.profile_picture ? userInfo.profile_picture : defaultUser.profile_picture }} style={styles.avatar} />
-          </Animated.View>
-          <View style={{ alignItems: "center", marginBottom: 20 }}>
-            <Text style={styles.username}>@{userInfo.username}</Text>
-            <Text style={styles.fullName}>{userInfo.full_name}</Text>
-          </View>
+      {/* Profile avatar and name */}
+      <View style={styles.profileContainer}>
+        <Animated.View style={[styles.avatarContainer, avatarStyle]}>
+          <Image source={{ uri: userData.avatar }} style={styles.avatar} />
+        </Animated.View>
+        <View style={{ alignItems: "center", marginBottom: 20 }}>
+          <Text style={styles.username}>@{userData.username}</Text>
+          <Text style={styles.fullName}>{userData.fullName}</Text>
         </View>
+      </View>
 
-        {/* Profile stats */}
-        <ProfileStats
-          postsCount={stats.posts}
-          foundCount={stats.found}
-          lostCount={stats.lost}
-          onPressStats={handleStatsPress}
-        />
+      {/* Profile stats */}
+      <ProfileStats
+        postsCount={stats.posts}
+        foundCount={stats.found}
+        lostCount={stats.lost}
+        onPressStats={handleStatsPress}
+      />
 
-        {/* Profile info */}
-        <ProfileInfo
-          phone={userData.phone}
-          email={userData.email}
-          location={userData.location}
-        />
+      {/* Profile info */}
+      <ProfileInfo
+        phone={userData.phone}
+        email={userData.email}
+        location={userData.location}
+      />
+    </View>
+  );
 
-        {/* Posts grid */}
-        <PostsGrid
-          posts={
-            activeSection === "posts"
-              ? USERPOSTS
-              : USERPOSTS.filter((post) => post.type === activeSection)
-          }
-          title={
-            activeSection === "posts"
-              ? "All Posts"
-              : activeSection === "found"
-              ? "Found Items"
-              : "Lost Items"
-          }
-        />
-      </AnimatedScrollView>
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+
+      <PostsGrid
+        posts={
+          activeSection === "posts"
+            ? USERPOSTS
+            : USERPOSTS.filter((post) => post.type === activeSection)
+        }
+        title={
+          activeSection === "posts"
+            ? "All Posts"
+            : activeSection === "found"
+            ? "Found Items"
+            : "Lost Items"
+        }
+        ListHeaderComponent={ProfileHeader()}
+      />
     </SafeAreaView>
   );
 };
@@ -168,10 +158,10 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   editButtonContainer: {
-    position: "absolute",
-    top: 50,
-    right: 20,
-    zIndex: 10,
+    alignSelf: "flex-end",
+    marginRight: 20,
+    marginTop: 40,
+    marginBottom: 10,
   },
   editButton: {
     width: 40,
@@ -189,13 +179,10 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
-  scrollContent: {
-    paddingTop: 30,
-    paddingBottom: 30,
-  },
   profileContainer: {
     alignItems: "center",
     marginBottom: 20,
+    // marginTop: 20,
   },
   avatarContainer: {
     borderRadius: 75,

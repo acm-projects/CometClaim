@@ -1,3 +1,4 @@
+// Post.tsx
 import React, { useRef } from "react";
 import {
   StyleSheet,
@@ -16,42 +17,44 @@ import { LinearGradient } from "expo-linear-gradient";
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
 import { RelativePathString, router } from "expo-router";
 import { useEffect, useState } from "react";
-import * as Haptics from 'expo-haptics'
+import * as Haptics from "expo-haptics";
 import { defaultUser, User } from "@/types";
 
 type PostProps = {
+  user: User;
   item: Item;
   onShare: () => void;
-}
+};
 
 type PostHeaderProps = {
   user: User;
   item: Item;
   datetime: string;
-}
+};
 
 type PostDateAndLocationProps = {
+  status: string;
   datetime: string;
   location: string;
-}
+};
 
 type PostImageProps = {
   image_url?: string;
-}
+};
 
 type PostFooterProps = {
   description: string;
   onShare: () => void;
-}
+};
 
 type IconProps = {
   imgStyle: any;
   imgUrl: string;
-}
+};
 
 type CaptionProps = {
   caption: string;
-}
+};
 
 export type Item = {
   item_id: string;
@@ -62,56 +65,86 @@ export type Item = {
   reporter_id: string;
   status: string;
   image_url?: string;
-}
+};
 
+// export type User = {
+//   user_id: string;
+//   user_email: string;
+//   user_name: string;
+//   user_phone: string;
+//   user_profile_picture: string;
+// };
 
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-const apiUrl = process.env.EXPO_PUBLIC_API_URL
-
-
-
+// const defaultUser: User = {
+//   user_id: "123",
+//   user_email: "default@example.com",
+//   user_name: "default",
+//   user_phone: "000-000-0000",
+//   user_profile_picture:
+//     "https://s3.amazonaws.com/37assets/svn/765-default-avatar.png",
+// };
 
 export function Post(props: PostProps) {
-
-  const [user, setUser] = useState<any>(defaultUser)
+  const [user, setUser] = useState<any>(defaultUser);
 
   useEffect(() => {
     async function getUserData() {
-      const res = await fetch(`${apiUrl}/users/${props.item.reporter_id}`)
-      const data = await res.json()
-      if(data.body) {
-        setUser(JSON.parse(data.body))
+      const res = await fetch(`${apiUrl}/users/${props.item.reporter_id}`);
+      const data = await res.json();
+      if (data.body) {
+        setUser(JSON.parse(data.body));
         // console.log("user is", data.body)
       }
     }
-    getUserData()
-  }, [])
+    getUserData();
+  }, []);
 
   return (
     <View style={{ marginTop: 20 }}>
       {/* <Divider width={1} orientation="vertical" /> */}
-      <View style={styles.backPost}>
-        <PostHeader datetime={props.item.date_reported} user={user} item={props.item}/>
-        <PostDateAndLocation datetime={props.item.date_reported} location={props.item.location}/>
+      <Pressable
+        style={styles.backPost}
+        // onPress={() => router.push("/seePost")}
+        onPress={() =>
+          router.push({
+            pathname: "/seePost",
+            params: {
+              userId: props.user?.user_id || "",
+            },
+          })
+        }
+      >
+        <PostHeader
+          datetime={props.item.date_reported}
+          user={user}
+          item={props.item}
+        />
+        <PostDateAndLocation
+          status={props.item.status}
+          datetime={props.item.date_reported}
+          location={props.item.location}
+        />
         {/* <PostImage post={post} /> */}
         <PostImage image_url={props.item.image_url} />
         <View style={{ marginHorizontal: 15, marginTop: 10 }}>
-          <PostFooter description={props.item.description} onShare={props.onShare} />
+          <PostFooter
+            description={props.item.description}
+            onShare={props.onShare}
+          />
         </View>
-      </View>
+      </Pressable>
     </View>
   );
-};
-
-
+}
 
 function PostHeader(props: PostHeaderProps) {
+  const screenHeight = Dimensions.get("window").height;
 
-  const screenHeight = Dimensions.get('window').height
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const [modalVisible, setModalVisible] = useState(false)
-
-  const slideAnim = useRef(new Animated.Value(screenHeight)).current
+  const slideAnim = useRef(new Animated.Value(screenHeight)).current;
 
   const slideUp = () => {
     setModalVisible(true);
@@ -120,132 +153,147 @@ function PostHeader(props: PostHeaderProps) {
       toValue: 0,
       duration: 200,
       // easing: Easing.out(Easing.exp),
-      useNativeDriver: true
-    }).start()
-  }
+      useNativeDriver: true,
+    }).start();
+  };
 
   const slideDown = () => {
     Animated.timing(slideAnim, {
       toValue: screenHeight,
       duration: 200,
       // easing: Easing.in(Easing.exp),
-      useNativeDriver: true
-    }).start()
-  }
+      useNativeDriver: true,
+    }).start();
+  };
 
-  const fadeAnim = useRef(new Animated.Value(0)).current
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const fadeIn = () => {
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 200,
       useNativeDriver: true,
-    }).start()
-  }
+    }).start();
+  };
 
   const fadeOut = () => {
     Animated.timing(fadeAnim, {
       toValue: 0,
       duration: 200,
       useNativeDriver: true,
-    }).start()
-  }
+    }).start();
+  };
 
   const openModal = () => {
-    setModalVisible(true); 
-    slideUp()
-    fadeIn()
-  }
+    setModalVisible(true);
+    slideUp();
+    fadeIn();
+  };
 
   const closeModal = () => {
-    slideDown()
-    fadeOut()
+    slideDown();
+    fadeOut();
     setTimeout(() => {
-      setModalVisible(false); 
+      setModalVisible(false);
     }, 500);
-  }
+  };
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
       onPanResponderMove: (e, gestureState) => {
-        if(gestureState.dy > 0) {
-          slideAnim.setValue(gestureState.dy)
-        } else if(gestureState.dy < 0 && gestureState.dy > -10) {
-          slideAnim.setValue(gestureState.dy)
+        if (gestureState.dy > 0) {
+          slideAnim.setValue(gestureState.dy);
+        } else if (gestureState.dy < 0 && gestureState.dy > -10) {
+          slideAnim.setValue(gestureState.dy);
         }
       },
       onPanResponderRelease(e, gestureState) {
-          if(gestureState.dy > 100) {
-            closeModal()
-          } else {
-            Animated.spring(slideAnim, {
-              toValue: 0,
-              useNativeDriver: true,
-            }).start()
-          }
+        if (gestureState.dy > 100) {
+          closeModal();
+        } else {
+          Animated.spring(slideAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+        }
       },
     })
-  ).current
+  ).current;
 
   const markItemAsFound = () => {
     const sendFoundRequest = async () => {
-      await fetch(`${process.env.EXPO_PUBLIC_API_URL}/items/${props.item.item_id}`, {
-        method: 'PATCH',
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          status: "found"
-        })
-      })
-    }
-    sendFoundRequest()
-  }
-
+      await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/items/${props.item.item_id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status: "found",
+          }),
+        }
+      );
+    };
+    sendFoundRequest();
+  };
 
   const handleDropdownTriggerPress = (key: string) => {
     console.log("dd trigger pressed: ", key);
   };
 
   function datetimeToHowLongAgo(datetime: string) {
-    const timeDifferenceInMilliseconds = Date.now() - Date.parse(datetime)
-    
-    const timeDifferenceInSeconds = Math.floor(timeDifferenceInMilliseconds / 1000)
-    if(timeDifferenceInSeconds < 60) return `${timeDifferenceInSeconds}s`
-    
-    const timeDifferenceInMinutes = Math.floor(timeDifferenceInSeconds / 60)
-    if(timeDifferenceInMinutes < 60) return `${timeDifferenceInMinutes}m`
+    const timeDifferenceInMilliseconds = Date.now() - Date.parse(datetime);
 
-    const timeDifferenceInHours = Math.floor(timeDifferenceInMinutes / 60)
-    if(timeDifferenceInHours < 24) return `${timeDifferenceInHours}h`
+    const timeDifferenceInSeconds = Math.floor(
+      timeDifferenceInMilliseconds / 1000
+    );
+    if (timeDifferenceInSeconds < 60) return `${timeDifferenceInSeconds}s`;
 
-    const timeDifferenceInDays = Math.floor(timeDifferenceInHours / 24)
-    if(timeDifferenceInDays < 31) return `${timeDifferenceInDays}d`
+    const timeDifferenceInMinutes = Math.floor(timeDifferenceInSeconds / 60);
+    if (timeDifferenceInMinutes < 60) return `${timeDifferenceInMinutes}m`;
 
-    const timeDifferenceInMonths = Math.floor(timeDifferenceInDays / 31)
-    if(timeDifferenceInMonths < 12) return `${timeDifferenceInMonths}mo`
+    const timeDifferenceInHours = Math.floor(timeDifferenceInMinutes / 60);
+    if (timeDifferenceInHours < 24) return `${timeDifferenceInHours}h`;
 
-    const timeDifferenceInYears = Math.floor(timeDifferenceInMonths / 12)
-    return `${timeDifferenceInYears}y`
+    const timeDifferenceInDays = Math.floor(timeDifferenceInHours / 24);
+    if (timeDifferenceInDays < 31) return `${timeDifferenceInDays}d`;
+
+    const timeDifferenceInMonths = Math.floor(timeDifferenceInDays / 31);
+    if (timeDifferenceInMonths < 12) return `${timeDifferenceInMonths}mo`;
+
+    const timeDifferenceInYears = Math.floor(timeDifferenceInMonths / 12);
+    return `${timeDifferenceInYears}y`;
   }
-
-  
 
   return (
     <View style={styles.headerView}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Image source={{ uri: props.user.profile_picture ? props.user.profile_picture : defaultUser.profile_picture }} style={styles.story} />
-        <Text
-          style={{
-            color: "black",
-            marginLeft: 5,
-            fontWeight: "500",
-          }}
+        <Pressable
+          style={{ flexDirection: "row", alignItems: "center" }}
+          onPress={() =>
+            router.push({
+              pathname: "/UsersProfile",
+              params: { userId: props.user.user_id },
+            })
+          }
         >
-          {props.user.username}
-        </Text>
+          <Image
+            source={{ uri: props.user.profile_picture }}
+            style={styles.story}
+          />
+          <Text
+            style={{
+              color: "black",
+              marginLeft: 5,
+              fontWeight: "500",
+            }}
+          >
+            {props.user.username}
+          </Text>
+        </Pressable>
         <Text
           style={{
             color: "black",
@@ -266,141 +314,205 @@ function PostHeader(props: PostHeaderProps) {
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
-          closeModal()
+          closeModal();
         }}
+      >
+        <Animated.View
+          style={{
+            height: "100%",
+            opacity: fadeAnim,
+            backgroundColor: "#000000AA",
+          }}
         >
-          <Animated.View style={{height: '100%', opacity: fadeAnim, backgroundColor: '#000000AA'}}>
-            <Pressable style={{flex: 1}} onPress={closeModal}>
-
-            </Pressable>
-            <Animated.View {...panResponder.panHandlers} style={{borderRadius: 20, height: '80%', transform: [{translateY: slideAnim}], marginTop: 'auto', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff'}}>
-              <View style={{height: 100, width: 100}}>
-                <Pressable style={{flex: 1, justifyContent: 'center', alignItems: 'center'}} onPress={() => {Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy); markItemAsFound();}}>
-                  <AntDesign name='checkcircle' size={90} color={'#f27c1b'} />
-                </Pressable>
-              </View>
-              <View style={{height: 30, backgroundColor: '#f27c1b', borderRadius: 10, width: 80}}>
-                <Pressable style={{flex: 1, justifyContent: 'center', alignItems: 'center'}} onPress={() => closeModal()}>
-                  <Text>Close</Text>
-                </Pressable>
-              </View>
-              
-            </Animated.View>
+          <Pressable style={{ flex: 1 }} onPress={closeModal}></Pressable>
+          <Animated.View
+            {...panResponder.panHandlers}
+            style={{
+              borderRadius: 20,
+              height: "80%",
+              transform: [{ translateY: slideAnim }],
+              marginTop: "auto",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#ffffff",
+            }}
+          >
+            <View style={{ height: 100, width: 100 }}>
+              <Pressable
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                  markItemAsFound();
+                }}
+              >
+                <AntDesign name="checkcircle" size={90} color={"#f27c1b"} />
+              </Pressable>
+            </View>
+            <View
+              style={{
+                height: 30,
+                backgroundColor: "#f27c1b",
+                borderRadius: 10,
+                width: 80,
+              }}
+            >
+              <Pressable
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                onPress={() => closeModal()}
+              >
+                <Text>Close</Text>
+              </Pressable>
+            </View>
           </Animated.View>
+        </Animated.View>
       </Modal>
     </View>
   );
-};
-
+}
 
 function PostDateAndLocation(props: PostDateAndLocationProps) {
   const getDateString = (datetime: string) => {
     const dateOptions: Intl.DateTimeFormatOptions = {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    };
 
-    const postDate = new Date(props.datetime)
+    const postDate = new Date(props.datetime);
 
-    return postDate.toLocaleDateString('en-US', dateOptions)
+    return postDate.toLocaleDateString("en-US", dateOptions);
+  };
 
-  }
-  
   return (
-  <View style={styles.dateLocation}>
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 5,
-      }}
-    >
-      <Icon
-        imgStyle={styles.dateLocationIcon}
-        imgUrl={"https://img.icons8.com/ios/50/calendar--v1.png"}
-      />
-      <Text
+    <View style={styles.dateLocation}>
+      <View
         style={{
-          fontSize: 13,
-          color: "#666",
-          fontWeight: "500",
-          marginLeft: 20,
+          flexDirection: "row",
+          alignItems: "center",
+          marginTop: 5,
         }}
       >
-        {getDateString(props.datetime)}
-      </Text>
-    </View>
-    <View style={{ flexDirection: "row", alignItems: "center", marginTop: 5 }}>
-      <Icon
-        imgStyle={styles.dateLocationIcon}
-        imgUrl={"https://img.icons8.com/ios/50/place-marker--v1.png"}
-      />
-      <Text
-        style={{
-          fontSize: 13,
-          color: "#666",
-          fontWeight: "500",
-          marginLeft: 20,
-        }}
+        <View
+          style={{
+            backgroundColor: props.status === "lost" ? "#CB3131" : "#419D44",
+            paddingVertical: 8,
+            paddingHorizontal: 16,
+            marginLeft: 10,
+            marginRight: 15,
+            borderRadius: 20,
+            alignSelf: "flex-start",
+          }}
+        >
+          <Text style={{ color: "white", fontWeight: "600", fontSize: 12 }}>
+            {props.status === "lost" ? "Lost" : "Found"}
+          </Text>
+        </View>
+        <Icon
+          imgStyle={styles.dateLocationIcon}
+          imgUrl={"https://img.icons8.com/ios/50/calendar--v1.png"}
+        />
+        <Text
+          style={{
+            fontSize: 13,
+            color: "#666",
+            fontWeight: "500",
+            marginLeft: 20,
+          }}
+        >
+          {getDateString(props.datetime)}
+        </Text>
+      </View>
+      <View
+        style={{ flexDirection: "row", alignItems: "center", marginTop: 5 }}
       >
-        {props.location}
-      </Text>
+        <Icon
+          imgStyle={styles.dateLocationIcon}
+          imgUrl={"https://img.icons8.com/ios/50/place-marker--v1.png"}
+        />
+        <Text
+          style={{
+            fontSize: 13,
+            color: "#666",
+            fontWeight: "500",
+            marginLeft: 20,
+          }}
+        >
+          {props.location}
+        </Text>
+      </View>
     </View>
-  </View>
   );
 }
 
 function PostImage(props: PostImageProps) {
   return (
-  <View style={styles.imagePost}>
-    <Image
-      source={{ uri: props.image_url ? props.image_url : "https://media.istockphoto.com/id/1409329028/vector/no-picture-available-placeholder-thumbnail-icon-illustration-design.jpg?s=612x612&w=0&k=20&c=_zOuJu755g2eEUioiOUdz_mHKJQJn-tDgIAhQzyeKUQ=" }}
-      style={{
-        width: 370,
-        height: 370,
-        borderRadius: 15,
-      }}
-      alt="TESTING"
-    />
-  </View>
-  )
+    <View style={styles.imagePost}>
+      <Image
+        source={{
+          uri: props.image_url
+            ? props.image_url
+            : "https://media.istockphoto.com/id/1409329028/vector/no-picture-available-placeholder-thumbnail-icon-illustration-design.jpg?s=612x612&w=0&k=20&c=_zOuJu755g2eEUioiOUdz_mHKJQJn-tDgIAhQzyeKUQ=",
+        }}
+        style={{
+          width: 370,
+          height: 370,
+          borderRadius: 15,
+        }}
+        alt="TESTING"
+      />
+    </View>
+  );
 }
 
 function PostFooter(props: PostFooterProps) {
   return (
-  <View>
-    <Caption caption={props.description} />
-    <View
-      style={{ justifyContent: "center", alignItems: "center", paddingTop: 10 }}
-    >
-      <LinearGradient
-        colors={["#FFDCB5", "#FC5E1A", "#FFDCB5"]}
-        locations={[0, 0.5, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={[styles.gradientLine]}
-      />
-    </View>
-    <View style={styles.actionContainer}>
-      <Pressable
-        style={styles.leftFooterIconsContainer}
-        onPress={() => router.push("/commentsScreen" as RelativePathString)}
+    <View>
+      <Caption caption={props.description} />
+      <View
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          paddingTop: 10,
+        }}
       >
-        <FontAwesome name="comment-o" size={20} color="#666" />
-        <Text> </Text>
-        <Text style={styles.actionText}>Comment</Text>
-      </Pressable>
+        <LinearGradient
+          colors={["#FFDCB5", "#FC5E1A", "#FFDCB5"]}
+          locations={[0, 0.5, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={[styles.gradientLine]}
+        />
+      </View>
+      <View style={styles.actionContainer}>
+        <Pressable
+          style={styles.leftFooterIconsContainer}
+          onPress={() => router.push("/commentsScreen" as RelativePathString)}
+        >
+          <FontAwesome name="comment-o" size={20} color="#666" />
+          <Text> </Text>
+          <Text style={styles.actionText}>Comment</Text>
+        </Pressable>
 
-      <Pressable style={styles.rightFooterIconsContainer} onPress={props.onShare}>
-        <FontAwesome name="share" size={20} color="#666" />
-        <Text> </Text>
-        <Text style={styles.actionText}>Share</Text>
-      </Pressable>
+        <Pressable
+          style={styles.rightFooterIconsContainer}
+          onPress={props.onShare}
+        >
+          <FontAwesome name="share" size={20} color="#666" />
+          <Text> </Text>
+          <Text style={styles.actionText}>Share</Text>
+        </Pressable>
+      </View>
     </View>
-  </View>
-  )
+  );
 }
 
 function Icon(props: IconProps) {
@@ -451,12 +563,19 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   backPost: {
-    backgroundColor: "white",
+    backgroundColor: "#fff",
     borderRadius: 20,
     marginHorizontal: 10,
     marginTop: 20,
     paddingBottom: 10,
     flexGrow: 1, // Allows the container to expand
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
   },
   imagePost: {
     width: 370,

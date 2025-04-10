@@ -12,10 +12,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import Header from "@/components/ui/Header";
 import { Post, Item } from "@/components/ui/Post";
-import ShareScreen from "@/components/ui/ShareScreen"; // <- extract this into its own component 
+import ShareScreen from "@/components/ui/ShareScreen"; // <- extract this into its own component
 import { useFocusEffect } from "expo-router";
-
-
+import ChatbotButton from "@/components/ui/ChatbotButton";
 
 const HomeScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -31,33 +30,37 @@ const HomeScreen: React.FC = () => {
     setSelectedItem(null);
   };
 
-  const apiUrl = process.env.EXPO_PUBLIC_API_URL
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-  const [items, setItems] = useState<Item[]>([])
+  const [items, setItems] = useState<Item[]>([]);
 
   useFocusEffect(
     useCallback(() => {
       async function getItems() {
-        const res = await fetch(`${apiUrl}/items`)
-        const data = await res.json()
-        setItems(JSON.parse(data.body))
+        const res = await fetch(`${apiUrl}/items`);
+        const data = await res.json();
+        setItems(JSON.parse(data.body));
       }
-      getItems()
+      getItems();
     }, [])
-    
-  )
-
+  );
 
   return (
-    <LinearGradient
-      style={styles.container}
-      colors={["#FFDCB5", "#FC5E1A"]}
-      start={{ x: 0.5, y: 0.5 }}
-      end={{ x: 0.5, y: 0 }}
+    // <LinearGradient
+    //   style={styles.container}
+    //   colors={["#FFDCB5", "#FC5E1A"]}
+    //   start={{ x: 0.5, y: 0.5 }}
+    //   end={{ x: 0.5, y: 0 }}
+    // >
+    <View
+      style={{ flex: 1, flexDirection: "column", backgroundColor: "#FFFAF8" }}
     >
-      <SafeAreaView style={{ flex: 1}}>
+      <SafeAreaView style={{ flex: 1 }}>
         <Header />
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{paddingBottom: 70}}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 70 }}
+        >
           {items.map((item: Item, index: number) => (
             <Post
               item={item}
@@ -70,7 +73,9 @@ const HomeScreen: React.FC = () => {
           <ShareScreen item={selectedItem} onClose={closeShareModal} />
         </Modal>
       </SafeAreaView>
-    </LinearGradient>
+      <ChatbotButton />
+      {/* // </LinearGradient> */}
+    </View>
   );
 };
 
@@ -90,15 +95,6 @@ const styles = StyleSheet.create({
     // backgroundColor: "rgba(0,0,0,0.5)",
     marginBottom: 120,
   },
-  // link: {
-  //   color: "white",
-  //   fontSize: 42,
-  //   fontWeight: "bold",
-  //   textAlign: "center",
-  //   textDecorationLine: "underline",
-  //   backgroundColor: "rgba(0,0,0,0.5)",
-  //   padding: 4,
-  // },
   button: {
     height: 60,
     borderRadius: 20,
