@@ -1,3 +1,4 @@
+// [chat_id].tsx
 ("use client");
 
 import { useState, useEffect, useRef } from "react";
@@ -36,13 +37,12 @@ type DMInfo = {
   chat_name: string;
   chat_profile_picture: string;
   recipient_ids_to_names?: object;
-}
+};
 
-const apiUrl = process.env.EXPO_PUBLIC_API_URL
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 const DMScreen = () => {
-
-  const [dmInfo, setDmInfo] = useState<DMInfo>()
+  const [dmInfo, setDmInfo] = useState<DMInfo>();
 
   const searchParams = useLocalSearchParams();
 
@@ -54,7 +54,7 @@ const DMScreen = () => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [currentUsername, setCurrentUsername] = useState<string>("user1"); // Your username
 
-  const [currentUserId, setCurrentUserId] = useState<string|null>(null)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -63,30 +63,35 @@ const DMScreen = () => {
 
   useEffect(() => {
     const { chat_id, ids, name, avatar } = searchParams;
-    console.log(chat_id, ids, name, avatar)
-    if(typeof chat_id === 'string' && (typeof ids === 'object' || typeof ids === 'string') && typeof name === 'string' && typeof avatar === 'string') {
+    console.log(chat_id, ids, name, avatar);
+    if (
+      typeof chat_id === "string" &&
+      (typeof ids === "object" || typeof ids === "string") &&
+      typeof name === "string" &&
+      typeof avatar === "string"
+    ) {
       const dm_info: DMInfo = {
         chat_id: chat_id,
-        recipient_ids: typeof ids === 'object' ? ids : ids.split(','),
+        recipient_ids: typeof ids === "object" ? ids : ids.split(","),
         chat_name: name,
-        chat_profile_picture: avatar
-      }
-      
-      setDmInfo(dm_info)
+        chat_profile_picture: avatar,
+      };
 
-      console.log('dm info', dm_info)
+      setDmInfo(dm_info);
+
+      console.log("dm info", dm_info);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     async function getUserId() {
-      const userId = await AsyncStorage.getItem('userId')
-      const username = await AsyncStorage.getItem('username')
-      setCurrentUserId(userId)
-      if(username) setCurrentUsername(username)
+      const userId = await AsyncStorage.getItem("userId");
+      const username = await AsyncStorage.getItem("username");
+      setCurrentUserId(userId);
+      if (username) setCurrentUsername(username);
     }
-    getUserId()
-  }, [])
+    getUserId();
+  }, []);
 
   // Initialize WebSocket connection
   useEffect(() => {
@@ -95,20 +100,21 @@ const DMScreen = () => {
       return;
     }
 
-    if(!currentUserId) {
-      console.log("current user id hasnt loaded yet")
+    if (!currentUserId) {
+      console.log("current user id hasnt loaded yet");
       return;
     } else {
-      console.log(currentUserId)
+      console.log(currentUserId);
     }
-    
 
-    const newSocket = new WebSocket(`${websocketApiUrl}?user_id=${currentUserId}`);
+    const newSocket = new WebSocket(
+      `${websocketApiUrl}?user_id=${currentUserId}`
+    );
     setSocket(newSocket);
 
     newSocket.onopen = (event) => {
       console.log("WebSocket Connected!");
-      console.log('event', event)
+      console.log("event", event);
       // Join the conversation with the specific user
       // newSocket.send(
       //   JSON.stringify({
@@ -159,14 +165,13 @@ const DMScreen = () => {
   }, [messages]);
 
   const loadInitialMessages = async () => {
-
     const res = await fetch(`${apiUrl}/chats/${dmInfo?.chat_id}/messages`, {
-      method: 'GET'
-    })
+      method: "GET",
+    });
 
-    const data = await res.json()
+    const data = await res.json();
 
-    const initialMessages = JSON.parse(data.body)
+    const initialMessages = JSON.parse(data.body);
 
     // This could be an API call to get message history
     // For now, we'll use some sample messages
@@ -189,17 +194,22 @@ const DMScreen = () => {
 
     // const initialMessages = []
 
-    const reformattedInitialMessages = initialMessages.map((message: Message) => ({
-      id: message.message_id,
-      message: message.message,
-      username: message.username,
-      sender: message.sender_id === currentUserId ? 'sender' : 'receiver',
-      timestamp: new Date(parseInt(message.timestamp) - 3000000).toISOString()
-    } as ChatMessage)) as ChatMessage[]
+    const reformattedInitialMessages = initialMessages.map(
+      (message: Message) =>
+        ({
+          id: message.message_id,
+          message: message.message,
+          username: message.username,
+          sender: message.sender_id === currentUserId ? "sender" : "receiver",
+          timestamp: new Date(
+            parseInt(message.timestamp) - 3000000
+          ).toISOString(),
+        } as ChatMessage)
+    ) as ChatMessage[];
 
-    reformattedInitialMessages.reverse()
+    reformattedInitialMessages.reverse();
 
-    console.log(reformattedInitialMessages)
+    console.log(reformattedInitialMessages);
 
     setMessages(reformattedInitialMessages);
   };
@@ -219,22 +229,22 @@ const DMScreen = () => {
       };
 
       const res = await fetch(`${apiUrl}/chats/${dmInfo?.chat_id}/messages`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           sender_id: currentUserId,
           message: messageInput,
-          username: currentUsername
-        })
-      })
+          username: currentUsername,
+        }),
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
-      console.log(data)
+      console.log(data);
 
-      console.log(messageObj)
+      console.log(messageObj);
 
       // Send to WebSocket server
       socket.send(JSON.stringify(messageObj));
@@ -322,10 +332,15 @@ const DMScreen = () => {
           </TouchableOpacity>
 
           {dmInfo?.chat_profile_picture ? (
-            <Image source={{ uri: dmInfo?.chat_profile_picture }} style={styles.profileImage} />
+            <Image
+              source={{ uri: dmInfo?.chat_profile_picture }}
+              style={styles.profileImage}
+            />
           ) : (
             <View style={styles.defaultAvatar}>
-              <Text style={styles.avatarText}>{dmInfo?.chat_name.charAt(0)}</Text>
+              <Text style={styles.avatarText}>
+                {dmInfo?.chat_name.charAt(0)}
+              </Text>
             </View>
           )}
 

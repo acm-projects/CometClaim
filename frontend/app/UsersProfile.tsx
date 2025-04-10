@@ -50,9 +50,10 @@ const ProfilePage: React.FC = () => {
     avatar?: string;
   }) => {
     router.push({
-      pathname: "/messages/[id]",
+      pathname: "/messages/[chat_id]",
       params: {
-        id: user.id,
+        chat_id: user.id,
+        ids: [user.id],
         name: user.name,
         avatar: user.avatar || "",
       },

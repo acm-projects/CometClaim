@@ -36,13 +36,11 @@ const accessKeyId = process.env.EXPO_PUBLIC_AWS_ACCESS_KEY_ID;
 const secretAccessKey = process.env.EXPO_PUBLIC_AWS_SECRET_ACCESS_KEY;
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-
-
 type UserInfo = {
   username: string;
   email: string;
   fullName: string;
-}
+};
 
 export const s3Client = new S3Client({
   region: bucketRegion,
@@ -63,7 +61,7 @@ interface FormData {
 }
 
 const AddItemScreen = () => {
-  const router = useRouter()
+  const router = useRouter();
   const [itemName, setItemName] = useState("");
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
@@ -181,7 +179,7 @@ const AddItemScreen = () => {
         throw "Image failed to upload to S3";
       }
 
-      const reporterId = await AsyncStorage.getItem('userId')
+      const reporterId = await AsyncStorage.getItem("userId");
       const submissionData = { ...form };
       if (s3URL) {
         submissionData.image_url = s3URL;
@@ -192,11 +190,13 @@ const AddItemScreen = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-           ...form, 
-           image_url: s3URL, 
-           date_reported: (new Date()).toLocaleString('sv', {timeZone: 'CST'}).replace(' ', 'T'), 
-           reporter_id: reporterId
-          }),
+          ...form,
+          image_url: s3URL,
+          date_reported: new Date()
+            .toLocaleString("sv", { timeZone: "CST" })
+            .replace(" ", "T"),
+          reporter_id: reporterId,
+        }),
       });
 
       const data = await response.json();
@@ -209,16 +209,14 @@ const AddItemScreen = () => {
         status: "",
         keywords: [""],
         color: "",
-      })
+      });
 
-      setImage("")
+      setImage("");
 
-      router.navigate('/(tabs)/HomeScreen' as RelativePathString)
-
+      router.navigate("/(tabs)/HomeScreen" as RelativePathString);
     } catch (error) {
       console.error("Error adding item:", error);
-    }
-    finally {
+    } finally {
       setIsUploading(false);
     }
   };
@@ -240,119 +238,131 @@ const AddItemScreen = () => {
   // };
 
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={["#FC5E1A", "#FFC480"]}
-        locations={[0, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={{
-          minHeight: 95,
-          height: "11.3%",
-          width: "100%",
-        }}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        <LinearGradient
+          colors={["#FC5E1A", "#FFC480"]}
+          locations={[0, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{
+            minHeight: 95,
+            height: "11.3%",
+            width: "100%",
+          }}
         >
           <View
-            style={{
-              width: "100%",
-              marginTop: "10%",
-              alignSelf: "flex-start",
-              flexDirection: "row",
-              alignItems: "center",
-            }}
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
-            <Pressable
-              style={{ marginLeft: "2%" }}
-              onPress={() => router.back()}
-            >
-              <Entypo name="chevron-left" size={32} color="white" />
-            </Pressable>
             <View
               style={{
-                position: "absolute",
                 width: "100%",
-                flexDirection: "column",
+                marginTop: "10%",
+                alignSelf: "flex-start",
+                flexDirection: "row",
+                alignItems: "center",
               }}
             >
-              <Text
+              <Pressable
+                style={{ marginLeft: "2%" }}
+                // onPress={() => router.back()}
+                onPress={() =>
+                  router.push("/(tabs)/HomeScreen" as RelativePathString)
+                }
+              >
+                <Entypo name="chevron-left" size={32} color="white" />
+              </Pressable>
+              <View
                 style={{
-                  alignSelf: "center",
-                  color: "white",
-                  fontWeight: "700",
-                  fontSize: 18,
+                  position: "absolute",
+                  width: "100%",
+                  flexDirection: "column",
                 }}
               >
-                Add a New Found/Lost Item
-              </Text>
+                <Text
+                  style={{
+                    alignSelf: "center",
+                    color: "white",
+                    fontWeight: "700",
+                    fontSize: 18,
+                  }}
+                >
+                  Add a New Found/Lost Item
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
-      </LinearGradient>
-      <ScrollView style={{ padding: 20, backgroundColor: "#ffffff", flex: 1 }}>
-        {/* Image section - with clear indication that it's optional */}
-        <View style={styles.imageSection}>
-          <Text style={styles.sectionTitle}>
-            Add Image <Text style={styles.optionalText}>(Optional)</Text>
-          </Text>
-          <View style={styles.imageContainer}>
-            {image ? (
-              <>
-                <Image
-                  source={{ uri: image }}
-                  style={{ width: "100%", height: 370, borderRadius: 10 }}
-                />
-                {/* Remove image button */}
-                <TouchableOpacity
-                  style={styles.removeImageButton}
-                  onPress={removeImage}
-                >
-                  <Entypo name="cross" size={24} color="white" />
-                </TouchableOpacity>
-              </>
-            ) : (
-              <View style={styles.noImagePlaceholder}>
-                <Entypo name="image" size={48} color="#ccc" />
-                <Text style={styles.placeholderText}>No image selected</Text>
-              </View>
-            )}
-          </View>
-
-          <View style={styles.imageButtonsContainer}>
-            <TouchableOpacity style={styles.imageButton} onPress={selectImage}>
-              <Entypo name="images" size={20} color="white" />
-              <Text style={styles.buttonText}>Gallery</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.imageButton} onPress={takePhoto}>
-              <Entypo name="camera" size={20} color="white" />
-              <Text style={styles.buttonText}>Camera</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Form Fields */}
-        <View style={styles.formSection}>
-          <Text style={styles.sectionTitle}>
-            Item Details <Text style={styles.requiredText}>*</Text>
-          </Text>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>
-              Item Name <Text style={styles.requiredText}>*</Text>
+        </LinearGradient>
+        <ScrollView
+          style={{ padding: 20, backgroundColor: "#ffffff", flex: 1 }}
+        >
+          {/* Image section - with clear indication that it's optional */}
+          <View style={styles.imageSection}>
+            <Text style={styles.sectionTitle}>
+              Add Image <Text style={styles.optionalText}>(Optional)</Text>
             </Text>
-            <TextInput
-              placeholder="Enter item name"
-              placeholderTextColor="#888"
-              value={form.item}
-              onChangeText={(value) => handleChange("item", value)}
-              style={styles.input}
-            />
+            <View style={styles.imageContainer}>
+              {image ? (
+                <>
+                  <Image
+                    source={{ uri: image }}
+                    style={{ width: "100%", height: 370, borderRadius: 10 }}
+                  />
+                  {/* Remove image button */}
+                  <TouchableOpacity
+                    style={styles.removeImageButton}
+                    onPress={removeImage}
+                  >
+                    <Entypo name="cross" size={24} color="white" />
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <View style={styles.noImagePlaceholder}>
+                  <Entypo name="image" size={48} color="#ccc" />
+                  <Text style={styles.placeholderText}>No image selected</Text>
+                </View>
+              )}
+            </View>
+
+            <View style={styles.imageButtonsContainer}>
+              <TouchableOpacity
+                style={styles.imageButton}
+                onPress={selectImage}
+              >
+                <Entypo name="images" size={20} color="white" />
+                <Text style={styles.buttonText}>Gallery</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.imageButton} onPress={takePhoto}>
+                <Entypo name="camera" size={20} color="white" />
+                <Text style={styles.buttonText}>Camera</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
-          <View style={styles.inputGroup}>
+          {/* Form Fields */}
+          <View style={styles.formSection}>
+            <Text style={styles.sectionTitle}>
+              Item Details <Text style={styles.requiredText}>*</Text>
+            </Text>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>
+                Item Name <Text style={styles.requiredText}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="Enter item name"
+                placeholderTextColor="#888"
+                value={form.item}
+                onChangeText={(value) => handleChange("item", value)}
+                style={styles.input}
+              />
+            </View>
+
+            {/* <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>
               Date Reported <Text style={styles.requiredText}>*</Text>
             </Text>
@@ -381,37 +391,40 @@ const AddItemScreen = () => {
                 )}
               </View>
             </TouchableOpacity>
-          </View>
+          </View> */}
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>
-              Location <Text style={styles.requiredText}>*</Text>
-            </Text>
-            <TextInput
-              placeholder="Enter location"
-              placeholderTextColor="#888"
-              value={form.location}
-              onChangeText={(value) => handleChange("location", value)}
-              style={styles.input}
-            />
-          </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>
+                Location <Text style={styles.requiredText}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="Enter location"
+                placeholderTextColor="#888"
+                value={form.location}
+                onChangeText={(value) => handleChange("location", value)}
+                style={styles.input}
+              />
+            </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>
-              Description <Text style={styles.requiredText}>*</Text>
-            </Text>
-            <TextInput
-              placeholder="Enter description"
-              placeholderTextColor="#888"
-              value={form.description}
-              onChangeText={(value) => handleChange("description", value)}
-              style={[styles.input, { height: 100, textAlignVertical: "top" }]}
-              multiline
-              numberOfLines={4}
-            />
-          </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>
+                Description <Text style={styles.requiredText}>*</Text>
+              </Text>
+              <TextInput
+                placeholder="Enter description"
+                placeholderTextColor="#888"
+                value={form.description}
+                onChangeText={(value) => handleChange("description", value)}
+                style={[
+                  styles.input,
+                  { height: 100, textAlignVertical: "top" },
+                ]}
+                multiline
+                numberOfLines={4}
+              />
+            </View>
 
-          <View style={styles.inputGroup}>
+            {/* <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Reporter ID</Text>
             <TextInput
               placeholder="Enter reporter ID"
@@ -421,87 +434,88 @@ const AddItemScreen = () => {
               keyboardType="numeric"
               style={styles.input}
             />
-          </View>
+          </View> */}
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Status</Text>
-            <View style={styles.segmentedControlContainer}>
-              <View style={styles.segmentedControl}>
-                <TouchableOpacity
-                  style={[
-                    styles.segmentOption,
-                    form.status === "Lost" && styles.activeSegment,
-                    { borderTopLeftRadius: 8, borderBottomLeftRadius: 8 },
-                  ]}
-                  onPress={() => handleChange("status", "Lost")}
-                >
-                  <Text
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Status</Text>
+              <View style={styles.segmentedControlContainer}>
+                <View style={styles.segmentedControl}>
+                  <TouchableOpacity
                     style={[
-                      styles.segmentText,
-                      form.status === "Lost" && styles.activeSegmentText,
+                      styles.segmentOption,
+                      form.status === "Lost" && styles.activeSegment,
+                      { borderTopLeftRadius: 8, borderBottomLeftRadius: 8 },
                     ]}
+                    onPress={() => handleChange("status", "Lost")}
                   >
-                    Lost
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.segmentOption,
-                    form.status === "Found" && styles.activeSegment,
-                    { borderTopRightRadius: 8, borderBottomRightRadius: 8 },
-                  ]}
-                  onPress={() => handleChange("status", "Found")}
-                >
-                  <Text
+                    <Text
+                      style={[
+                        styles.segmentText,
+                        form.status === "Lost" && styles.activeSegmentText,
+                      ]}
+                    >
+                      Lost
+                    </Text>
+                  </TouchableOpacity>
+                  <View style={styles.divider} />
+                  <TouchableOpacity
                     style={[
-                      styles.segmentText,
-                      form.status === "Found" && styles.activeSegmentText,
+                      styles.segmentOption,
+                      form.status === "Found" && styles.activeSegment,
+                      { borderTopRightRadius: 8, borderBottomRightRadius: 8 },
                     ]}
+                    onPress={() => handleChange("status", "Found")}
                   >
-                    Found
-                  </Text>
-                </TouchableOpacity>
+                    <Text
+                      style={[
+                        styles.segmentText,
+                        form.status === "Found" && styles.activeSegmentText,
+                      ]}
+                    >
+                      Found
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Keywords</Text>
-            <TextInput
-              placeholder="Enter keywords (comma separated)"
-              placeholderTextColor="#888"
-              value={form.keywords.join(", ")}
-              onChangeText={(value) => handleChange("keywords", value)}
-              style={styles.input}
-            />
-          </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Keywords</Text>
+              <TextInput
+                placeholder="Enter keywords (comma separated)"
+                placeholderTextColor="#888"
+                value={form.keywords.join(", ")}
+                onChangeText={(value) => handleChange("keywords", value)}
+                style={styles.input}
+              />
+            </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Color</Text>
-            <TextInput
-              placeholder="Enter color"
-              placeholderTextColor="#888"
-              value={form.color}
-              onChangeText={(value) => handleChange("color", value)}
-              style={styles.input}
-            />
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Color</Text>
+              <TextInput
+                placeholder="Enter color"
+                placeholderTextColor="#888"
+                value={form.color}
+                onChangeText={(value) => handleChange("color", value)}
+                style={styles.input}
+              />
+            </View>
           </View>
+        </ScrollView>
+
+        <View style={styles.bottomContainer}>
+          <TouchableOpacity
+            style={[styles.postButton, isUploading && styles.disabledButton]}
+            onPress={handleSubmit}
+            disabled={isUploading}
+          >
+            <Text style={styles.postButtonText}>
+              {isUploading ? "Posting..." : "Post Item"}
+            </Text>
+          </TouchableOpacity>
         </View>
-      </ScrollView>
-
-      <View style={styles.bottomContainer}>
-        <TouchableOpacity
-          style={[styles.postButton, isUploading && styles.disabledButton]}
-          onPress={handleSubmit}
-          disabled={isUploading}
-        >
-          <Text style={styles.postButtonText}>
-            {isUploading ? "Posting..." : "Post Item"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -630,7 +644,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#FC5E1A",
     borderRadius: 8,
-    overflow: "hidden",
+    // overflow: "hidden",
     width: "100%",
   },
   segmentOption: {
@@ -639,9 +653,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     alignItems: "center",
     backgroundColor: "white",
-    borderRightWidth: 0.5,
-    borderLeftWidth: 0.5,
-    borderColor: "#FC5E1A",
+    // borderColor: "#FC5E1A",
+  },
+  divider: {
+    width: 1,
+    height: "100%",
+    backgroundColor: "#FC5E1A",
   },
   activeSegment: {
     backgroundColor: "#FC5E1A",

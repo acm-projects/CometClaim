@@ -11,7 +11,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import fetchAnswerFromOpenAI from "./openaiAPI";
+import { fetchAnswerFromOpenAI } from "./openaiAPI";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 //List of FAQs

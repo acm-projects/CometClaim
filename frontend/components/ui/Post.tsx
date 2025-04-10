@@ -21,6 +21,7 @@ import * as Haptics from "expo-haptics";
 import { defaultUser, User } from "@/types";
 
 type PostProps = {
+  user: User;
   item: Item;
   onShare: () => void;
 };
@@ -66,24 +67,24 @@ export type Item = {
   image_url?: string;
 };
 
-export type User = {
-  user_id: string;
-  user_email: string;
-  user_name: string;
-  user_phone: string;
-  user_profile_picture: string;
-};
+// export type User = {
+//   user_id: string;
+//   user_email: string;
+//   user_name: string;
+//   user_phone: string;
+//   user_profile_picture: string;
+// };
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-const defaultUser: User = {
-  user_id: "123",
-  user_email: "default@example.com",
-  user_name: "default",
-  user_phone: "000-000-0000",
-  user_profile_picture:
-    "https://s3.amazonaws.com/37assets/svn/765-default-avatar.png",
-};
+// const defaultUser: User = {
+//   user_id: "123",
+//   user_email: "default@example.com",
+//   user_name: "default",
+//   user_phone: "000-000-0000",
+//   user_profile_picture:
+//     "https://s3.amazonaws.com/37assets/svn/765-default-avatar.png",
+// };
 
 export function Post(props: PostProps) {
   const [user, setUser] = useState<any>(defaultUser);
@@ -105,7 +106,15 @@ export function Post(props: PostProps) {
       {/* <Divider width={1} orientation="vertical" /> */}
       <Pressable
         style={styles.backPost}
-        onPress={() => router.push("/seePost")}
+        // onPress={() => router.push("/seePost")}
+        onPress={() =>
+          router.push({
+            pathname: "/seePost",
+            params: {
+              userId: props.user?.user_id || "",
+            },
+          })
+        }
       >
         <PostHeader
           datetime={props.item.date_reported}

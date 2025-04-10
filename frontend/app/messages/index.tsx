@@ -31,47 +31,6 @@ interface ChatPreview {
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-// Define messages data
-// const messages: ChatPreview[] = [
-//   {
-//     chat_id: '1',
-//     user_ids: ["1"],
-//     name: "Jeremy Dough",
-//     preview: "Are you available next Wednesday?",
-//     timestamp: "10:30 AM",
-//     unread: true,
-//   },
-//   {
-//     chat_id: '1',
-//     user_ids: ["2"],
-//     name: "Jane Steward",
-//     preview: "We can meet after my CS2336 class...",
-//     timestamp: "Yesterday",
-//   },
-//   {
-//     chat_id: '1',
-//     user_ids: ["3"],
-//     name: "FAQ Chatbot",
-//     preview: "What date did you lose the item?",
-//     timestamp: "Mon",
-//     avatar: "https://img.icons8.com/color/96/000000/chatbot.png",
-//   },
-//   {
-//     chat_id: '1',
-//     user_ids: ["4"],
-//     name: "Jordan Rodriguez",
-//     preview: "No worries! I can stop by...",
-//     timestamp: "Sun",
-//   },
-//   {
-//     chat_id: '1',
-//     user_ids: ["5"],
-//     name: "Mohammad Mehrab",
-//     preview: "Hello from the client",
-//     timestamp: "Today",
-//   },
-// ];
-
 export default function MessagesScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<User[]>([]);
@@ -276,19 +235,16 @@ export default function MessagesScreen() {
       </View>
 
       <FlatList
-        data={data}
-        keyExtractor={(item) => item.user_id}
+        data={chatList}
+        keyExtractor={(item) => item.chat_id}
         renderItem={({ item }) => (
-          <NewMessage
-            name={item.username}
-            avatar={item.profile_picture}
-            onPress={() =>
-              navigateToDM({
-                id: item.user_id,
-                name: item.username,
-                avatar: item.profile_picture || "",
-              })
-            }
+          <UserMessage
+            name={item.name}
+            preview={item.preview}
+            timestamp={item.timestamp}
+            unread={item.unread}
+            avatar={item.avatar}
+            onPress={() => navigateToDM(item)}
           />
         )}
         contentContainerStyle={styles.listContent}
