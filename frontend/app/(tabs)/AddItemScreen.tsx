@@ -65,6 +65,7 @@ const AddItemScreen = () => {
   const [itemName, setItemName] = useState("");
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
+  const [postKeywordsString, setPostKeywordsString] = useState("")
 
   const [form, setForm] = useState<FormData>({
     item: "",
@@ -180,6 +181,14 @@ const AddItemScreen = () => {
       }
 
       const reporterId = await AsyncStorage.getItem("userId");
+      const reporterRes = await fetch(`${apiUrl}/users/${reporterId}`, {
+        method: 'GET'
+      })
+
+      const reporterData = await reporterRes.json()
+
+      const reporter = JSON.parse(reporterData.body)
+
       const submissionData = { ...form };
       if (s3URL) {
         submissionData.image_url = s3URL;
@@ -196,6 +205,7 @@ const AddItemScreen = () => {
             .toLocaleString("sv", { timeZone: "CST" })
             .replace(" ", "T"),
           reporter_id: reporterId,
+          reporter: reporter
         }),
       });
 
@@ -484,8 +494,7 @@ const AddItemScreen = () => {
               <TextInput
                 placeholder="Enter keywords (comma separated)"
                 placeholderTextColor="#888"
-                value={form.keywords.join(", ")}
-                onChangeText={(value) => handleChange("keywords", value)}
+                onChangeText={ (value) => setForm((oldForm) => ({...oldForm, keywords: value.split(",").map(val => val.trim()) }) ) }
                 style={styles.input}
               />
             </View>

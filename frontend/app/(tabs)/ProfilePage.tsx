@@ -13,7 +13,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import ProfileStats from "@/components/ui/ProfileStats";
 import ProfileInfo from "@/components/ui/ProfileInfo";
 import PostsGrid from "@/components/ui/PostsGrid";
-import { USERPOSTS } from "@/data/userPosts";
+// import { USERPOSTS } from "@/data/userPosts";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -28,7 +28,7 @@ import { Divider } from "react-native-elements";
 import SmallPost from "@/components/ui/SmallPost";
 import { Link, RelativePathString, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { defaultUser, Post, User } from "@/types";
+import { defaultUser, Item, Post, User } from "@/types";
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -38,7 +38,7 @@ const ProfilePage: React.FC = () => {
     "posts" | "found" | "lost"
   >("posts");
 
-  const [userInfo, setUserInfo] = useState<User>(defaultUser);
+  const [userData, setUserData] = useState<User>(defaultUser);
 
   useFocusEffect(
     useCallback(() => {
@@ -47,28 +47,28 @@ const ProfilePage: React.FC = () => {
         const res = await fetch(`${apiUrl}/users/${userId}`);
         const data = await res.json();
         // console.log("thing", JSON.parse(data.body))
-        setUserInfo(JSON.parse(data.body));
+        setUserData(JSON.parse(data.body));
       };
       updateUserInfo();
     }, [])
   );
 
   // User data - in a real app, this would come from a user context or API
-  const userData = {
-    username: "johndoe",
-    fullName: "John Doe",
-    phone: "(434) 423-7563",
-    email: "johndoe@example.com",
-    location: "989 Loop Rd, Richardson, TX 75080",
-    avatar:
-      "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
-  };
+  // const userData = {
+  //   username: "johndoe",
+  //   fullName: "John Doe",
+  //   phone: "(434) 423-7563",
+  //   email: "johndoe@example.com",
+  //   location: "989 Loop Rd, Richardson, TX 75080",
+  //   avatar:
+  //     "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+  // };
 
   // Stats - in a real app, these would be calculated from actual data
   const stats = {
-    posts: USERPOSTS.length,
-    found: USERPOSTS.filter((post) => post.type === "found").length,
-    lost: USERPOSTS.filter((post) => post.type === "lost").length,
+    posts: userData.posts.length,
+    found: userData.posts.filter((post: Item) => post.status === "found").length,
+    lost: userData.posts.filter((post: Item) => post.status === "lost").length,
   };
 
   const avatarStyle = useAnimatedStyle(() => {
@@ -103,11 +103,11 @@ const ProfilePage: React.FC = () => {
       {/* Profile avatar and name */}
       <View style={styles.profileContainer}>
         <Animated.View style={[styles.avatarContainer, avatarStyle]}>
-          <Image source={{ uri: userData.avatar }} style={styles.avatar} />
+          <Image source={{ uri: userData.profile_picture }} style={styles.avatar} />
         </Animated.View>
         <View style={{ alignItems: "center", marginBottom: 20 }}>
           <Text style={styles.username}>@{userData.username}</Text>
-          <Text style={styles.fullName}>{userData.fullName}</Text>
+          <Text style={styles.fullName}>{userData.full_name}</Text>
         </View>
       </View>
 
@@ -121,9 +121,8 @@ const ProfilePage: React.FC = () => {
 
       {/* Profile info */}
       <ProfileInfo
-        phone={userData.phone}
+        phone={userData.phone_number}
         email={userData.email}
-        location={userData.location}
       />
     </View>
   );
@@ -135,8 +134,8 @@ const ProfilePage: React.FC = () => {
       <PostsGrid
         posts={
           activeSection === "posts"
-            ? USERPOSTS
-            : USERPOSTS.filter((post) => post.type === activeSection)
+            ? userData.posts.map(item => ({item, user: userData} as Post))
+            : userData.posts.filter((post: Item) => post.status === activeSection).map(item => ({item, user: userData} as Post))
         }
         title={
           activeSection === "posts"

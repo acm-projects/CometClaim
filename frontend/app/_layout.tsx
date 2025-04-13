@@ -48,7 +48,7 @@ export default function RootLayout() {
           name="messages/[chat_id]"
           options={{ headerShown: false }}
         />
-        {/* <Stack.Screen name="posts/[chat_id]" options={{ headerShown: false }} />{" "} */}
+        <Stack.Screen name="posts/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="chatScreen" options={{ headerShown: false }} />
         <Stack.Screen name="seePost" options={{ headerShown: false }} />
         <Stack.Screen name="UsersProfile" options={{ headerShown: false }} />

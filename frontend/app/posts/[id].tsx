@@ -1,4 +1,4 @@
-import { Post } from "@/types";
+import { Item, Post } from "@/types";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import YourPost from "../YourPost";
@@ -13,7 +13,8 @@ export default function PostDetails() {
 
     const id = params.get('id')
 
-    const [post, setPost] = useState<Post>()
+    console.log("yeahhh", id)
+    const [item, setItem] = useState<Item>()
 
     useEffect(() => {
         async function getPost() {
@@ -21,18 +22,22 @@ export default function PostDetails() {
 
             const data = await res.json()
 
-            setPost(JSON.parse(data.body))
+            console.log(JSON.parse(data.body))
+            setItem(JSON.parse(data.body))
         }
         getPost()
     }, [])
 
     return (
         (
-            post 
+            item 
             ? 
-            <YourPost {...post} /> 
+            <View style={{flex: 1, backgroundColor: 'white'}}>
+                <YourPost {...item} /> 
+            </View>
+            
             : 
-            <View>
+            <View style={{flex: 1, backgroundColor: 'white'}}>
                 <Text>No post found</Text>
             </View>
         )

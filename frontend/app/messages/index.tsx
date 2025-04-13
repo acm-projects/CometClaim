@@ -19,7 +19,7 @@ import { useState, useEffect } from "react";
 import filter from "lodash.filter";
 
 // Define the message type
-interface ChatPreview {
+type ChatPreview = {
   chat_id: string;
   user_ids: string[];
   name: string;

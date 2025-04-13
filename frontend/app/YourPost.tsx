@@ -11,7 +11,7 @@ import {
 import React, { useEffect, useState } from "react";
 import YourPostHeader from "@/components/ui/YourPostHeader";
 import { LinearGradient } from "expo-linear-gradient";
-import { defaultUser, Post, User } from "@/types";
+import { defaultUser, Item, Post, User } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type IconProps = {
@@ -20,34 +20,34 @@ type IconProps = {
 }
 
 type PostProps = {
-  post: Post;
+  post: Item;
   author: User;
 }
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL
 
-const YourPost: React.FC<Post> = (post) => {
+const YourPost: React.FC<Item> = (item) => {
 
-  const [postAuthor, setPostAuthor] = useState<User>(defaultUser)
+  // const [postAuthor, setPostAuthor] = useState<User>(defaultUser)
   
 
-  useEffect(() => {
-    async function getPostAuthor() {
-      const res = await fetch(`${apiUrl}/users/${post.reporter_id}`)
-      const data = await res.json()
-      setPostAuthor(JSON.parse(data.body))
-    }
-    getPostAuthor()
-  }, [])
+  // useEffect(() => {
+  //   async function getPostAuthor() {
+  //     const res = await fetch(`${apiUrl}/users/${post.user}`)
+  //     const data = await res.json()
+  //     setPostAuthor(JSON.parse(data.body))
+  //   }
+  //   getPostAuthor()
+  // }, [])
 
   return (
     <View style={{ backgroundColor: "white", flex: 1 }}>
       <YourPostHeader />
       <ScrollView>
-        <PostTop post={post} author={postAuthor} />
-        <PostDateAndLocation {...post} />
-        <PostImage {...post} />
-        <PostFooter {...post} />
+        <PostTop post={item} author={item.reporter} />
+        <PostDateAndLocation {...item} />
+        <PostImage {...item} />
+        <PostFooter {...item} />
       </ScrollView>
     </View>
   );
@@ -130,7 +130,7 @@ const PostDateLocationIcon = [
   },
 ];
 
-const PostDateAndLocation: React.FC<Post> = (post) => (
+const PostDateAndLocation: React.FC<Item> = (post) => (
   <View style={styles.dateLocation}>
     <View
       style={{
@@ -178,7 +178,7 @@ const PostDateAndLocation: React.FC<Post> = (post) => (
   </View>
 );
 
-const PostImage: React.FC<Post> = (post) => (
+const PostImage: React.FC<Item> = (post) => (
   <View style={styles.imagePost}>
     <Image
       source={{ uri: post.image_url }}
@@ -190,7 +190,7 @@ const PostImage: React.FC<Post> = (post) => (
   </View>
 );
 
-const Caption: React.FC<Post> = (post: Post) => (
+const Caption: React.FC<Item> = (post: Item) => (
   <View>
     <Text
       style={{ fontSize: 16, paddingBottom: 5, paddingLeft: 20, marginTop: 10 }}
@@ -200,7 +200,7 @@ const Caption: React.FC<Post> = (post: Post) => (
   </View>
 );
 
-const PostFooter: React.FC<Post> = (post) => (
+const PostFooter: React.FC<Item> = (post) => (
   <View>
     <Caption {...post} />
   </View>

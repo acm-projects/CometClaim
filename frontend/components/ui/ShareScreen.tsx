@@ -17,15 +17,37 @@ import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Checkbox from "expo-checkbox";
 import { ShareRow } from "@/components/ShareRow";
-import { Item } from "./Post";
+import { Item, User } from "@/types";
 
 interface ShareScreenProps {
   item: Item | null;
   onClose: () => void;
 }
 
+const apiUrl = process.env.EXPO_PUBLIC_API_URL
+
 export default function ShareScreenPage({ item, onClose }: ShareScreenProps) {
   const [message, setMessage] = useState("");
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([])
+
+  useEffect(() => {
+    async function getUsers() {
+      const res = await fetch(`${apiUrl}/users`, {
+        method: 'GET'
+      })
+
+      const data = await res.json()
+
+      console.log(JSON.parse(data.body))
+
+      setUsers(JSON.parse(data.body))
+
+    }
+
+    getUsers()
+
+  }, [])
 
   return (
     <View style={[styles.centeredView, styles.backgroundView]}>
@@ -99,15 +121,9 @@ export default function ShareScreenPage({ item, onClose }: ShareScreenProps) {
             showsVerticalScrollIndicator={true}
             indicatorStyle="black"
           >
-            <ShareRow />
-            <ShareRow />
-            <ShareRow />
-            <ShareRow />
-            <ShareRow />
-            <ShareRow />
-            <ShareRow />
-            <ShareRow />
-            <ShareRow />
+            {
+              users && users.map(user => (<ShareRow key={user.user_id} user={user} setSelectedUsers={setSelectedUsers} />) )
+            }
           </ScrollView>
           <LinearGradient
             colors={["#9683F21B", "#FF4000", "#9683F21B"]}

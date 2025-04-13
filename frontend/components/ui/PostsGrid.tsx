@@ -13,10 +13,10 @@ import {
   Image,
 } from "react-native";
 import { router } from "expo-router";
-import type { PostTypeUser } from "@/data/userPosts";
+import { Item, Post } from "@/types";
 
 interface PostsGridProps {
-  posts: PostTypeUser[];
+  posts: Post[];
   title?: string;
   ListHeaderComponent?: ReactNode;
 }
@@ -31,30 +31,30 @@ const PostsGrid: React.FC<PostsGridProps> = ({
   const filteredPosts =
     activeTab === "all"
       ? posts
-      : posts.filter((post) => post.type === activeTab);
+      : posts.filter((post) => post.item.status.toLowerCase() === activeTab);
 
-  const renderItem = ({ item }: { item: PostTypeUser }) => (
+  const renderItem = ({ item }: { item: Item }) => (
     <TouchableOpacity
       style={styles.postItem}
       onPress={() =>
         router.push({
           pathname: "/YourPost",
-          params: { id: item.id },
+          params: { id: item.item_id },
         })
       }
     >
-      <Image source={{ uri: item.imageUrl }} style={styles.postImage} />
+      <Image source={{ uri: item.image_url }} style={styles.postImage} />
       <View style={styles.postOverlay}>
         <Text style={styles.postTitle} numberOfLines={1}>
-          {item.title}
+          {item.description}
         </Text>
       </View>
-      {item.type === "found" && (
+      {item.status.toLowerCase() === "found" && (
         <View style={[styles.postBadge, styles.foundBadge]}>
           <Text style={styles.badgeText}>Found</Text>
         </View>
       )}
-      {item.type === "lost" && (
+      {item.status.toLowerCase() === "lost" && (
         <View style={[styles.postBadge, styles.lostBadge]}>
           <Text style={styles.badgeText}>Lost</Text>
         </View>
@@ -129,9 +129,9 @@ const PostsGrid: React.FC<PostsGridProps> = ({
 
   return (
     <FlatList
-      data={filteredPosts}
+      data={filteredPosts.map(post => post.item)}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id.toString()}
+      keyExtractor={(item) => item.item_id.toString()}
       numColumns={2}
       contentContainerStyle={styles.listContainer}
       columnWrapperStyle={styles.columnWrapper}

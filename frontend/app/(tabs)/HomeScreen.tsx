@@ -11,7 +11,8 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import Header from "@/components/ui/Header";
-import { Post, Item } from "@/components/ui/Post";
+import { Post } from "@/components/ui/Post";
+import { defaultUser, Item } from "@/types";
 import ShareScreen from "@/components/ui/ShareScreen"; // <- extract this into its own component
 import { useFocusEffect } from "expo-router";
 import ChatbotButton from "@/components/ui/ChatbotButton";
@@ -39,7 +40,9 @@ const HomeScreen: React.FC = () => {
       async function getItems() {
         const res = await fetch(`${apiUrl}/items`);
         const data = await res.json();
-        setItems(JSON.parse(data.body));
+        const items = JSON.parse(data.body)
+        items.sort((a: Item, b: Item) => {return (new Date(b.date_reported)).getTime() - (new Date(a.date_reported)).getTime()})
+        setItems(items);
       }
       getItems();
     }, [])
@@ -64,6 +67,7 @@ const HomeScreen: React.FC = () => {
           {items.map((item: Item, index: number) => (
             <Post
               item={item}
+              user={item.reporter|| null}
               key={index}
               onShare={() => openShareModal(item)}
             />

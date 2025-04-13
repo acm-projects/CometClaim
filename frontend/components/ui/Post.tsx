@@ -18,7 +18,7 @@ import { AntDesign, FontAwesome } from "@expo/vector-icons";
 import { RelativePathString, router } from "expo-router";
 import { useEffect, useState } from "react";
 import * as Haptics from "expo-haptics";
-import { defaultUser, User } from "@/types";
+import { defaultUser, Item, User } from "@/types";
 
 type PostProps = {
   user: User;
@@ -56,17 +56,6 @@ type CaptionProps = {
   caption: string;
 };
 
-export type Item = {
-  item_id: string;
-  category: string;
-  date_reported: string;
-  description: string;
-  location: string;
-  reporter_id: string;
-  status: string;
-  image_url?: string;
-};
-
 // export type User = {
 //   user_id: string;
 //   user_email: string;
@@ -87,19 +76,25 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 // };
 
 export function Post(props: PostProps) {
-  const [user, setUser] = useState<any>(defaultUser);
+  // const [user, setUser] = useState<any>(defaultUser);
 
-  useEffect(() => {
-    async function getUserData() {
-      const res = await fetch(`${apiUrl}/users/${props.item.reporter_id}`);
-      const data = await res.json();
-      if (data.body) {
-        setUser(JSON.parse(data.body));
-        // console.log("user is", data.body)
-      }
-    }
-    getUserData();
-  }, []);
+  // useEffect(() => {
+  //   async function getUserData() {
+  //     const res = await fetch(`${apiUrl}/users/${props.item.reporter_id}`);
+  //     const data = await res.json();
+  //     if (data.body) {
+  //       setUser(JSON.parse(data.body));
+  //       // console.log("user is", data.body)
+  //     }
+  //   }
+  //   if(!props.user) {
+  //     getUserData();
+  //   }
+    
+  // }, []);
+
+  // console.log(props.user)
+
 
   return (
     <View style={{ marginTop: 20 }}>
@@ -107,18 +102,20 @@ export function Post(props: PostProps) {
       <Pressable
         style={styles.backPost}
         // onPress={() => router.push("/seePost")}
-        onPress={() =>
-          router.push({
-            pathname: "/seePost",
-            params: {
-              userId: props.user?.user_id || "",
-            },
-          })
+        onPress={() => {
+          console.log(`/posts/${props.item.item_id}`)
+            router.push({
+              pathname: `/posts/${props.item.item_id}` as RelativePathString,
+              // params: {
+              //   id: props.user?.user_id || "",
+              // },
+            })
+          }
         }
       >
         <PostHeader
           datetime={props.item.date_reported}
-          user={user}
+          user={(props.user)}
           item={props.item}
         />
         <PostDateAndLocation
@@ -276,12 +273,12 @@ function PostHeader(props: PostHeaderProps) {
           onPress={() =>
             router.push({
               pathname: "/UsersProfile",
-              params: { userId: props.user.user_id },
+              params: { userId: JSON.parse(JSON.stringify(props.user)).user_id },
             })
           }
         >
           <Image
-            source={{ uri: props.user.profile_picture }}
+            source={{ uri: JSON.parse(JSON.stringify(props.user)).profile_picture }}
             style={styles.story}
           />
           <Text
