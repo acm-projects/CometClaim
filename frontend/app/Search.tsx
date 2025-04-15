@@ -68,6 +68,7 @@ const Search = () => {
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
+
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -76,16 +77,16 @@ const Search = () => {
   const [items, setItems] = useState<Item[]>([]);
 
   // Apply filters when dependencies change
-  // useEffect(() => {
-  //   async function getItems() {
-  //     const res = await fetch(`${apiUrl}/items`);
-  //     const data = await res.json();
-  //     setItems(JSON.parse(data.body));
-  //   }
-  //   getItems();
-  // }, []);
+  useEffect(() => {
+    async function getItems() {
+      const res = await fetch(`${apiUrl}/items`);
+      const data = await res.json();
+      setItems(JSON.parse(data.body));
+    }
+    getItems();
+  }, []);
 
-  const [filteredItems, setFilteredItems] = useState<Item[]>(sampleItems);
+  const [filteredItems, setFilteredItems] = useState<Item[]>();
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -94,14 +95,13 @@ const Search = () => {
     setIsLoading(true);
 
     // Start with all items
-    let results = [...sampleItems];
+    let results = [...items];
 
     // Filter by search query
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase().trim();
       results = results.filter(
         (item) =>
-          item.category.toLowerCase().includes(query) ||
           item.description.toLowerCase().includes(query) ||
           item.keywords.some((keyword) => keyword.toLowerCase().includes(query))
       );
@@ -168,6 +168,10 @@ const Search = () => {
     setShowFilters(!showFilters);
   };
 
+  useEffect(() => {
+    filterItems();
+  }, [filterItems]);
+
   // Render item for FlatList
   const renderItem = ({ item }: { item: Item }) => <ItemCard item={item} />;
   const [messageInput, setMessageInput] = useState<string>("");
@@ -187,6 +191,7 @@ const Search = () => {
       </TouchableOpacity>
     </View>
   );
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -207,12 +212,12 @@ const Search = () => {
           </Pressable>
           <TextInput
             style={styles.input}
-            value={messageInput}
-            onChangeText={setMessageInput}
+            value={searchQuery}
+            onChangeText={handleSearch}
             placeholder="Search"
             placeholderTextColor="#DD8843"
-            inlineImageLeft="search_icon"
           />
+
           <TouchableOpacity onPress={toggleFilters} style={styles.filterButton}>
             <Image
               source={{

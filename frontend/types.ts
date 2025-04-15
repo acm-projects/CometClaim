@@ -6,7 +6,7 @@ export type User = {
   phone_number: string;
   profile_picture: string;
   comments: Comment[];
-  posts: Post[];
+  posts: Item[];
 };
 
 export type Comment = {
@@ -16,13 +16,20 @@ export type Comment = {
 };
 
 export type Post = {
+  item: Item;
+  user: User;
+};
+
+export type Item = {
   item_id: string;
   date_reported: string;
   description: string;
-  image_url: string;
   location: string;
   reporter_id: string;
   status: string;
+  image_url?: string;
+  reporter: User;
+  comments: object[];
 };
 
 export type Chat = {

@@ -27,7 +27,7 @@ interface User {
   comments?: any[];
 }
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL; // Replace with your actual API URL
+const apiUrl = process.env.EXPO_PUBLIC_API_URL; // Replace with your actual API URL
 
 export default function MessagesScreen() {
   // Navigate to the DM screen with the user's information
@@ -37,8 +37,9 @@ export default function MessagesScreen() {
     avatar?: string;
   }) => {
     router.push({
-      pathname: "/messages/[id]",
+      pathname: "/messages/[chat_id]",
       params: {
+        chat_id: user.id,
         id: user.id,
         name: user.name,
         avatar: user.avatar || "",
@@ -55,7 +56,7 @@ export default function MessagesScreen() {
     setIsLoading(true);
     const getUsers = async () => {
       try {
-        const res = await fetch(`${API_URL}/users`, {
+        const res = await fetch(`${apiUrl}/users`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

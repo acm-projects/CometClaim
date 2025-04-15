@@ -5,14 +5,9 @@ import { Feather, MaterialIcons, Ionicons } from "@expo/vector-icons";
 interface ProfileInfoProps {
   phone: string;
   email: string;
-  location: string;
 }
 
-const ProfileInfo: React.FC<ProfileInfoProps> = ({
-  phone,
-  email,
-  location,
-}) => {
+const ProfileInfo: React.FC<ProfileInfoProps> = ({ phone, email }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Contact Information</Text>
@@ -37,7 +32,7 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
         </View>
       </View>
 
-      <View style={styles.infoItem}>
+      {/* <View style={styles.infoItem}>
         <View style={styles.iconContainer}>
           <Ionicons name="location-sharp" size={18} color="#FC5E1A" />
         </View>
@@ -45,7 +40,7 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
           <Text style={styles.infoLabel}>Location</Text>
           <Text style={styles.infoValue}>{location}</Text>
         </View>
-      </View>
+      </View> */}
     </View>
   );
 };

@@ -11,75 +11,79 @@ import {
 import React, { useEffect, useState } from "react";
 import YourPostHeader from "@/components/ui/YourPostHeader";
 import { LinearGradient } from "expo-linear-gradient";
-import { defaultUser, Post, User } from "@/types";
+import { defaultUser, Item, Post, User } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type IconProps = {
   imgStyle: any;
   imgUrl: string;
-}
+};
 
 type PostProps = {
-  post: Post;
+  post: Item;
   author: User;
-}
+};
 
-const apiUrl = process.env.EXPO_PUBLIC_API_URL
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-const YourPost: React.FC<Post> = (post) => {
+const YourPost: React.FC<Item> = (item) => {
+  // const [postAuthor, setPostAuthor] = useState<User>(defaultUser)
 
-  const [postAuthor, setPostAuthor] = useState<User>(defaultUser)
-  
-
-  useEffect(() => {
-    async function getPostAuthor() {
-      const res = await fetch(`${apiUrl}/users/${post.reporter_id}`)
-      const data = await res.json()
-      setPostAuthor(JSON.parse(data.body))
-    }
-    getPostAuthor()
-  }, [])
+  // useEffect(() => {
+  //   async function getPostAuthor() {
+  //     const res = await fetch(`${apiUrl}/users/${post.user}`)
+  //     const data = await res.json()
+  //     setPostAuthor(JSON.parse(data.body))
+  //   }
+  //   getPostAuthor()
+  // }, [])
 
   return (
     <View style={{ backgroundColor: "white", flex: 1 }}>
       <YourPostHeader />
       <ScrollView>
-        <PostTop post={post} author={postAuthor} />
-        <PostDateAndLocation {...post} />
-        <PostImage {...post} />
-        <PostFooter {...post} />
+        <PostTop post={item} author={item.reporter} />
+        <PostDateAndLocation {...item} />
+        <PostImage {...item} />
+        <PostFooter {...item} />
       </ScrollView>
     </View>
   );
 };
-const PostTop: React.FC<PostProps> = ({post, author}) => {
-
+const PostTop: React.FC<PostProps> = ({ post, author }) => {
   function datetimeToHowLongAgo(datetime: string) {
-    const timeDifferenceInMilliseconds = Date.now() - Date.parse(datetime)
-    
-    const timeDifferenceInSeconds = Math.floor(timeDifferenceInMilliseconds / 1000)
-    if(timeDifferenceInSeconds < 60) return `${timeDifferenceInSeconds}s`
-    
-    const timeDifferenceInMinutes = Math.floor(timeDifferenceInSeconds / 60)
-    if(timeDifferenceInMinutes < 60) return `${timeDifferenceInMinutes}m`
+    const timeDifferenceInMilliseconds = Date.now() - Date.parse(datetime);
 
-    const timeDifferenceInHours = Math.floor(timeDifferenceInMinutes / 60)
-    if(timeDifferenceInHours < 24) return `${timeDifferenceInHours}h`
+    const timeDifferenceInSeconds = Math.floor(
+      timeDifferenceInMilliseconds / 1000
+    );
+    if (timeDifferenceInSeconds < 60) return `${timeDifferenceInSeconds}s`;
 
-    const timeDifferenceInDays = Math.floor(timeDifferenceInHours / 24)
-    if(timeDifferenceInDays < 31) return `${timeDifferenceInDays}d`
+    const timeDifferenceInMinutes = Math.floor(timeDifferenceInSeconds / 60);
+    if (timeDifferenceInMinutes < 60) return `${timeDifferenceInMinutes}m`;
 
-    const timeDifferenceInMonths = Math.floor(timeDifferenceInDays / 31)
-    if(timeDifferenceInMonths < 12) return `${timeDifferenceInMonths}mo`
+    const timeDifferenceInHours = Math.floor(timeDifferenceInMinutes / 60);
+    if (timeDifferenceInHours < 24) return `${timeDifferenceInHours}h`;
 
-    const timeDifferenceInYears = Math.floor(timeDifferenceInMonths / 12)
-    return `${timeDifferenceInYears}y`
+    const timeDifferenceInDays = Math.floor(timeDifferenceInHours / 24);
+    if (timeDifferenceInDays < 31) return `${timeDifferenceInDays}d`;
+
+    const timeDifferenceInMonths = Math.floor(timeDifferenceInDays / 31);
+    if (timeDifferenceInMonths < 12) return `${timeDifferenceInMonths}mo`;
+
+    const timeDifferenceInYears = Math.floor(timeDifferenceInMonths / 12);
+    return `${timeDifferenceInYears}y`;
   }
 
   return (
     <View style={styles.headerView}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Image source={{ uri: author.profile_picture || defaultUser.profile_picture }} style={styles.story} />
+        <Image
+          source={{
+            uri: author.profile_picture || defaultUser.profile_picture,
+          }}
+          style={styles.story}
+        />
         <Text
           style={{
             color: "black",
@@ -130,7 +134,7 @@ const PostDateLocationIcon = [
   },
 ];
 
-const PostDateAndLocation: React.FC<Post> = (post) => (
+const PostDateAndLocation: React.FC<Item> = (post) => (
   <View style={styles.dateLocation}>
     <View
       style={{
@@ -151,11 +155,11 @@ const PostDateAndLocation: React.FC<Post> = (post) => (
           marginLeft: 20,
         }}
       >
-        {(new Date(post.date_reported)).toLocaleDateString('en-US', {
-          weekday: 'short',
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
+        {new Date(post.date_reported).toLocaleDateString("en-US", {
+          weekday: "short",
+          year: "numeric",
+          month: "short",
+          day: "numeric",
         })}
       </Text>
     </View>
@@ -178,7 +182,7 @@ const PostDateAndLocation: React.FC<Post> = (post) => (
   </View>
 );
 
-const PostImage: React.FC<Post> = (post) => (
+const PostImage: React.FC<Item> = (post) => (
   <View style={styles.imagePost}>
     <Image
       source={{ uri: post.image_url }}
@@ -190,7 +194,7 @@ const PostImage: React.FC<Post> = (post) => (
   </View>
 );
 
-const Caption: React.FC<Post> = (post: Post) => (
+const Caption: React.FC<Item> = (post: Item) => (
   <View>
     <Text
       style={{ fontSize: 16, paddingBottom: 5, paddingLeft: 20, marginTop: 10 }}
@@ -200,7 +204,7 @@ const Caption: React.FC<Post> = (post: Post) => (
   </View>
 );
 
-const PostFooter: React.FC<Post> = (post) => (
+const PostFooter: React.FC<Item> = (post) => (
   <View>
     <Caption {...post} />
   </View>
