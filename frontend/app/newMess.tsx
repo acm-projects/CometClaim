@@ -14,6 +14,7 @@ import { Link, router } from "expo-router";
 import NewMessage from "@/components/ui/UserMessages";
 import { useState, useEffect, useRef } from "react";
 import filter from "lodash.filter";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define the user type
 interface User {
@@ -31,20 +32,40 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL; // Replace with your actual API
 
 export default function MessagesScreen() {
   // Navigate to the DM screen with the user's information
-  const navigateToDM = (user: {
+  const navigateToDM = (chat: {
     id: string;
     name: string;
     avatar?: string;
   }) => {
     router.push({
-      pathname: "/messages/[id]",
+      pathname: "/messages/[chat_id]",
       params: {
-        id: user.id,
-        name: user.name,
-        avatar: user.avatar || "",
+        chat_id: chat.id,
+        name: chat.name,
+        avatar: chat.avatar || "",
       },
     });
   };
+
+  const createNewChat = async (members: string[]) => {
+    const res = await fetch(`${API_URL}/chats`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chat_name: members.map(user_id => fullData.find(user => user.user_id == user_id)).join(', '),
+        chat_members: members
+      })
+    })
+
+    const data = await res.json()
+
+    return data.newChatId
+  }
+
+  const [currentUserId, setCurrentUserId] = useState("")
+
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<User[]>([]);
   const [error, setError] = useState<Error | null>(null);
@@ -55,6 +76,13 @@ export default function MessagesScreen() {
     setIsLoading(true);
     const getUsers = async () => {
       try {
+        const currentUserId = await AsyncStorage.getItem('userId')
+        if(currentUserId) {
+          setCurrentUserId(currentUserId)
+        } else {
+          console.log('couldnt get current user id')
+        }
+
         const res = await fetch(`${API_URL}/users`, {
           method: "GET",
           headers: {
@@ -67,6 +95,8 @@ export default function MessagesScreen() {
         setFullData(parsedUsers);
         setIsLoading(false);
         console.log(data);
+        console.log()
+        console.log(parsedUsers)
       } catch (err) {
         setError(err instanceof Error ? err : new Error(String(err)));
         setIsLoading(false);
@@ -198,12 +228,15 @@ export default function MessagesScreen() {
           <NewMessage
             name={item.username}
             avatar={item.profile_picture}
-            onPress={() =>
+            onPress={async () =>{
+              
+              const newChatId = await createNewChat([currentUserId, item.user_id])
               navigateToDM({
-                id: item.user_id,
+                id: newChatId,
                 name: item.username,
                 avatar: item.profile_picture || "",
               })
+            }
             }
           />
         )}
