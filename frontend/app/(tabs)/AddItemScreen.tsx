@@ -67,7 +67,7 @@ const AddItemScreen = () => {
   const [itemName, setItemName] = useState("");
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
-  const [postKeywordsString, setPostKeywordsString] = useState("");
+  const [postKeywordsString, setPostKeywordsString] = useState("")
 
   const [form, setForm] = useState<FormData>({
     item: "",
@@ -215,15 +215,15 @@ const AddItemScreen = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        // body: JSON.stringify({
-        //   ...form,
-        //   image_url: s3URL,
-        //   date_reported: new Date()
-        //     .toLocaleString("sv", { timeZone: "CST" })
-        //     .replace(" ", "T"),
-        //   reporter_id: reporterId,
-        //   reporter: reporter,
-        // }),
+        body: JSON.stringify({
+          ...form,
+          image_url: s3URL,
+          date_reported: new Date()
+            .toLocaleString("sv", { timeZone: "CST" })
+            .replace(" ", "T"),
+          reporter_id: reporterId,
+          reporter: reporter
+        }),
       });
 
       const data = await response.json();
@@ -511,12 +511,7 @@ const AddItemScreen = () => {
               <TextInput
                 placeholder="Enter keywords (comma separated)"
                 placeholderTextColor="#888"
-                onChangeText={(value) =>
-                  setForm((oldForm) => ({
-                    ...oldForm,
-                    keywords: value.split(",").map((val) => val.trim()),
-                  }))
-                }
+                onChangeText={ (value) => setForm((oldForm) => ({...oldForm, keywords: value.split(",").map(val => val.trim()) }) ) }
                 style={styles.input}
               />
             </View>

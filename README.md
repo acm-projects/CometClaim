@@ -4,7 +4,7 @@
 # <h1 align="center">CometClaim 💫</h1>
 
 <p align="center">
-UTD's Lost and Found system needs a digital upgrade to improve convenience. Instead of relying on physical visits or phone calls, CometClaim is an online platform where students and staff can easily upload and browse a virtual inventory of lost items, retrieve misplaced belongings, and query a chatbot ffor any questions from the comfort of their home before making a trip to the Lost and Found office.
+UTD's Lost and Found system needs a digital upgrade to improve convenience. Instead of relying on physical visits or phone calls, CometClaim is an online platform where students and staff can easily upload and browse a virtual inventory of lost items, retrieve misplaced belongings, and query a chatbot for any questions from the comfort of their home before making a trip to the Lost and Found office.
 </p>
 <br>
 

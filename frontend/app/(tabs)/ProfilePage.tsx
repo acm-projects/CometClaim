@@ -69,8 +69,7 @@ const ProfilePage: React.FC = () => {
   // Stats - in a real app, these would be calculated from actual data
   const stats = {
     posts: userData.posts.length,
-    found: userData.posts.filter((post: Item) => post.status === "found")
-      .length,
+    found: userData.posts.filter((post: Item) => post.status === "found").length,
     lost: userData.posts.filter((post: Item) => post.status === "lost").length,
   };
 
@@ -106,10 +105,7 @@ const ProfilePage: React.FC = () => {
       {/* Profile avatar and name */}
       <View style={styles.profileContainer}>
         <Animated.View style={[styles.avatarContainer, avatarStyle]}>
-          <Image
-            source={{ uri: userData.profile_picture }}
-            style={styles.avatar}
-          />
+          <Image source={{ uri: userData.profile_picture }} style={styles.avatar} />
         </Animated.View>
         <View style={{ alignItems: "center", marginBottom: 20 }}>
           <Text style={styles.username}>@{userData.username}</Text>
@@ -126,7 +122,10 @@ const ProfilePage: React.FC = () => {
       />
 
       {/* Profile info */}
-      <ProfileInfo phone={userData.phone_number} email={userData.email} />
+      <ProfileInfo
+        phone={userData.phone_number}
+        email={userData.email}
+      />
     </View>
   );
 

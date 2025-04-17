@@ -255,16 +255,12 @@ function PostHeader(props: PostHeaderProps) {
           onPress={() =>
             router.push({
               pathname: "/UsersProfile",
-              params: {
-                userId: JSON.parse(JSON.stringify(props.user)).user_id,
-              },
+              params: { userId: JSON.parse(JSON.stringify(props.user)).user_id },
             })
           }
         >
           <Image
-            source={{
-              uri: JSON.parse(JSON.stringify(props.user)).profile_picture,
-            }}
+            source={{ uri: JSON.parse(JSON.stringify(props.user)).profile_picture }}
             style={styles.story}
           />
           <Text

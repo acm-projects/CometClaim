@@ -24,7 +24,7 @@ interface ShareScreenProps {
   onClose: () => void;
 }
 
-const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+const apiUrl = process.env.EXPO_PUBLIC_API_URL
 
 export default function ShareScreenPage({ item, onClose }: ShareScreenProps) {
   const [message, setMessage] = useState("");

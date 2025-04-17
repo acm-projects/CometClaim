@@ -129,7 +129,7 @@ const PostsGrid: React.FC<PostsGridProps> = ({
 
   return (
     <FlatList
-      data={filteredPosts.map((post) => post.item)}
+      data={filteredPosts.map(post => post.item)}
       renderItem={renderItem}
       keyExtractor={(item) => item.item_id.toString()}
       numColumns={2}

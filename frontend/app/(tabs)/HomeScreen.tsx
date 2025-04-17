@@ -13,10 +13,10 @@ import type React from "react";
 import { useCallback, useEffect, useState, useRef } from "react";
 import Header from "@/components/ui/Header";
 import { Post } from "@/components/ui/Post";
-import ShareScreen from "@/components/ui/ShareScreen";
+import { User, defaultUser, Item } from "@/types";
+import ShareScreen from "@/components/ui/ShareScreen"; // <- extract this into its own component
 import { useFocusEffect } from "expo-router";
 import ChatbotButton from "@/components/ui/ChatbotButton";
-import { type User, defaultUser, type Item } from "@/types";
 import CategoryFilter from "@/components/ui/CategoryFilter";
 
 const HomeScreen: React.FC = () => {
