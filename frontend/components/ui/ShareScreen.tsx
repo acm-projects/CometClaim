@@ -29,25 +29,23 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL
 export default function ShareScreenPage({ item, onClose }: ShareScreenProps) {
   const [message, setMessage] = useState("");
   const [users, setUsers] = useState<User[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<User[]>([])
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
 
   useEffect(() => {
     async function getUsers() {
       const res = await fetch(`${apiUrl}/users`, {
-        method: 'GET'
-      })
+        method: "GET",
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
-      console.log(JSON.parse(data.body))
+      console.log(JSON.parse(data.body));
 
-      setUsers(JSON.parse(data.body))
-
+      setUsers(JSON.parse(data.body));
     }
 
-    getUsers()
-
-  }, [])
+    getUsers();
+  }, []);
 
   return (
     <View style={[styles.centeredView, styles.backgroundView]}>
@@ -121,9 +119,14 @@ export default function ShareScreenPage({ item, onClose }: ShareScreenProps) {
             showsVerticalScrollIndicator={true}
             indicatorStyle="black"
           >
-            {
-              users && users.map(user => (<ShareRow key={user.user_id} user={user} setSelectedUsers={setSelectedUsers} />) )
-            }
+            {users &&
+              users.map((user) => (
+                <ShareRow
+                  key={user.user_id}
+                  user={user}
+                  setSelectedUsers={setSelectedUsers}
+                />
+              ))}
           </ScrollView>
           <LinearGradient
             colors={["#9683F21B", "#FF4000", "#9683F21B"]}

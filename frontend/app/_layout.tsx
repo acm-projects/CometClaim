@@ -53,7 +53,7 @@ export default function RootLayout() {
         <Stack.Screen name="seePost" options={{ headerShown: false }} />
         <Stack.Screen name="UsersProfile" options={{ headerShown: false }} />
         <Stack.Screen name="newMess" options={{ headerShown: false }} />
-        {/* <Stack.Screen name="CommentScreen" options={{ headerShown: false }} /> */}
+        {/* <Stack.Screen name="posts/[id]" options={{ headerShown: false }} /> */}
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

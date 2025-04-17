@@ -36,12 +36,12 @@ export function ShareRow({user, setSelectedUsers}: ShareRowProps ) {
 }
 
 const styles = StyleSheet.create({
-    shareRow: {
-        flex: 1, 
-        flexDirection: 'row', 
-        alignItems: "center", 
-        gap: 20, 
-        justifyContent: "center",
-        margin: 10
-    }
+  shareRow: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 20,
+    justifyContent: "center",
+    margin: 10,
+  },
 });

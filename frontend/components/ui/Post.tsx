@@ -76,46 +76,25 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 // };
 
 export function Post(props: PostProps) {
-  // const [user, setUser] = useState<any>(defaultUser);
-
-  // useEffect(() => {
-  //   async function getUserData() {
-  //     const res = await fetch(`${apiUrl}/users/${props.item.reporter_id}`);
-  //     const data = await res.json();
-  //     if (data.body) {
-  //       setUser(JSON.parse(data.body));
-  //       // console.log("user is", data.body)
-  //     }
-  //   }
-  //   if(!props.user) {
-  //     getUserData();
-  //   }
-    
-  // }, []);
-
-  // console.log(props.user)
-
-
   return (
-    <View style={{ marginTop: 20 }}>
+    <View>
       {/* <Divider width={1} orientation="vertical" /> */}
       <Pressable
         style={styles.backPost}
         // onPress={() => router.push("/seePost")}
         onPress={() => {
-          console.log(`/posts/${props.item.item_id}`)
-            router.push({
-              pathname: `/posts/${props.item.item_id}` as RelativePathString,
-              // params: {
-              //   id: props.user?.user_id || "",
-              // },
-            })
-          }
-        }
+          console.log(`/posts/${props.item.item_id}`);
+          router.push({
+            pathname: `/posts/${props.item.item_id}` as RelativePathString,
+            // params: {
+            //   id: props.user?.user_id || "",
+            // },
+          });
+        }}
       >
         <PostHeader
           datetime={props.item.date_reported}
-          user={(props.user)}
+          user={props.user}
           item={props.item}
         />
         <PostDateAndLocation
@@ -124,7 +103,10 @@ export function Post(props: PostProps) {
           location={props.item.location}
         />
         {/* <PostImage post={post} /> */}
-        <PostImage image_url={props.item.image_url} />
+        {/* <PostImage image_url={props.item.image_url} /> */}
+        {props.item.image_url && props.item.image_url.trim() !== "" && (
+          <PostImage image_url={props.item.image_url} />
+        )}
         <View style={{ marginHorizontal: 15, marginTop: 10 }}>
           <PostFooter
             description={props.item.description}
@@ -400,7 +382,7 @@ function PostDateAndLocation(props: PostDateAndLocationProps) {
       >
         <View
           style={{
-            backgroundColor: props.status === "lost" ? "#CB3131" : "#419D44",
+            backgroundColor: props.status === "Lost" ? "#CB3131" : "#419D44",
             paddingVertical: 8,
             paddingHorizontal: 16,
             marginLeft: 10,
@@ -410,7 +392,7 @@ function PostDateAndLocation(props: PostDateAndLocationProps) {
           }}
         >
           <Text style={{ color: "white", fontWeight: "600", fontSize: 12 }}>
-            {props.status === "lost" ? "Lost" : "Found"}
+            {props.status === "Lost" ? "Lost" : "Found"}
           </Text>
         </View>
         <Icon
@@ -440,8 +422,11 @@ function PostDateAndLocation(props: PostDateAndLocationProps) {
             fontSize: 13,
             color: "#666",
             fontWeight: "500",
-            marginLeft: 20,
+            marginLeft: 10,
+            width: 100,
           }}
+          numberOfLines={1}
+          ellipsizeMode="tail"
         >
           {props.location}
         </Text>
@@ -569,10 +554,11 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 3,
+      height: 2,
     },
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.1,
     shadowRadius: 3,
+    elevation: 3,
   },
   imagePost: {
     width: 370,

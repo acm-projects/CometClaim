@@ -28,7 +28,7 @@ interface User {
   comments?: any[];
 }
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL; // Replace with your actual API URL
+const apiUrl = process.env.EXPO_PUBLIC_API_URL; // Replace with your actual API URL
 
 export default function MessagesScreen() {
   // Navigate to the DM screen with the user's information
@@ -48,23 +48,25 @@ export default function MessagesScreen() {
   };
 
   const createNewChat = async (members: string[]) => {
-    const res = await fetch(`${API_URL}/chats`, {
-      method: 'POST',
+    const res = await fetch(`${apiUrl}/chats`, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        chat_name: members.map(user_id => fullData.find(user => user.user_id == user_id)).join(', '),
-        chat_members: members
-      })
-    })
+        chat_name: members
+          .map((user_id) => fullData.find((user) => user.user_id == user_id))
+          .join(", "),
+        chat_members: members,
+      }),
+    });
 
-    const data = await res.json()
+    const data = await res.json();
 
-    return data.newChatId
-  }
+    return data.newChatId;
+  };
 
-  const [currentUserId, setCurrentUserId] = useState("")
+  const [currentUserId, setCurrentUserId] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<User[]>([]);
@@ -76,14 +78,14 @@ export default function MessagesScreen() {
     setIsLoading(true);
     const getUsers = async () => {
       try {
-        const currentUserId = await AsyncStorage.getItem('userId')
-        if(currentUserId) {
-          setCurrentUserId(currentUserId)
+        const currentUserId = await AsyncStorage.getItem("userId");
+        if (currentUserId) {
+          setCurrentUserId(currentUserId);
         } else {
-          console.log('couldnt get current user id')
+          console.log("couldnt get current user id");
         }
 
-        const res = await fetch(`${API_URL}/users`, {
+        const res = await fetch(`${apiUrl}/users`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -95,8 +97,8 @@ export default function MessagesScreen() {
         setFullData(parsedUsers);
         setIsLoading(false);
         console.log(data);
-        console.log()
-        console.log(parsedUsers)
+        console.log();
+        console.log(parsedUsers);
       } catch (err) {
         setError(err instanceof Error ? err : new Error(String(err)));
         setIsLoading(false);
@@ -228,16 +230,17 @@ export default function MessagesScreen() {
           <NewMessage
             name={item.username}
             avatar={item.profile_picture}
-            onPress={async () =>{
-              
-              const newChatId = await createNewChat([currentUserId, item.user_id])
+            onPress={async () => {
+              const newChatId = await createNewChat([
+                currentUserId,
+                item.user_id,
+              ]);
               navigateToDM({
                 id: newChatId,
                 name: item.username,
                 avatar: item.profile_picture || "",
-              })
-            }
-            }
+              });
+            }}
           />
         )}
         contentContainerStyle={styles.listContent}

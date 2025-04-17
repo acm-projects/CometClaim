@@ -1,3 +1,5 @@
+// ProfilePage.tsx
+
 "use client";
 import {
   StyleSheet,
@@ -134,8 +136,10 @@ const ProfilePage: React.FC = () => {
       <PostsGrid
         posts={
           activeSection === "posts"
-            ? userData.posts.map(item => ({item, user: userData} as Post))
-            : userData.posts.filter((post: Item) => post.status === activeSection).map(item => ({item, user: userData} as Post))
+            ? userData.posts.map((item) => ({ item, user: userData } as Post))
+            : userData.posts
+                .filter((post: Item) => post.status === activeSection)
+                .map((item) => ({ item, user: userData } as Post))
         }
         title={
           activeSection === "posts"
@@ -146,6 +150,7 @@ const ProfilePage: React.FC = () => {
         }
         ListHeaderComponent={ProfileHeader()}
       />
+      <View style={{ height: 25 }}></View>
     </SafeAreaView>
   );
 };

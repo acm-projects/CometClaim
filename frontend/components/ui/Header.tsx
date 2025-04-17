@@ -43,9 +43,9 @@ const Header = () => {
           <TouchableOpacity
             onPress={() => router.push("/messages" as RelativePathString)}
           >
-            <View style={styles.unreadBadge}>
+            {/* <View style={styles.unreadBadge}>
               <Text style={styles.unreadBadgeText}>1</Text>
-            </View>
+            </View> */}
             <Image
               source={{
                 uri: "https://img.icons8.com/fluency-systems-regular/90/000000/speech-bubble-with-dots--v1.png",
