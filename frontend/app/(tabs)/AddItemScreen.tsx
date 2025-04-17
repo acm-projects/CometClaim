@@ -176,10 +176,12 @@ const AddItemScreen = () => {
 
   const handleSubmit = async () => {
     try {
-      const s3URL = await uploadImage();
-      // console.log("THIS IS THE FORM RIGHT NOW: \n" + JSON.stringify(form))
-      if (!s3URL) {
-        throw "Image failed to upload to S3";
+      let s3URL = "";
+      if (image) {
+        s3URL = await uploadImage();
+        if (image && !s3URL) {
+          throw "Image failed to upload to S3";
+        }
       }
 
       const reporterId = await AsyncStorage.getItem("userId");
@@ -188,27 +190,40 @@ const AddItemScreen = () => {
       });
 
       const reporterData = await reporterRes.json();
-
       const reporter = JSON.parse(reporterData.body);
 
-      const submissionData = { ...form };
+      // Only include image_url in the payload if it exists
+      const payload = {
+        ...form,
+        date_reported: new Date()
+          .toLocaleString("sv", { timeZone: "CST" })
+          .replace(" ", "T"),
+        reporter_id: reporterId,
+        reporter: reporter,
+      };
+
       if (s3URL) {
-        submissionData.image_url = s3URL;
+        payload.image_url = s3URL;
       }
+
+      // const submissionData = { ...form };
+      // if (s3URL) {
+      //   submissionData.image_url = s3URL;
+      // }
       const response = await fetch(`${apiUrl}/items/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...form,
-          image_url: s3URL,
-          date_reported: new Date()
-            .toLocaleString("sv", { timeZone: "CST" })
-            .replace(" ", "T"),
-          reporter_id: reporterId,
-          reporter: reporter,
-        }),
+        // body: JSON.stringify({
+        //   ...form,
+        //   image_url: s3URL,
+        //   date_reported: new Date()
+        //     .toLocaleString("sv", { timeZone: "CST" })
+        //     .replace(" ", "T"),
+        //   reporter_id: reporterId,
+        //   reporter: reporter,
+        // }),
       });
 
       const data = await response.json();

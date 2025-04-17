@@ -960,7 +960,7 @@ const App: React.FC = () => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#FC5E1A" />
       <LinearGradient
-        colors={["#FC5E1A", "#FFE380"]}
+        colors={["#FC5E1A", "#FEAB55"]}
         locations={[0, 1]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 0.35 }}

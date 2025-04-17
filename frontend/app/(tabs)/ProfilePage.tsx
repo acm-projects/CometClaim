@@ -1,3 +1,5 @@
+// ProfilePage.tsx
+
 "use client";
 import {
   StyleSheet,
@@ -149,6 +151,7 @@ const ProfilePage: React.FC = () => {
         }
         ListHeaderComponent={ProfileHeader()}
       />
+      <View style={{ height: 25 }}></View>
     </SafeAreaView>
   );
 };

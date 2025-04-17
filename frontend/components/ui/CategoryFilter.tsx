@@ -27,14 +27,14 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
           >
             All
           </Text>
-          {activeCategory === "all" && (
+          {/* {activeCategory === "all" && (
             <LinearGradient
               colors={["#FFDCB5", "#FC5E1A"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.activeIndicator}
             />
-          )}
+          )} */}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -49,14 +49,14 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
           >
             Lost
           </Text>
-          {activeCategory === "Lost" && (
+          {/* {activeCategory === "Lost" && (
             <LinearGradient
               colors={["#FFDCB5", "#FC5E1A"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.activeIndicator}
             />
-          )}
+          )} */}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -71,14 +71,14 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
           >
             Found
           </Text>
-          {activeCategory === "Found" && (
+          {/* {activeCategory === "Found" && (
             <LinearGradient
               colors={["#FFDCB5", "#FC5E1A"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.activeIndicator}
             />
-          )}
+          )} */}
         </TouchableOpacity>
       </View>
     </View>
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: "row",
-    backgroundColor: "#f7f7f7",
+    backgroundColor: "#f5f5f5",
     borderRadius: 25,
     padding: 5,
     shadowColor: "#000",
@@ -114,7 +114,15 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   activeTab: {
-    backgroundColor: "rgba(252, 94, 26, 0.05)",
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    elevation: 1,
   },
   tabText: {
     fontSize: 14,
