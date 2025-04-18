@@ -35,23 +35,21 @@ export type Item = {
 export type Chat = {
   chat_id: string;
   chat_members: string[];
-  created_at: string;
-  chat_name: string;
+  last_message: string;
+  last_updated: string;
 };
 
 export type ChatMembership = {
   user_id: string;
   chat_id: string;
-  joined_at: string;
 };
 
 export type Message = {
   chat_id: string;
   message_id: string;
   sender_id: string;
-  message: string;
+  content: string;
   timestamp: string;
-  username: string;
 };
 
 export const defaultUser: User = {

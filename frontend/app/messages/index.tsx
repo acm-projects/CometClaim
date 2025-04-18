@@ -12,130 +12,100 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Entypo } from "@expo/vector-icons";
-import { type RelativePathString, router } from "expo-router";
+import { type RelativePathString, router, useFocusEffect } from "expo-router";
 import { UserMessage } from "@/components/ui/UserMessages";
-import type { User } from "@/types";
+import type { Chat, User } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 // Define the message type
 type ChatPreview = {
-  chat_id: string;
-  user_ids: string[];
-  name: string;
-  preview: string;
-  timestamp?: string;
-  unread?: boolean;
-  avatar?: string;
+  chat: Chat;
+  avatar: string;
+  username: string;
 };
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function MessagesScreen() {
   const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState<User[]>([]);
-  const [error, setError] = useState<Error | null>(null);
-  const [fullData, setFullData] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Navigate to the DM screen with the user's information
-  const navigateToDM = (user: ChatPreview) => {
+  const navigateToDM = (chatPreview: ChatPreview) => {
     router.push({
       pathname: "/messages/[chat_id]" as RelativePathString,
       params: {
-        chat_id: user.chat_id,
-        ids: user.user_ids.join(","), // Convert array to comma-separated string
-        name: user.name,
-        avatar: user.avatar || "",
+        chat_id: chatPreview.chat.chat_id,
+        recipient_ids: chatPreview.chat.chat_members
+          .filter((member) => member !== currentUserId)
+          .join(","), // Convert array to comma-separated string
+        name: chatPreview.username,
+        avatar: chatPreview.avatar || "",
       },
     });
   };
 
-  const [chatList, setChatList] = useState<ChatPreview[]>([]);
+  const [chatPreviewList, setChatPreviewList] = useState<ChatPreview[]>([]);
   const [currentUserId, setCurrentUserId] = useState("");
 
-  useEffect(() => {
-    async function getCurrentUserId() {
-      const userId = await AsyncStorage.getItem("userId");
-      if (userId) setCurrentUserId(userId);
-    }
-    getCurrentUserId();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      async function getChats() {
+        try {
+          setIsLoading(true);
 
-  useEffect(() => {
-    async function getChats() {
-      try {
-        setIsLoading(true);
-        const res = await fetch(`${apiUrl}/users/${currentUserId}/chats`, {
-          method: "GET",
-        });
+          const userId = await AsyncStorage.getItem("userId");
+          if (userId) setCurrentUserId(userId);
 
-        const data = await res.json();
-
-        const chatIds = JSON.parse(data.body).map(
-          (obj: { user_id: string; chat_id: string }) => obj.chat_id
-        );
-
-        console.log("chats of user:", chatIds);
-
-        const chatList: ChatPreview[] = [];
-
-        for (const chatId of chatIds) {
-          const res = await fetch(`${apiUrl}/chats/${chatId}`, {
+          const res = await fetch(`${apiUrl}/users/${userId}/chats`, {
             method: "GET",
           });
 
           const data = await res.json();
-          const chatInfo = JSON.parse(data.body);
 
-          // Get profile picture for the chat (if it's a direct message)
-          let avatar = "";
-          if (chatInfo.chat_members && chatInfo.chat_members.length === 2) {
-            // Find the other user's ID (not current user)
-            const otherUserId = chatInfo.chat_members.find(
-              (id: string) => id !== currentUserId
+          const chats: Chat[] = JSON.parse(data.body);
+
+          const chatPreviewList: ChatPreview[] = [];
+
+          for (const chat of chats) {
+            // Get profile picture for the chat (if it's a direct message)
+            const otherMembersList = chat.chat_members.filter(
+              (member) => member !== userId
             );
-            if (otherUserId) {
-              try {
-                const userRes = await fetch(`${apiUrl}/users/${otherUserId}`, {
-                  method: "GET",
-                });
-                const userData = await userRes.json();
-                const userInfo = JSON.parse(userData.body);
-                avatar = userInfo.profile_picture || "";
-              } catch (err) {
-                console.error("Error fetching user info:", err);
-              }
-            }
+
+            console.log("CURRENT USER ID", userId);
+
+            console.log("OTHER MEMBERS LIST", otherMembersList);
+
+            const otherMemberId = otherMembersList[0];
+
+            const res = await fetch(`${apiUrl}/users/${otherMemberId}`);
+            const data = await res.json();
+
+            const otherMember: User = JSON.parse(data.body);
+
+            const chatPreview: ChatPreview = {
+              chat: chat,
+              avatar: otherMember.profile_picture,
+              username: otherMember.username,
+            };
+
+            chatPreviewList.push(chatPreview);
           }
 
-          const chatPreview = {
-            chat_id: chatInfo.chat_id,
-            user_ids: chatInfo.chat_members || [],
-            name: chatInfo.chat_name,
-            preview: chatInfo.last_message?.message || "No messages yet",
-            timestamp:
-              chatInfo.last_message?.timestamp || Date.now().toString(),
-            avatar: avatar,
-          };
-
-          chatList.push(chatPreview);
+          console.log("chat list:", chatPreviewList);
+          setChatPreviewList(chatPreviewList);
+          setIsLoading(false);
+        } catch (error) {
+          console.error("Error fetching chats:", error);
+          setIsLoading(false);
         }
-
-        console.log("chat list:", chatList);
-        setChatList(chatList);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching chats:", error);
-        setIsLoading(false);
       }
-    }
 
-    if (currentUserId) {
-      console.log("Current user ID:", currentUserId);
       getChats();
-    }
-  }, [currentUserId]);
+    }, [])
+  );
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -214,7 +184,7 @@ export default function MessagesScreen() {
         />
       </View>
 
-      {chatList.length === 0 ? (
+      {chatPreviewList.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No conversations yet</Text>
           <Pressable
@@ -228,14 +198,16 @@ export default function MessagesScreen() {
         </View>
       ) : (
         <FlatList
-          data={chatList}
-          keyExtractor={(item) => item.chat_id}
+          data={chatPreviewList}
+          keyExtractor={(item) => item.chat.chat_id}
           renderItem={({ item }) => (
             <UserMessage
-              name={item.name}
-              preview={item.preview}
-              timestamp={item.timestamp}
-              unread={item.unread}
+              name={item.username}
+              preview={item.chat.last_message}
+              timestamp={new Date(
+                parseInt(item.chat.last_updated)
+              ).toDateString()}
+              unread={false}
               avatar={item.avatar}
               onPress={() => navigateToDM(item)}
             />

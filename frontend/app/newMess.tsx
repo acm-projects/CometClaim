@@ -92,13 +92,15 @@ export default function MessagesScreen() {
           },
         });
         const responseData = await res.json();
-        const parsedUsers: User[] = JSON.parse(responseData.body);
+        const parsedUsers: User[] = JSON.parse(responseData.body).filter(
+          (user: User) => user.user_id !== currentUserId
+        );
         setData(parsedUsers);
         setFullData(parsedUsers);
         setIsLoading(false);
-        console.log(data);
-        console.log();
-        console.log(parsedUsers);
+        // console.log(data);
+        // console.log();
+        // console.log(parsedUsers);
       } catch (err) {
         setError(err instanceof Error ? err : new Error(String(err)));
         setIsLoading(false);
