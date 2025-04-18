@@ -21,16 +21,6 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { defaultUser, User, Message } from "@/types";
 
-// Define the Message type
-interface ChatMessage {
-  id?: string;
-  text?: string;
-  message?: string; // For compatibility with WebSocket messages
-  sender?: "sender" | "receiver";
-  username?: string; // For WebSocket messages
-  timestamp?: string;
-}
-
 type DMInfo = {
   chat_id: string;
   recipient_ids: string[];
@@ -49,10 +39,10 @@ const DMScreen = () => {
   // console.log(id, name, avatar)
 
   // State for messages and input
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState<string>("");
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [currentUsername, setCurrentUsername] = useState<string>("user1"); // Your username
+  const [currentUsername, setCurrentUsername] = useState<string>("default"); // Your username
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -62,17 +52,21 @@ const DMScreen = () => {
   const websocketApiUrl = process.env.EXPO_PUBLIC_WS_API_URL;
 
   useEffect(() => {
-    const { chat_id, ids, name, avatar } = searchParams;
-    console.log(chat_id, ids, name, avatar);
+    const { chat_id, recipient_ids, name, avatar } = searchParams;
+    console.log("TESTSITSSNG", chat_id, recipient_ids, name, avatar);
     if (
       typeof chat_id === "string" &&
-      (typeof ids === "object" || typeof ids === "string") &&
+      (typeof recipient_ids === "object" ||
+        typeof recipient_ids === "string") &&
       typeof name === "string" &&
       typeof avatar === "string"
     ) {
       const dm_info: DMInfo = {
         chat_id: chat_id,
-        recipient_ids: typeof ids === "object" ? ids : ids.split(","),
+        recipient_ids:
+          typeof recipient_ids === "object"
+            ? recipient_ids
+            : recipient_ids.split(","),
         chat_name: name,
         chat_profile_picture: avatar,
       };
@@ -104,7 +98,7 @@ const DMScreen = () => {
       console.log("current user id hasnt loaded yet");
       return;
     } else {
-      console.log(currentUserId);
+      console.log("current user id is", currentUserId);
     }
 
     const newSocket = new WebSocket(
@@ -126,21 +120,20 @@ const DMScreen = () => {
     };
 
     newSocket.onmessage = (event) => {
-      const messageObj = JSON.parse(event.data);
-      console.log("Message from server:", messageObj);
+      console.log("ejehfuisdgfauigdfishdfauidhgfuigasyudfg", event.data);
+      const eventData = JSON.parse(event.data);
+      console.log("Message from server:", eventData);
+
+      const messageReceived: Message = {
+        sender_id: eventData.sender_id,
+        content: eventData.message,
+        chat_id: "" + Date.now(),
+        timestamp: "" + Date.now(),
+        message_id: "" + Date.now() + "_" + eventData.sender_id,
+      };
 
       // Add the new message to the messages state
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          id: Date.now().toString(),
-          message: messageObj.message,
-          username: messageObj.username,
-          sender:
-            messageObj.username === currentUsername ? "sender" : "receiver",
-          timestamp: new Date().toISOString(),
-        },
-      ]);
+      setMessages((prevMessages) => [...prevMessages, messageReceived]);
     };
 
     newSocket.onclose = () => {
@@ -171,47 +164,15 @@ const DMScreen = () => {
 
     const data = await res.json();
 
-    const initialMessages = JSON.parse(data.body);
+    console.log("JDFHJKADGFLKJGSADFKHJSF", data);
 
-    // This could be an API call to get message history
-    // For now, we'll use some sample messages
-    // const initialMessages: Message[] = [
-    //   {
-    //     id: "1",
-    //     message: `Hello ${currentUsername}!`,
-    //     username: recipient.username,
-    //     sender: "receiver",
-    //     timestamp: new Date(Date.now() - 3600000).toISOString(),
-    //   },
-    //   {
-    //     id: "2",
-    //     message: `Hi ${recipient.username}, how are you?`,
-    //     username: currentUsername,
-    //     sender: "sender",
-    //     timestamp: new Date(Date.now() - 3000000).toISOString(),
-    //   },
-    // ];
+    const initialMessages: Message[] = JSON.parse(data.body);
 
-    // const initialMessages = []
+    initialMessages.reverse();
 
-    const reformattedInitialMessages = initialMessages.map(
-      (message: Message) =>
-        ({
-          id: message.message_id,
-          message: message.message,
-          username: message.username,
-          sender: message.sender_id === currentUserId ? "sender" : "receiver",
-          timestamp: new Date(
-            parseInt(message.timestamp) - 3000000
-          ).toISOString(),
-        } as ChatMessage)
-    ) as ChatMessage[];
+    console.log(initialMessages);
 
-    reformattedInitialMessages.reverse();
-
-    console.log(reformattedInitialMessages);
-
-    setMessages(reformattedInitialMessages);
+    setMessages(initialMessages);
   };
 
   // Send a message via WebSocket
@@ -220,13 +181,17 @@ const DMScreen = () => {
 
     if (socket && socket.readyState === WebSocket.OPEN) {
       // Create message object
+
+      console.log("DM INFO RECIPIENT IDS:", dmInfo?.recipient_ids);
+
       const messageObj = {
         action: "sendMessage",
-        senderId: currentUserId,
-        recipientIds: dmInfo?.recipient_ids || [],
-        username: currentUsername,
+        sender_id: currentUserId,
+        recipient_ids: dmInfo?.recipient_ids || [],
         message: messageInput,
       };
+
+      console.log({ messageObj });
 
       const res = await fetch(`${apiUrl}/chats/${dmInfo?.chat_id}/messages`, {
         method: "POST",
@@ -235,8 +200,7 @@ const DMScreen = () => {
         },
         body: JSON.stringify({
           sender_id: currentUserId,
-          message: messageInput,
-          username: currentUsername,
+          content: messageInput,
         }),
       });
 
@@ -246,17 +210,26 @@ const DMScreen = () => {
 
       console.log(messageObj);
 
+      console.log("bkahsdf 1");
+
       // Send to WebSocket server
       socket.send(JSON.stringify(messageObj));
 
+      console.log("bkahsdf 2");
+
       // Add to local messages (optimistic update)
-      const newMessage: ChatMessage = {
-        id: Date.now().toString(),
-        message: messageInput,
-        username: currentUsername,
-        sender: "sender",
+      const newMessage: Message = {
+        message_id: Date.now().toString() + "_" + currentUserId,
+        chat_id: Date.now().toString(),
+        content: messageInput,
+        sender_id: currentUserId || "",
         timestamp: new Date().toISOString(),
       };
+      console.log("data", data);
+      // const newMessage: Message = JSON.parse(data.body);
+      console.log("bkahsdf 3");
+
+      console.log("NEW MESSAGE:", newMessage);
 
       setMessages((prevMessages) => [...prevMessages, newMessage]);
       setMessageInput("");
@@ -264,13 +237,21 @@ const DMScreen = () => {
     } else {
       console.log("WebSocket not connected");
       // Fallback for when WebSocket is not available
-      const newMessage: ChatMessage = {
-        id: Date.now().toString(),
-        message: messageInput,
-        username: currentUsername,
-        sender: "sender",
-        timestamp: new Date().toISOString(),
-      };
+      const res = await fetch(`${apiUrl}/chats/${dmInfo?.chat_id}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sender_id: currentUserId,
+          message: messageInput,
+        }),
+      });
+
+      const data = await res.json();
+
+      console.log(data);
+      const newMessage: Message = JSON.parse(data.body);
 
       setMessages((prevMessages) => [...prevMessages, newMessage]);
       setMessageInput("");
@@ -279,26 +260,30 @@ const DMScreen = () => {
   };
 
   // Render a message bubble
-  const renderMessage = ({ item }: { item: ChatMessage }) => (
+  const renderMessage = ({ item }: { item: Message }) => (
     <View
       style={[
         styles.messageBubble,
-        item.sender === "sender" ? styles.senderBubble : styles.receiverBubble,
+        item.sender_id === currentUserId
+          ? styles.senderBubble
+          : styles.receiverBubble,
       ]}
     >
       <Text
         style={[
           styles.messageText,
-          item.sender === "sender" ? styles.senderText : styles.receiverText,
+          item.sender_id === currentUserId
+            ? styles.senderText
+            : styles.receiverText,
         ]}
       >
-        {item.message || item.text}
+        {item.content}
       </Text>
       {item.timestamp && (
         <Text
           style={[
             styles.timestampText,
-            item.sender === "sender"
+            item.sender_id === currentUserId
               ? styles.senderTimestamp
               : styles.receiverTimestamp,
           ]}
@@ -311,7 +296,7 @@ const DMScreen = () => {
 
   // Format timestamp for display
   const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
+    const date = new Date(parseInt(timestamp));
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
@@ -351,7 +336,7 @@ const DMScreen = () => {
         <FlatList
           data={messages}
           renderItem={renderMessage}
-          keyExtractor={(item) => item.id || Math.random().toString()}
+          keyExtractor={(item) => item.message_id || Math.random().toString()}
           style={styles.messagesList}
           contentContainerStyle={styles.messagesContentContainer}
           ref={scrollViewRef as any}
