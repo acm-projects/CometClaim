@@ -6,7 +6,7 @@ export interface PostTypeUser {
   caption: string;
   title: string;
   location: string;
-  type: "found" | "lost";
+  type: "Found" | "Lost";
   likes: number;
   comments: number;
   timestamp: string;
@@ -22,7 +22,7 @@ export const USERPOSTS: PostTypeUser[] = [
       "Found this water bottle near the library. If it's yours, please contact me!",
     title: "Found Water Bottle",
     location: "University Library",
-    type: "found",
+    type: "Found",
     likes: 42,
     comments: 5,
     timestamp: "2 hours ago",
@@ -37,7 +37,7 @@ export const USERPOSTS: PostTypeUser[] = [
       "Lost my AirPods in the ECSN building. If found, please let me know!",
     title: "Lost AirPods",
     location: "ECSN Building",
-    type: "lost",
+    type: "Lost",
     likes: 28,
     comments: 12,
     timestamp: "5 hours ago",
@@ -52,7 +52,7 @@ export const USERPOSTS: PostTypeUser[] = [
       "Found a student ID card near the Student Union. Name is Sarah Johnson.",
     title: "Found Student ID",
     location: "Student Union",
-    type: "found",
+    type: "Found",
     likes: 56,
     comments: 8,
     timestamp: "1 day ago",
@@ -67,7 +67,7 @@ export const USERPOSTS: PostTypeUser[] = [
       "Lost my keys somewhere in the ECSS building. They have a blue keychain.",
     title: "Lost Keys",
     location: "ECSS Building",
-    type: "lost",
+    type: "Lost",
     likes: 34,
     comments: 15,
     timestamp: "2 days ago",

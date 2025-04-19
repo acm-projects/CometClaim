@@ -28,7 +28,14 @@ const HomeScreen: React.FC = () => {
   >("all");
 
   const scrollY = useRef(new Animated.Value(0)).current;
-  const filterHeight = 70; // Adjust based on actual height of your CategoryFilter
+  const filterHeight = 70;
+
+  // This is a trigger to refresh the items when the filter changes
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const refreshItems = () => {
+    console.log("Refresh triggered!");
+    setRefreshTrigger((prev) => prev + 1);
+  };
 
   // This will make the filter completely disappear when scrolled
   const filterTranslateY = scrollY.interpolate({
@@ -87,6 +94,11 @@ const HomeScreen: React.FC = () => {
     getCurrentUser();
   }, []);
 
+  useEffect(() => {
+    // Force a refresh when changing categories
+    refreshItems();
+  }, [activeCategory]);
+
   useFocusEffect(
     useCallback(() => {
       async function getItems() {
@@ -109,7 +121,7 @@ const HomeScreen: React.FC = () => {
         }
       }
       getItems();
-    }, [activeCategory])
+    }, [activeCategory, refreshTrigger])
   );
 
   const filterItems = (
@@ -125,7 +137,8 @@ const HomeScreen: React.FC = () => {
 
   const handleCategoryChange = (category: "all" | "Lost" | "Found") => {
     setActiveCategory(category);
-    filterItems(items, category);
+    refreshItems();
+    // filterItems(items, category);
   };
 
   return (
@@ -157,6 +170,7 @@ const HomeScreen: React.FC = () => {
                 user={item.reporter || null}
                 key={index}
                 onShare={() => openShareModal(item)}
+                onStatusChange={refreshItems}
               />
             ))}
             {filteredItems.length === 0 && (
