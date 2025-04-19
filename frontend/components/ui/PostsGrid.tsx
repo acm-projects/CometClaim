@@ -10,8 +10,8 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Image,
 } from "react-native";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Item, Post } from "@/types";
 
@@ -129,7 +129,7 @@ const PostsGrid: React.FC<PostsGridProps> = ({
 
   return (
     <FlatList
-      data={filteredPosts.map(post => post.item)}
+      data={filteredPosts.map((post) => post.item)}
       renderItem={renderItem}
       keyExtractor={(item) => item.item_id.toString()}
       numColumns={2}

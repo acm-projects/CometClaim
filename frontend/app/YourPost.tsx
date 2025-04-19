@@ -3,7 +3,6 @@ import {
   Text,
   View,
   SafeAreaView,
-  Image,
   TouchableOpacity,
   ScrollView,
   TextInput,
@@ -20,6 +19,7 @@ import { Divider } from "react-native-elements";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import Shimmer from "@/components/ui/Shimmer";
+import { Image } from "expo-image";
 
 type IconProps = {
   imgStyle: any;

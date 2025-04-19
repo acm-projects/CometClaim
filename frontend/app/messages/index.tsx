@@ -6,7 +6,6 @@ import {
   FlatList,
   StyleSheet,
   Pressable,
-  Image,
   TextInput,
   ActivityIndicator,
 } from "react-native";
@@ -16,6 +15,7 @@ import { type RelativePathString, router, useFocusEffect } from "expo-router";
 import { UserMessage } from "@/components/ui/UserMessages";
 import type { Chat, User } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Image } from "expo-image";
 import { useState, useEffect, useCallback } from "react";
 
 // Define the message type
@@ -74,9 +74,9 @@ export default function MessagesScreen() {
               (member) => member !== userId
             );
 
-            console.log("CURRENT USER ID", userId);
+            // console.log("CURRENT USER ID", userId);
 
-            console.log("OTHER MEMBERS LIST", otherMembersList);
+            // console.log("OTHER MEMBERS LIST", otherMembersList);
 
             const otherMemberId = otherMembersList[0];
 
@@ -94,7 +94,7 @@ export default function MessagesScreen() {
             chatPreviewList.push(chatPreview);
           }
 
-          console.log("chat list:", chatPreviewList);
+          // console.log("chat list:", chatPreviewList);
           setChatPreviewList(chatPreviewList);
           setIsLoading(false);
         } catch (error) {
@@ -119,7 +119,14 @@ export default function MessagesScreen() {
   // Loading state
   if (isLoading && currentUserId) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          ...styles.container,
+        }}
+      >
         <ActivityIndicator size="large" color="#FC5E1A" />
         <Text style={{ marginTop: 10 }}>Loading chats...</Text>
       </View>
