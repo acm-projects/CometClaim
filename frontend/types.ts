@@ -30,6 +30,8 @@ export type Item = {
   image_url?: string;
   reporter: User;
   comments: object[];
+  color: string;
+  keywords: string[];
 };
 
 export type Chat = {

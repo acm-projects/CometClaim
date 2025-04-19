@@ -14,7 +14,13 @@ import { Image } from "expo-image";
 // import { useState } from "react";
 import { router } from "expo-router";
 
-const YourPostHeader: React.FC = () => {
+type YourPostHeaderProps = {
+  isCurrentUserAuthor: boolean;
+};
+
+const YourPostHeader: React.FC<YourPostHeaderProps> = ({
+  isCurrentUserAuthor,
+}) => {
   return (
     <LinearGradient
       style={styles.container}
@@ -41,7 +47,7 @@ const YourPostHeader: React.FC = () => {
             fontWeight: "600",
           }}
         >
-          Your Post
+          {isCurrentUserAuthor ? "Your Post" : "Post Details"}
         </Text>
       </SafeAreaView>
     </LinearGradient>

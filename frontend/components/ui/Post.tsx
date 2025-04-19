@@ -24,12 +24,14 @@ type PostProps = {
   user: User;
   item: Item;
   onShare: () => void;
+  onStatusChange?: () => void; // Optional prop to refresh the parent component
 };
 
 type PostHeaderProps = {
   user: User;
   item: Item;
   datetime: string;
+  onStatusChange?: () => void; // Optional prop to refresh the parent component
 };
 
 type PostDateAndLocationProps = {
@@ -86,9 +88,9 @@ export function Post(props: PostProps) {
           console.log(`/posts/${props.item.item_id}`);
           router.push({
             pathname: `/posts/${props.item.item_id}` as RelativePathString,
-            // params: {
-            //   id: props.user?.user_id || "",
-            // },
+            params: {
+              currentUserId: props.user?.user_id || "",
+            },
           });
         }}
       >
@@ -96,6 +98,7 @@ export function Post(props: PostProps) {
           datetime={props.item.date_reported}
           user={props.user}
           item={props.item}
+          onStatusChange={props.onStatusChange} // Pass the prop to PostHeader
         />
         <PostDateAndLocation
           status={props.item.status}
@@ -201,8 +204,39 @@ function PostHeader(props: PostHeaderProps) {
     })
   ).current;
 
-  const markItemAsFound = () => {
-    const sendFoundRequest = async () => {
+  const markItemAsFound = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/items/${props.item.item_id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status: "Found",
+          }),
+        }
+      );
+
+      if (response.ok) {
+        // Close the modal after successful update
+        closeModal();
+
+        // If there's an onStatusChange prop, call it to refresh the parent component
+        if (props.onStatusChange) {
+          props.onStatusChange();
+        }
+      } else {
+        console.error("Failed to update item status");
+      }
+    } catch (error) {
+      console.error("Error updating item:", error);
+    }
+  };
+
+  const markItemAsLost = () => {
+    const sendLostRequest = async () => {
       await fetch(
         `${process.env.EXPO_PUBLIC_API_URL}/items/${props.item.item_id}`,
         {
@@ -211,12 +245,12 @@ function PostHeader(props: PostHeaderProps) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            status: "found",
+            status: "Lost",
           }),
         }
       );
     };
-    sendFoundRequest();
+    sendLostRequest();
   };
 
   const handleDropdownTriggerPress = (key: string) => {
@@ -255,12 +289,16 @@ function PostHeader(props: PostHeaderProps) {
           onPress={() =>
             router.push({
               pathname: "/UsersProfile",
-              params: { userId: JSON.parse(JSON.stringify(props.user)).user_id },
+              params: {
+                userId: JSON.parse(JSON.stringify(props.user)).user_id,
+              },
             })
           }
         >
           <Image
-            source={{ uri: JSON.parse(JSON.stringify(props.user)).profile_picture }}
+            source={{
+              uri: JSON.parse(JSON.stringify(props.user)).profile_picture,
+            }}
             style={styles.story}
           />
           <Text
@@ -381,6 +419,7 @@ function PostDateAndLocation(props: PostDateAndLocationProps) {
         }}
       >
         <View
+          key={`status-${props.status}`}
           style={{
             backgroundColor: props.status === "Lost" ? "#CB3131" : "#419D44",
             paddingVertical: 8,

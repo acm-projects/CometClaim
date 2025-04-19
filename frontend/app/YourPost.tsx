@@ -9,17 +9,23 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
+  Animated,
+  Dimensions,
+  Modal,
+  PanResponder,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import YourPostHeader from "@/components/ui/YourPostHeader";
 import { LinearGradient } from "expo-linear-gradient";
 import { defaultUser, Item, Post, User } from "@/types";
 import { Comment } from "@/components/Comment";
 import { Divider } from "react-native-elements";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons, AntDesign } from "@expo/vector-icons";
 import Shimmer from "@/components/ui/Shimmer";
 import { Image } from "expo-image";
+import { useLocalSearchParams } from "expo-router";
+import * as Haptics from "expo-haptics";
 
 type IconProps = {
   imgStyle: any;
@@ -42,21 +48,22 @@ const SkeletonPostImage = () => (
 const YourPost: React.FC<Item> = (item) => {
   const [comment, setComment] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isCurrentUserAuthor, setIsCurrentUserAuthor] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User>(defaultUser);
 
-  // const [comments, setComments] = useState([]);
-  //
-  // useEffect(() => {
-  //   async function fetchComments() {
-  //     try {
-  //       const res = await fetch(`${apiUrl}/items/${item.item_id}/comments`);
-  //       const data = await res.json();
-  //       setComments(JSON.parse(data.body));
-  //     } catch (error) {
-  //       console.error("Error fetching comments:", error);
-  //     }
-  //   }
-  //   fetchComments();
-  // }, [item.item_id]);
+  // Get params from the URL
+  const params = useLocalSearchParams();
+  const { id, currentUserId } = params;
+
+  // Fetch current user and check if they're the author
+  useEffect(() => {
+    async function getCurrentUser() {
+      const currentUserId = await AsyncStorage.getItem("userId");
+      const isCurrentUserAuthor = currentUserId === item.reporter_id;
+      setIsCurrentUserAuthor(isCurrentUserAuthor);
+    }
+    getCurrentUser();
+  }, [item]);
 
   const handleSubmitComment = () => {
     // const postComment = async () => {
@@ -99,7 +106,7 @@ const YourPost: React.FC<Item> = (item) => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={90}
     >
-      <YourPostHeader />
+      <YourPostHeader isCurrentUserAuthor={isCurrentUserAuthor} />
       <ScrollView>
         {isLoading ? (
           <>
@@ -107,7 +114,11 @@ const YourPost: React.FC<Item> = (item) => {
           </>
         ) : (
           <>
-            <PostTop post={item} author={item.reporter} />
+            <PostTop
+              post={item}
+              author={item.reporter}
+              isCurrentUserAuthor={isCurrentUserAuthor}
+            />
             <PostDateAndLocation {...item} />
             <PostImage {...item} />
             <PostFooter {...item} />
@@ -201,7 +212,11 @@ const YourPost: React.FC<Item> = (item) => {
     </KeyboardAvoidingView>
   );
 };
-const PostTop: React.FC<PostProps> = ({ post, author }) => {
+const PostTop: React.FC<PostProps & { isCurrentUserAuthor: boolean }> = ({
+  post,
+  author,
+  isCurrentUserAuthor,
+}) => {
   function datetimeToHowLongAgo(datetime: string) {
     const timeDifferenceInMilliseconds = Date.now() - Date.parse(datetime);
 
@@ -225,6 +240,102 @@ const PostTop: React.FC<PostProps> = ({ post, author }) => {
     const timeDifferenceInYears = Math.floor(timeDifferenceInMonths / 12);
     return `${timeDifferenceInYears}y`;
   }
+  const screenHeight = Dimensions.get("window").height;
+
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const slideAnim = useRef(new Animated.Value(screenHeight)).current;
+
+  const slideUp = () => {
+    setModalVisible(true);
+
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 200,
+      // easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const slideDown = () => {
+    Animated.timing(slideAnim, {
+      toValue: screenHeight,
+      duration: 200,
+      // easing: Easing.in(Easing.exp),
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const fadeIn = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const fadeOut = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const openModal = () => {
+    setModalVisible(true);
+    slideUp();
+    fadeIn();
+  };
+
+  const closeModal = () => {
+    slideDown();
+    fadeOut();
+    setTimeout(() => {
+      setModalVisible(false);
+    }, 500);
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: (e, gestureState) => {
+        if (gestureState.dy > 0) {
+          slideAnim.setValue(gestureState.dy);
+        } else if (gestureState.dy < 0 && gestureState.dy > -10) {
+          slideAnim.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease(e, gestureState) {
+        if (gestureState.dy > 100) {
+          closeModal();
+        } else {
+          Animated.spring(slideAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  const markItemAsFound = () => {
+    const sendFoundRequest = async () => {
+      await fetch(`${process.env.EXPO_PUBLIC_API_URL}/items/${post.item_id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "Found",
+        }),
+      });
+    };
+    sendFoundRequest();
+  };
 
   return (
     <View style={styles.headerView}>
@@ -254,16 +365,86 @@ const PostTop: React.FC<PostProps> = ({ post, author }) => {
           {datetimeToHowLongAgo(post.date_reported)}
         </Text>
       </View>
-      <Text
-        style={{
-          color: "black",
-          fontWeight: "900",
-          marginRight: 20,
-          marginBottom: 5,
+      <Pressable onPress={() => openModal()}>
+        <Text style={{ color: "black", fontWeight: "900", marginRight: 20 }}>
+          ...
+        </Text>
+      </Pressable>
+      <Modal
+        animationType="none"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          closeModal();
         }}
       >
-        ...
-      </Text>
+        <Animated.View
+          style={{
+            height: "100%",
+            opacity: fadeAnim,
+            backgroundColor: "#000000AA",
+          }}
+        >
+          <Pressable style={{ flex: 1 }} onPress={closeModal}></Pressable>
+          <Animated.View
+            {...panResponder.panHandlers}
+            style={{
+              borderRadius: 20,
+              height: "80%",
+              transform: [{ translateY: slideAnim }],
+              marginTop: "auto",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#ffffff",
+            }}
+          >
+            {isCurrentUserAuthor ? (
+              // Content for post owner
+              <View style={{ height: 100, width: 100 }}>
+                <Pressable
+                  style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                    markItemAsFound();
+                  }}
+                >
+                  <AntDesign name="checkcircle" size={90} color={"#f27c1b"} />
+                </Pressable>
+              </View>
+            ) : (
+              // Empty or different content for non-owners
+              <View style={{ padding: 20 }}>
+                <Text style={{ fontSize: 16, textAlign: "center" }}>
+                  Options not available for this post
+                </Text>
+              </View>
+            )}
+            <View
+              style={{
+                height: 30,
+                backgroundColor: "#f27c1b",
+                borderRadius: 10,
+                width: 80,
+              }}
+            >
+              <Pressable
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                onPress={() => closeModal()}
+              >
+                <Text>Close</Text>
+              </Pressable>
+            </View>
+          </Animated.View>
+        </Animated.View>
+      </Modal>
     </View>
   );
 };

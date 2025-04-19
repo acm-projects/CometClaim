@@ -22,7 +22,7 @@ interface ProfileStatsProps {
   postsCount: number;
   foundCount: number;
   lostCount: number;
-  onPressStats?: (type: "posts" | "found" | "lost") => void;
+  onPressStats?: (type: "posts" | "Found" | "Lost") => void;
 }
 
 const ProfileStats: React.FC<ProfileStatsProps> = ({
@@ -42,13 +42,13 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({
       <StatItem
         value={foundCount}
         label="Found"
-        onPress={() => onPressStats?.("found")}
+        onPress={() => onPressStats?.("Found")}
       />
       <View style={styles.divider} />
       <StatItem
         value={lostCount}
         label="Lost"
-        onPress={() => onPressStats?.("lost")}
+        onPress={() => onPressStats?.("Lost")}
       />
     </View>
   );

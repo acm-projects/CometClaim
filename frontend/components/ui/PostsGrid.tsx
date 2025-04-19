@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { router, RelativePathString } from "expo-router";
 import { Item, Post } from "@/types";
 
 interface PostsGridProps {
@@ -38,8 +38,9 @@ const PostsGrid: React.FC<PostsGridProps> = ({
       style={styles.postItem}
       onPress={() =>
         router.push({
-          pathname: "/YourPost",
-          params: { id: item.item_id },
+          // pathname: "/YourPost",
+          // params: { id: item.item_id },
+          pathname: `/posts/${item.item_id}` as RelativePathString,
         })
       }
     >

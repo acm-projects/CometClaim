@@ -17,7 +17,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import ProfileStats from "@/components/ui/ProfileStats";
 import ProfileInfo from "@/components/ui/ProfileInfo";
 import PostsGrid from "@/components/ui/PostsGrid";
-import { USERPOSTS } from "@/data/userPosts";
+// import { USERPOSTS } from "@/data/userPosts";
 import { useState, useEffect } from "react";
 import { useLocalSearchParams } from "expo-router";
 import Animated, {
@@ -27,6 +27,10 @@ import Animated, {
   Extrapolation,
 } from "react-native-reanimated";
 import { defaultUser, Item, Post, User } from "@/types";
+
+type ItemProps = {
+  item: Item;
+};
 
 // interface User {
 //   user_id: string;
@@ -70,7 +74,7 @@ const ProfilePage: React.FC = () => {
   const [userData, setUserData] = useState<User>(defaultUser);
 
   const [activeSection, setActiveSection] = useState<
-    "posts" | "found" | "lost"
+    "posts" | "Found" | "Lost"
   >("posts");
 
   // User data - in a real app, this would come from a user context or API
@@ -83,13 +87,6 @@ const ProfilePage: React.FC = () => {
   //   avatar:
   //     "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
   // };
-
-  // Stats - in a real app, these would be calculated from actual data
-  const stats = {
-    posts: USERPOSTS.length,
-    found: USERPOSTS.filter((post) => post.type === "found").length,
-    lost: USERPOSTS.filter((post) => post.type === "lost").length,
-  };
 
   const avatarStyle = useAnimatedStyle(() => {
     const scale = interpolate(
@@ -104,7 +101,7 @@ const ProfilePage: React.FC = () => {
     };
   });
 
-  const handleStatsPress = (type: "posts" | "found" | "lost") => {
+  const handleStatsPress = (type: "posts" | "Found" | "Lost") => {
     setActiveSection(type);
   };
 
@@ -176,6 +173,17 @@ const ProfilePage: React.FC = () => {
         </View>
       );
     }
+
+    // Stats - in a real app, these would be calculated from actual data
+    const stats = {
+      posts: currentUser?.posts?.length || 0,
+      found:
+        currentUser?.posts?.filter((post: Item) => post.status === "Found")
+          .length || 0,
+      lost:
+        currentUser?.posts?.filter((post: Item) => post.status === "Lost")
+          .length || 0,
+    };
     return (
       <View style={{ marginTop: "15%" }}>
         {/* Profile avatar and name */}
@@ -239,15 +247,17 @@ const ProfilePage: React.FC = () => {
       <PostsGrid
         posts={
           activeSection === "posts"
-            ? userData.posts.map((item) => ({ item, user: userData } as Post))
-            : userData.posts
+            ? currentUser?.posts?.map(
+                (item) => ({ item, user: currentUser } as Post)
+              ) || []
+            : currentUser?.posts
                 .filter((post: Item) => post.status === activeSection)
-                .map((item) => ({ item, user: userData } as Post))
+                .map((item) => ({ item, user: currentUser } as Post)) || []
         }
         title={
           activeSection === "posts"
             ? "All Posts"
-            : activeSection === "found"
+            : activeSection === "Found"
             ? "Found Items"
             : "Lost Items"
         }

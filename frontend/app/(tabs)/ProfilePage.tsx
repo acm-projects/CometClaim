@@ -37,7 +37,7 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 const ProfilePage: React.FC = () => {
   const scrollY = useSharedValue(0);
   const [activeSection, setActiveSection] = useState<
-    "posts" | "found" | "lost"
+    "posts" | "Found" | "Lost"
   >("posts");
 
   const [userData, setUserData] = useState<User>(defaultUser);
@@ -67,12 +67,6 @@ const ProfilePage: React.FC = () => {
   // };
 
   // Stats - in a real app, these would be calculated from actual data
-  const stats = {
-    posts: userData.posts.length,
-    found: userData.posts.filter((post: Item) => post.status === "found")
-      .length,
-    lost: userData.posts.filter((post: Item) => post.status === "lost").length,
-  };
 
   const avatarStyle = useAnimatedStyle(() => {
     const scale = interpolate(
@@ -87,7 +81,7 @@ const ProfilePage: React.FC = () => {
     };
   });
 
-  const handleStatsPress = (type: "posts" | "found" | "lost") => {
+  const handleStatsPress = (type: "posts" | "Found" | "Lost") => {
     setActiveSection(type);
   };
 
@@ -130,6 +124,13 @@ const ProfilePage: React.FC = () => {
     </View>
   );
 
+  const stats = {
+    posts: userData.posts.length,
+    found: userData.posts.filter((post: Item) => post.status === "Found")
+      .length,
+    lost: userData.posts.filter((post: Item) => post.status === "Lost").length,
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -145,7 +146,7 @@ const ProfilePage: React.FC = () => {
         title={
           activeSection === "posts"
             ? "All Posts"
-            : activeSection === "found"
+            : activeSection === "Found"
             ? "Found Items"
             : "Lost Items"
         }
