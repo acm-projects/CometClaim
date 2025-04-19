@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Button, ScrollView, Text, View, Image } from "react-native";
+import { Button, ScrollView, Text, View } from "react-native";
+import { Image } from 'expo-image'
 import Constants from "expo-constants";
 
 interface Item {

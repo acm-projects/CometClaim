@@ -248,7 +248,6 @@ import {
   Text,
   View,
   SafeAreaView,
-  Image,
   TouchableOpacity,
   ScrollView,
   TextInput,
@@ -258,6 +257,7 @@ import YourPostHeader from "@/components/ui/YourPostHeader";
 import { LinearGradient } from "expo-linear-gradient";
 import { defaultUser, Post, User } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Image } from "expo-image";
 
 type IconProps = {
   imgStyle: any;

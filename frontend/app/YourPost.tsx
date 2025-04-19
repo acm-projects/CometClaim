@@ -3,7 +3,6 @@ import {
   Text,
   View,
   SafeAreaView,
-  Image,
   TouchableOpacity,
   ScrollView,
   TextInput,
@@ -24,6 +23,7 @@ import { Divider } from "react-native-elements";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather, Ionicons, AntDesign } from "@expo/vector-icons";
 import Shimmer from "@/components/ui/Shimmer";
+import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 

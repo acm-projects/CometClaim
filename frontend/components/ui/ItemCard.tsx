@@ -1,5 +1,6 @@
 import type React from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 import { router, RelativePathString } from "expo-router";
 import { Item } from "@/types";
 

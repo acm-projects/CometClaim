@@ -65,3 +65,20 @@ export const defaultUser: User = {
   comments: [],
   posts: [],
 };
+
+export const defaultItem: Item = {
+  item_id: "0",
+  date_reported: "2025-04-13T15:13:43",
+  description: "jajaja",
+  location: "ecse",
+  reporter_id: "2",
+  status: "lost",
+  image_url: "https://danb.me/blog/images/2022/ruby/ruby_07.webp",
+  reporter: defaultUser,
+  comments: [],
+};
+
+export const defaultPost: Post = {
+  item: defaultItem,
+  user: defaultUser,
+};

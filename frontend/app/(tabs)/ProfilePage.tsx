@@ -3,13 +3,13 @@
 "use client";
 import {
   StyleSheet,
-  Image,
   TouchableOpacity,
   SafeAreaView,
   View,
   Text,
   StatusBar,
 } from "react-native";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import ProfileStats from "@/components/ui/ProfileStats";

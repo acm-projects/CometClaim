@@ -10,8 +10,8 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Image,
 } from "react-native";
+import { Image } from "expo-image";
 import { router, RelativePathString } from "expo-router";
 import { Item, Post } from "@/types";
 

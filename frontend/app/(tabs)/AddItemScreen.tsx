@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Pressable,
-  Image,
   Platform,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -22,7 +21,9 @@ import * as base64 from "base64-js";
 import { LinearGradient } from "expo-linear-gradient";
 import { RelativePathString, useRouter } from "expo-router";
 import { Entypo } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { ImageManipulator, SaveFormat, } from "expo-image-manipulator";
 
 import {
   S3Client,
@@ -134,15 +135,32 @@ const AddItemScreen = () => {
     setImage("");
   };
 
+  const manipulateImage = async (uri: string) => {
+    const context = ImageManipulator.manipulate(uri)
+
+    context.resize({
+      width: 800
+    })
+
+    const image = await context.renderAsync()
+    const result = await image.saveAsync({
+      format: SaveFormat.WEBP,
+      compress: 0.7,
+      base64: true
+    })
+
+    return result.uri
+  };
+
   const uploadImage = async () => {
     if (!image) {
       return "";
     }
     try {
       setIsUploading(true);
-      const fileURI = image;
+      const fileURI = await manipulateImage(image);
       const fileName = fileURI.split("/").pop();
-      const fileType = "image/jpeg";
+      const fileType = "image/webp";
       const fileData = await ExpoFileSystem.readAsStringAsync(fileURI, {
         encoding: ExpoFileSystem.EncodingType.Base64,
       });

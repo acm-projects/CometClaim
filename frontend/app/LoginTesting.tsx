@@ -503,7 +503,6 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Image,
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
@@ -515,6 +514,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
 import { Link, RelativePathString } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient"; // Make sure to install expo-linear-gradient
 
 type AuthUser = {

@@ -1,6 +1,7 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import { RelativePathString, router } from "expo-router";
+import { Image } from "expo-image";
 import { defaultUser, Post, User } from "@/types";
 
 interface PostProps {
@@ -113,6 +114,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingBottom: 10,
     width: 190,
-    flexGrow: 1, // Allows the container to expand
+    // flexGrow: 1, // Allows the container to expand
   },
 });

@@ -12,14 +12,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
-  Image,
   SafeAreaView,
   type ScrollView,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { defaultUser, User, Message } from "@/types";
+import { defaultUser, User, Message, Post, Item, defaultPost } from "@/types";
+import { Image } from "expo-image";
+import SmallPost from "@/components/ui/SmallPost";
 
 type DMInfo = {
   chat_id: string;
@@ -45,7 +46,7 @@ const DMScreen = () => {
   const [currentUsername, setCurrentUsername] = useState<string>("default"); // Your username
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
+  const [sharedPosts, setSharedPosts] = useState<Post[]>([]);
   const scrollViewRef = useRef<ScrollView>(null);
 
   // WebSocket URL from environment variables
@@ -53,7 +54,7 @@ const DMScreen = () => {
 
   useEffect(() => {
     const { chat_id, recipient_ids, name, avatar } = searchParams;
-    console.log("TESTSITSSNG", chat_id, recipient_ids, name, avatar);
+    // console.log("TESTSITSSNG", chat_id, recipient_ids, name, avatar);
     if (
       typeof chat_id === "string" &&
       (typeof recipient_ids === "object" ||
@@ -73,7 +74,7 @@ const DMScreen = () => {
 
       setDmInfo(dm_info);
 
-      console.log("dm info", dm_info);
+      // console.log("dm info", dm_info);
     }
   }, []);
 
@@ -120,7 +121,7 @@ const DMScreen = () => {
     };
 
     newSocket.onmessage = (event) => {
-      console.log("ejehfuisdgfauigdfishdfauidhgfuigasyudfg", event.data);
+      // console.log("ejehfuisdgfauigdfishdfauidhgfuigasyudfg", event.data);
       const eventData = JSON.parse(event.data);
       console.log("Message from server:", eventData);
 
@@ -131,6 +132,23 @@ const DMScreen = () => {
         timestamp: "" + Date.now(),
         message_id: "" + Date.now() + "_" + eventData.sender_id,
       };
+
+      async function checkAndGetSharedPostInfo() {
+        if (eventData.message.startsWith("cometclaim_post::")) {
+          const itemId = eventData.message.substring(
+            eventData.message.lastIndexOf(":") + 1
+          );
+          const res = await fetch(`${apiUrl}/items/${itemId}`);
+          const data = await res.json();
+          const item: Item = JSON.parse(data.body);
+          setSharedPosts((former) => [
+            ...former,
+            { item, user: item.reporter } as Post,
+          ]);
+        }
+      }
+
+      checkAndGetSharedPostInfo();
 
       // Add the new message to the messages state
       setMessages((prevMessages) => [...prevMessages, messageReceived]);
@@ -164,13 +182,30 @@ const DMScreen = () => {
 
     const data = await res.json();
 
-    console.log("JDFHJKADGFLKJGSADFKHJSF", data);
+    // console.log("JDFHJKADGFLKJGSADFKHJSF", data);
 
     const initialMessages: Message[] = JSON.parse(data.body);
 
     initialMessages.reverse();
 
-    console.log(initialMessages);
+    // console.log(initialMessages);
+
+    const sharedPostRequests = initialMessages.map((message) => async () => {
+      if (message.content.startsWith("cometclaim_post::")) {
+        const itemId = message.content.substring(
+          message.content.lastIndexOf(":") + 1
+        );
+        const res = await fetch(`${apiUrl}/items/${itemId}`);
+        const data = await res.json();
+        const item: Item = JSON.parse(data.body);
+        setSharedPosts((former) => [
+          ...former,
+          { item, user: item.reporter } as Post,
+        ]);
+      }
+    });
+
+    await Promise.all(sharedPostRequests.map((req) => req()));
 
     setMessages(initialMessages);
   };
@@ -269,16 +304,36 @@ const DMScreen = () => {
           : styles.receiverBubble,
       ]}
     >
-      <Text
-        style={[
-          styles.messageText,
-          item.sender_id === currentUserId
-            ? styles.senderText
-            : styles.receiverText,
-        ]}
-      >
-        {item.content}
-      </Text>
+      {item.content.startsWith("cometclaim_post::") ? (
+        // <Image
+        //   source={
+        //     "https://static.wikia.nocookie.net/sml/images/c/c0/Fulljeffyrender.png/revision/latest/scale-to-width/360?cb=20241219004720"
+        //   }
+        //   style={{
+        //     height: 100,
+        //     width: 100,
+        //   }}
+        // />
+        <SmallPost
+          {...(sharedPosts.find(
+            (post) =>
+              post.item.item_id ===
+              item.content.substring(item.content.lastIndexOf(":") + 1)
+          ) || defaultPost)}
+        />
+      ) : (
+        <Text
+          style={[
+            styles.messageText,
+            item.sender_id === currentUserId
+              ? styles.senderText
+              : styles.receiverText,
+          ]}
+        >
+          {item.content}
+        </Text>
+      )}
+
       {item.timestamp && (
         <Text
           style={[

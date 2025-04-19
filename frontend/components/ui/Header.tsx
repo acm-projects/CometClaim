@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 import React from "react";
 import { RelativePathString, router } from "expo-router";
 
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
   icon: {
     width: 40,
     height: 40,
-    resizeMode: "center",
+    resizeMode: "cover",
   },
   unreadBadge: {
     backgroundColor: "#FC5E1A",
