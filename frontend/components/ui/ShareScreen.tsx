@@ -17,19 +17,30 @@ import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Checkbox from "expo-checkbox";
 import { ShareRow } from "@/components/ShareRow";
-import { Item, User } from "@/types";
+import { Chat, Item, User } from "@/types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface ShareScreenProps {
   item: Item | null;
   onClose: () => void;
 }
 
-const apiUrl = process.env.EXPO_PUBLIC_API_URL
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function ShareScreenPage({ item, onClose }: ShareScreenProps) {
   const [message, setMessage] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string>();
+
+  useEffect(() => {
+    async function getCurrentUserId() {
+      const userId = await AsyncStorage.getItem("userId");
+      if (userId) setCurrentUserId(userId);
+    }
+
+    getCurrentUserId();
+  }, []);
 
   useEffect(() => {
     async function getUsers() {
@@ -39,13 +50,111 @@ export default function ShareScreenPage({ item, onClose }: ShareScreenProps) {
 
       const data = await res.json();
 
-      console.log(JSON.parse(data.body));
+      const users = JSON.parse(data.body).filter(
+        (user: User) => user.user_id !== currentUserId
+      );
+      // console.log(users);
 
-      setUsers(JSON.parse(data.body));
+      setUsers(users);
     }
 
-    getUsers();
-  }, []);
+    if (currentUserId) getUsers();
+  }, [currentUserId]);
+
+  const getShareChats = async () => {
+    if (!currentUserId) return;
+
+    const selectedUserIds = selectedUsers.map((user) => user.user_id);
+    const selectedUserIdsSet = new Set(
+      selectedUsers.map((user) => user.user_id)
+    );
+
+    // console.log(`selected user ids ${selectedUserIds}`);
+    // console.log(`selected user ids set  ${selectedUserIdsSet}`);
+
+    const createChatRequests = selectedUserIds.map((userId) => async () => {
+      const res = await fetch(`${apiUrl}/chats`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chat_name: users.find((user) => user.user_id === userId)?.username,
+          chat_members: [currentUserId, userId],
+        }),
+      });
+
+      // console.log("created new chat");
+    });
+
+    // console.log(createChatRequests);
+
+    await Promise.all(createChatRequests.map((request) => request()));
+
+    const res = await fetch(`${apiUrl}/users/${currentUserId}/chats`, {
+      method: "GET",
+    });
+
+    const data = await res.json();
+
+    const chats: Chat[] = JSON.parse(data.body);
+    // console.log(`got ${chats.length} chats`);
+
+    const chatIds: string[] = [];
+
+    chats.forEach((chat) => {
+      // console.log(
+      //   "thingy",
+      //   chat.chat_members.filter((member) => member !== currentUserId)[0]
+      // );
+      if (
+        selectedUserIdsSet.has(
+          chat.chat_members.filter((member) => member !== currentUserId)[0]
+        )
+      ) {
+        chatIds.push(chat.chat_id);
+      }
+    });
+
+    // console.log(`after filter, there are  ${chatIds.length} chats`);
+
+    return chatIds;
+  };
+
+  const sendShare = async () => {
+    // console.log("send share clicked");
+    const chatIds = await getShareChats();
+
+    if (chatIds) {
+      chatIds.forEach(async (chatId) => {
+        // console.log("ITEEMEMMEMEMEM id", item?.item_id);
+        const res = await fetch(`${apiUrl}/chats/${chatId}/messages`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sender_id: currentUserId,
+            content: `cometclaim_post::${item?.item_id}`,
+          }),
+        });
+
+        const res2 = await fetch(`${apiUrl}/chats/${chatId}/messages`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sender_id: currentUserId,
+            content: message,
+          }),
+        });
+        // console.log("sent message");
+      });
+    }
+
+    onClose();
+  };
 
   return (
     <View style={[styles.centeredView, styles.backgroundView]}>
@@ -115,7 +224,11 @@ export default function ShareScreenPage({ item, onClose }: ShareScreenProps) {
           </LinearGradient>
 
           <ScrollView
-            style={{ flexBasis: "50%" }}
+            style={{}}
+            contentContainerStyle={{
+              justifyContent: "center",
+              alignItems: "center",
+            }}
             showsVerticalScrollIndicator={true}
             indicatorStyle="black"
           >
@@ -159,10 +272,23 @@ export default function ShareScreenPage({ item, onClose }: ShareScreenProps) {
             locations={[0, 1]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
-            style={styles.sendButton}
+            style={{ ...styles.sendButton }}
           >
-            <Pressable>
-              <Text style={{ textAlign: "center", color: "white" }}>Send</Text>
+            <Pressable
+              onPress={sendShare}
+              style={{
+                flex: 1,
+                justifyContent: "center",
+              }}
+            >
+              <Text
+                style={{
+                  textAlign: "center",
+                  color: "white",
+                }}
+              >
+                Send
+              </Text>
             </Pressable>
           </LinearGradient>
         </View>
@@ -206,8 +332,12 @@ const styles = StyleSheet.create({
   sendButton: {
     height: 30,
     borderRadius: "2%",
-    alignItems: "center",
-    justifyContent: "center",
+    // alignItems: "center",
+    // justifyContent: "center",
     marginInline: 10,
+  },
+  testBorder: {
+    borderWidth: 1,
+    borderColor: "black",
   },
 });

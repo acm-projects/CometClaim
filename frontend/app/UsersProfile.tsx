@@ -3,9 +3,9 @@
 "use client";
 
 import type React from "react";
+import { Image } from "expo-image";
 import {
   StyleSheet,
-  Image,
   TouchableOpacity,
   SafeAreaView,
   View,

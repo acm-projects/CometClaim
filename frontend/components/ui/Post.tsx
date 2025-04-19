@@ -4,7 +4,6 @@ import {
   StyleSheet,
   Text,
   View,
-  Image,
   TouchableOpacity,
   Pressable,
   Modal,
@@ -18,6 +17,7 @@ import { AntDesign, FontAwesome } from "@expo/vector-icons";
 import { RelativePathString, router } from "expo-router";
 import { useEffect, useState } from "react";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import { defaultUser, Item, User } from "@/types";
 
 type PostProps = {

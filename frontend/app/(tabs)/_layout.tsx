@@ -1,5 +1,5 @@
 import { RelativePathString, Tabs, useRouter } from "expo-router";
-import { Platform, Image, Pressable, StyleSheet, View } from "react-native";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -11,6 +11,7 @@ import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
+import { Image } from "expo-image";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useRoute } from "@react-navigation/native";
 import AddItemScreen from "./AddItemScreen";
@@ -59,7 +60,7 @@ export default function TabLayout() {
                   ? "https://img.icons8.com/fluency-systems-filled/48/home.png"
                   : "https://img.icons8.com/fluency-systems-regular/100/home--v1.png",
               }}
-              resizeMode="contain"
+              contentFit="contain"
               style={{
                 marginLeft: 30,
                 width: 39,

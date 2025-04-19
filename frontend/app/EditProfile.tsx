@@ -3,7 +3,6 @@ import {
   Text,
   View,
   SafeAreaView,
-  Image,
   TouchableOpacity,
   ScrollView,
   TextInput,
@@ -16,18 +15,19 @@ import React, { useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { Divider } from "react-native-elements";
 import { useState } from "react";
-import AWS from 'aws-sdk'
+import AWS from "aws-sdk";
+import { Image } from "expo-image";
 
-import * as ExpoImagePicker from 'expo-image-picker'
+import * as ExpoImagePicker from "expo-image-picker";
 import ProfileHeader from "@/components/ui/ProfileHeader"; // Adjust the import path as necessary
 import { defaultUser } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 AWS.config.update({
-  region: 'us-east-1'
-})
+  region: "us-east-1",
+});
 
-const cognitoIdp = new AWS.CognitoIdentityServiceProvider()
+const cognitoIdp = new AWS.CognitoIdentityServiceProvider();
 
 export type UserProfileInfo = {
   full_name: string;
@@ -35,40 +35,41 @@ export type UserProfileInfo = {
   email: string;
   phone_number: string;
   profile_picture: string;
-}
+};
 
-const apiUrl = process.env.EXPO_PUBLIC_API_URL
-
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 const EditProfile: React.FC = () => {
-
   const [userProfileInfo, setUserProfileInfo] = useState<UserProfileInfo>({
     full_name: "",
     username: "",
     email: "",
     phone_number: "",
-    profile_picture: ""
-  })
+    profile_picture: "",
+  });
 
   useEffect(() => {
     async function getUserInfo() {
-      const userId = await AsyncStorage.getItem('userId')
-      const res = await fetch(`${apiUrl}/users/${userId}`)
-      const data = await res.json()
-      setUserProfileInfo(JSON.parse(data.body) as UserProfileInfo)
-      console.log("test")
+      const userId = await AsyncStorage.getItem("userId");
+      const res = await fetch(`${apiUrl}/users/${userId}`);
+      const data = await res.json();
+      setUserProfileInfo(JSON.parse(data.body) as UserProfileInfo);
+      console.log("test");
     }
-    getUserInfo()
-  }, [])
-  
+    getUserInfo();
+  }, []);
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <KeyboardAvoidingView style={{flex: 1}} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <LinearGradient
-        style={styles.container}
-        colors={["#FFDCB5", "#FC5E1A"]}
-        start={{ x: 0.5, y: 0.5 }}
-        end={{ x: 0.5, y: 0 }}
+          style={styles.container}
+          colors={["#FFDCB5", "#FC5E1A"]}
+          start={{ x: 0.5, y: 0.5 }}
+          end={{ x: 0.5, y: 0 }}
         >
           <SafeAreaView
             style={{
@@ -83,23 +84,23 @@ const EditProfile: React.FC = () => {
               shadowRadius: 3,
             }}
           >
-            <ProfileHeader {...userProfileInfo}/>
+            <ProfileHeader {...userProfileInfo} />
             <View style={{ flex: 1, width: "100%" }}>
               <ScrollView style={{ flex: 1, flexGrow: 1 }}>
                 <Divider width={1} orientation="vertical" />
-                <ProfileImage 
+                <ProfileImage
                   userProfileInfo={userProfileInfo}
-                  setUserProfileInfo={setUserProfileInfo} 
+                  setUserProfileInfo={setUserProfileInfo}
                 />
                 <Divider width={1} orientation="vertical" />
-                <PersonalInfo 
+                <PersonalInfo
                   userProfileInfo={userProfileInfo}
-                  setUserProfileInfo={setUserProfileInfo} 
+                  setUserProfileInfo={setUserProfileInfo}
                 />
                 <Divider width={1} orientation="vertical" />
-                <ContactInfo 
+                <ContactInfo
                   userProfileInfo={userProfileInfo}
-                  setUserProfileInfo={setUserProfileInfo} 
+                  setUserProfileInfo={setUserProfileInfo}
                 />
                 {/* <Divider width={1} orientation="vertical" />
                 <OtherInfo 
@@ -115,8 +116,10 @@ const EditProfile: React.FC = () => {
   );
 };
 
-const ProfileImage = ({userProfileInfo, setUserProfileInfo}: EditProfileSubcomponentProps) => {
-
+const ProfileImage = ({
+  userProfileInfo,
+  setUserProfileInfo,
+}: EditProfileSubcomponentProps) => {
   const selectImage = async () => {
     let result = await ExpoImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images", "videos"],
@@ -128,7 +131,10 @@ const ProfileImage = ({userProfileInfo, setUserProfileInfo}: EditProfileSubcompo
     console.log(result);
 
     if (!result.canceled) {
-      setUserProfileInfo({...userProfileInfo, profile_picture: result.assets[0].uri});
+      setUserProfileInfo({
+        ...userProfileInfo,
+        profile_picture: result.assets[0].uri,
+      });
     }
   };
 
@@ -154,7 +160,10 @@ const ProfileImage = ({userProfileInfo, setUserProfileInfo}: EditProfileSubcompo
 
       if (!result.canceled) {
         console.log("BLASH: " + result.assets[0].uri);
-        setUserProfileInfo({...userProfileInfo, profile_picture: result.assets[0].uri});
+        setUserProfileInfo({
+          ...userProfileInfo,
+          profile_picture: result.assets[0].uri,
+        });
       }
       // console.log("imageeeeee: " + image)
     } else {
@@ -197,7 +206,9 @@ const ProfileImage = ({userProfileInfo, setUserProfileInfo}: EditProfileSubcompo
           }}
           onPress={selectImage}
         >
-          <Text style={{ color: "white", fontWeight: "bold" }}>Select Photo</Text>
+          <Text style={{ color: "white", fontWeight: "bold" }}>
+            Select Photo
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -217,8 +228,10 @@ const ProfileImage = ({userProfileInfo, setUserProfileInfo}: EditProfileSubcompo
   );
 };
 
-const PersonalInfo = ({userProfileInfo, setUserProfileInfo}: EditProfileSubcomponentProps) => {
-  
+const PersonalInfo = ({
+  userProfileInfo,
+  setUserProfileInfo,
+}: EditProfileSubcomponentProps) => {
   return (
     <View style={{ flexDirection: "column", margin: 15 }}>
       <Text style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>
@@ -231,7 +244,9 @@ const PersonalInfo = ({userProfileInfo, setUserProfileInfo}: EditProfileSubcompo
           placeholder="Enter your Full Name"
           placeholderTextColor="#888888"
           value={userProfileInfo.full_name}
-          onChangeText={(text) => setUserProfileInfo(profile => ({...profile, full_name: text}))}
+          onChangeText={(text) =>
+            setUserProfileInfo((profile) => ({ ...profile, full_name: text }))
+          }
         />
       </View>
       <View style={{ marginLeft: 15 }}>
@@ -241,15 +256,19 @@ const PersonalInfo = ({userProfileInfo, setUserProfileInfo}: EditProfileSubcompo
           placeholder="Enter your username"
           placeholderTextColor="#888888"
           value={userProfileInfo.username}
-          onChangeText={(text) => setUserProfileInfo(profile => ({...profile, username: text}))}
+          onChangeText={(text) =>
+            setUserProfileInfo((profile) => ({ ...profile, username: text }))
+          }
         />
       </View>
     </View>
   );
 };
 
-const ContactInfo = ({userProfileInfo, setUserProfileInfo}: EditProfileSubcomponentProps) => {
-  
+const ContactInfo = ({
+  userProfileInfo,
+  setUserProfileInfo,
+}: EditProfileSubcomponentProps) => {
   return (
     <View style={{ flexDirection: "column", margin: 15 }}>
       <Text style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>
@@ -262,7 +281,9 @@ const ContactInfo = ({userProfileInfo, setUserProfileInfo}: EditProfileSubcompon
           placeholder="Enter your Email"
           placeholderTextColor="#888888"
           value={userProfileInfo.email}
-          onChangeText={(text) => setUserProfileInfo(profile => ({...profile, email: text}))}
+          onChangeText={(text) =>
+            setUserProfileInfo((profile) => ({ ...profile, email: text }))
+          }
         />
       </View>
       <View style={{ marginLeft: 15 }}>
@@ -272,7 +293,12 @@ const ContactInfo = ({userProfileInfo, setUserProfileInfo}: EditProfileSubcompon
           placeholder="Enter your phone number"
           placeholderTextColor="#888888"
           value={userProfileInfo.phone_number}
-          onChangeText={(text) => setUserProfileInfo(profile => ({...profile, phone_number: text}))}
+          onChangeText={(text) =>
+            setUserProfileInfo((profile) => ({
+              ...profile,
+              phone_number: text,
+            }))
+          }
         />
       </View>
     </View>
@@ -280,7 +306,7 @@ const ContactInfo = ({userProfileInfo, setUserProfileInfo}: EditProfileSubcompon
 };
 
 // const OtherInfo = ({userProfileInfo, setUserProfileInfo}: EditProfileSubcomponentProps) => {
-  
+
 //   return (
 //     <View style={{ flexDirection: "column", margin: 15 }}>
 //       <Text style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>
@@ -342,4 +368,4 @@ const styles = StyleSheet.create({
 type EditProfileSubcomponentProps = {
   userProfileInfo: UserProfileInfo;
   setUserProfileInfo: React.Dispatch<React.SetStateAction<UserProfileInfo>>;
-}
+};
