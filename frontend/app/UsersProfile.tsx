@@ -26,7 +26,8 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
-import { defaultUser, Item, Post, User } from "@/types";
+import { Chat, defaultUser, Item, Post, User } from "@/types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type ItemProps = {
   item: Item;
@@ -49,21 +50,31 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL; // Replace with your actual API
 const ProfilePage: React.FC = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
 
-  const navigateToDM = (user: {
+  const navigateToDM = async (user: {
     id: string;
     name: string;
     avatar?: string;
   }) => {
+    const res = await fetch(`${API_URL}/users/${user.id}/chats`);
+    const data = await res.json();
+    const chatList = JSON.parse(data.body);
+    const chatId = chatList.find((chat: Chat) =>
+      chat.chat_members.includes(loggedInUserId)
+    ).chat_id;
+
+    console.log("chat id", chatId);
+
     router.push({
       pathname: "/messages/[chat_id]",
       params: {
-        chat_id: user.id,
-        ids: [user.id],
+        chat_id: chatId,
+        recipient_ids: [user.id],
         name: user.name,
         avatar: user.avatar || "",
       },
     });
   };
+  const [loggedInUserId, setLoggedInUserId] = useState<string>("0");
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<User[]>([]);
   const [error, setError] = useState<Error | null>(null);
@@ -122,9 +133,15 @@ const ProfilePage: React.FC = () => {
   );
 
   useEffect(() => {
+    // console.log("usah id", userId);
     setIsLoading(true);
     const getUserData = async () => {
       try {
+        const loggedInUserId = await AsyncStorage.getItem("userId");
+        if (loggedInUserId) {
+          setLoggedInUserId(loggedInUserId);
+        }
+
         if (userId) {
           // If userId is provided, fetch specific user
           const res = await fetch(`${API_URL}/users/${userId}`, {
@@ -213,20 +230,22 @@ const ProfilePage: React.FC = () => {
         />
 
         {/* Profile message */}
-        <TouchableOpacity
-          style={styles.messageContainer}
-          onPress={() => {
-            if (currentUser) {
-              navigateToDM({
-                id: currentUser.user_id,
-                name: currentUser.username,
-                avatar: currentUser.profile_picture || "",
-              });
-            }
-          }}
-        >
-          <Text style={styles.sectionTitle}>Message</Text>
-        </TouchableOpacity>
+        {currentUser?.user_id !== loggedInUserId && (
+          <TouchableOpacity
+            style={styles.messageContainer}
+            onPress={() => {
+              if (currentUser) {
+                navigateToDM({
+                  id: currentUser.user_id,
+                  name: currentUser.username,
+                  avatar: currentUser.profile_picture || "",
+                });
+              }
+            }}
+          >
+            <Text style={styles.sectionTitle}>Message</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Profile info */}
         <ProfileInfo
