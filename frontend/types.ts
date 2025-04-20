@@ -76,6 +76,8 @@ export const defaultItem: Item = {
   image_url: "https://danb.me/blog/images/2022/ruby/ruby_07.webp",
   reporter: defaultUser,
   comments: [],
+  color: "Black",
+  keywords: ["kw1", "kw2"],
 };
 
 export const defaultPost: Post = {

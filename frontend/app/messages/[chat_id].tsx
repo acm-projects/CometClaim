@@ -55,6 +55,13 @@ const DMScreen = () => {
   useEffect(() => {
     const { chat_id, recipient_ids, name, avatar } = searchParams;
     // console.log("TESTSITSSNG", chat_id, recipient_ids, name, avatar);
+    // console.log(
+    //   typeof chat_id,
+    //   typeof recipient_ids,
+    //   typeof name,
+    //   typeof avatar
+    // );
+
     if (
       typeof chat_id === "string" &&
       (typeof recipient_ids === "object" ||
