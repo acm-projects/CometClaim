@@ -5,7 +5,6 @@ import {
   TextInput,
   SafeAreaView,
   TouchableOpacity,
-  Image,
   ScrollView,
   Platform,
   KeyboardAvoidingView,
@@ -19,7 +18,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import FilterAccordion from "@/components/ui/FilterAccordion";
 import { Entypo } from "@expo/vector-icons";
 // import { SearchableFlatList } from "react-native-searchable-list";
-import { sampleItems, type Item } from "@/data/sampleData";
+import { Item } from "@/types";
+import { Image } from "expo-image";
 import ItemCard from "@/components/ui/ItemCard";
 
 const locationOptions = [

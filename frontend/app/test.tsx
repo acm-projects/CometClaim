@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, ScrollView, Image } from "react-native";
+import { View, Text, TextInput, Button, ScrollView } from "react-native";
+import { Image } from "expo-image";
 import * as ExpoFileSystem from "expo-file-system";
 import * as ExpoImagePicker from "expo-image-picker";
 import * as base64 from "base64-js";

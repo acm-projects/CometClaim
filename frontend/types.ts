@@ -30,28 +30,28 @@ export type Item = {
   image_url?: string;
   reporter: User;
   comments: object[];
+  color: string;
+  keywords: string[];
 };
 
 export type Chat = {
   chat_id: string;
   chat_members: string[];
-  created_at: string;
-  chat_name: string;
+  last_message: string;
+  last_updated: string;
 };
 
 export type ChatMembership = {
   user_id: string;
   chat_id: string;
-  joined_at: string;
 };
 
 export type Message = {
   chat_id: string;
   message_id: string;
   sender_id: string;
-  message: string;
+  content: string;
   timestamp: string;
-  username: string;
 };
 
 export const defaultUser: User = {
@@ -64,4 +64,21 @@ export const defaultUser: User = {
     "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
   comments: [],
   posts: [],
+};
+
+export const defaultItem: Item = {
+  item_id: "0",
+  date_reported: "2025-04-13T15:13:43",
+  description: "jajaja",
+  location: "ecse",
+  reporter_id: "2",
+  status: "lost",
+  image_url: "https://danb.me/blog/images/2022/ruby/ruby_07.webp",
+  reporter: defaultUser,
+  comments: [],
+};
+
+export const defaultPost: Post = {
+  item: defaultItem,
+  user: defaultUser,
 };

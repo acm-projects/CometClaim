@@ -1,25 +1,32 @@
 import type React from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { router } from "expo-router";
-import type { Item } from "@/data/sampleData";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
+import { router, RelativePathString } from "expo-router";
+import { Item } from "@/types";
 
-interface ItemCardProps {
+// type PostProps = {
+//   user: User;
+//   item: Item;
+//   onShare: () => void;
+// };
+
+type ItemCardProps = {
   item: Item;
-}
+};
 
-const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
+const ItemCard: React.FC<ItemCardProps> = (props: ItemCardProps) => {
   const handlePress = () => {
     // Navigate to item details page
     router.push({
-      pathname: "/YourPost",
-      params: {
-        id: item.item_id,
-        name: item.category,
-        location: item.location,
-        description: item.description,
-      },
+      // pathname: "/YourPost",
+      // params: {
+      //   id: item.item_id,
+      //   name: item.category,
+      //   location: item.location,
+      //   description: item.description,
+      // },
+      pathname: `/posts/${props.item.item_id}` as RelativePathString,
     });
-    console.log("Item selected: ", item);
   };
 
   // Format the date to a more readable format
@@ -38,22 +45,24 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
         <Image
           source={{
             uri:
-              item.image_url ||
+              props.item.image_url ||
               "https://img.icons8.com/ios-filled/50/question-mark.png",
           }}
           style={styles.image}
         />
       </View>
       <View style={styles.contentContainer}>
-        <Text style={styles.title}>{item.category}</Text>
+        {/* <Text style={styles.title}>{props.item.category}</Text> */}
         <Text style={styles.description} numberOfLines={2}>
-          {item.description}
+          {props.item.description}
         </Text>
         <View style={styles.detailsContainer}>
           <Text style={styles.location}>
-            Location: {item.location.toUpperCase()}
+            Location: {props.item.location.toUpperCase()}
           </Text>
-          <Text style={styles.date}>{formatDate(item.date_reported)}</Text>
+          <Text style={styles.date}>
+            {formatDate(props.item.date_reported)}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>

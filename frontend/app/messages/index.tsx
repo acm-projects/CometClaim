@@ -1,179 +1,134 @@
+"use client";
+
 import {
   View,
   Text,
   FlatList,
   StyleSheet,
   Pressable,
-  Image,
   TextInput,
-  Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Entypo } from "@expo/vector-icons";
-import { Link, RelativePathString, router } from "expo-router";
-import NewMessage from "@/components/ui/UserMessages";
+import { type RelativePathString, router, useFocusEffect } from "expo-router";
 import { UserMessage } from "@/components/ui/UserMessages";
-import { User } from "@/types";
+import type { Chat, User } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState, useEffect } from "react";
-import filter from "lodash.filter";
+import { Image } from "expo-image";
+import { useState, useEffect, useCallback } from "react";
 
 // Define the message type
 type ChatPreview = {
-  chat_id: string;
-  user_ids: string[];
-  name: string;
-  preview: string;
-  timestamp?: string;
-  unread?: boolean;
-  avatar?: string;
-}
+  chat: Chat;
+  avatar: string;
+  username: string;
+};
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function MessagesScreen() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState<User[]>([]);
-  const [error, setError] = useState<Error | null>(null);
-  const [fullData, setFullData] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Navigate to the DM screen with the user's information
-  const navigateToDM = (user: ChatPreview) => {
-    console.log("test");
+  const navigateToDM = (chatPreview: ChatPreview) => {
     router.push({
       pathname: "/messages/[chat_id]" as RelativePathString,
       params: {
-        chat_id: user.chat_id,
-        ids: user.user_ids,
-        name: user.name,
-        avatar: user.avatar || "",
+        chat_id: chatPreview.chat.chat_id,
+        recipient_ids: chatPreview.chat.chat_members
+          .filter((member) => member !== currentUserId)
+          .join(","), // Convert array to comma-separated string
+        name: chatPreview.username,
+        avatar: chatPreview.avatar || "",
       },
     });
   };
 
-  const [chatList, setChatList] = useState<ChatPreview[]>([]);
+  const [chatPreviewList, setChatPreviewList] = useState<ChatPreview[]>([]);
   const [currentUserId, setCurrentUserId] = useState("");
 
-  useEffect(() => {
-    async function getCurrentUserId() {
-      const userId = await AsyncStorage.getItem("userId");
-      if (userId) setCurrentUserId(userId);
-    }
-    getCurrentUserId();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      async function getChats() {
+        try {
+          setIsLoading(true);
 
-  useEffect(() => {
-    async function getChats() {
-      const res = await fetch(`${apiUrl}/users/${currentUserId}/chats`, {
-        method: "GET",
-      });
+          const userId = await AsyncStorage.getItem("userId");
+          if (userId) setCurrentUserId(userId);
 
-      const data = await res.json();
+          const res = await fetch(`${apiUrl}/users/${userId}/chats`, {
+            method: "GET",
+          });
 
-      const chatIds = JSON.parse(data.body).map(
-        (obj: { user_id: string; chat_id: string }) => obj.chat_id
-      );
+          const data = await res.json();
 
-      console.log("chats of user:", chatIds);
+          const chats: Chat[] = JSON.parse(data.body);
 
-      const chatList: ChatPreview[] = [];
+          const chatPreviewList: ChatPreview[] = [];
 
-      for (const chatId of chatIds) {
-        const res = await fetch(`${apiUrl}/chats/${chatId}`, {
-          method: "GET",
-        });
+          for (const chat of chats) {
+            // Get profile picture for the chat (if it's a direct message)
+            const otherMembersList = chat.chat_members.filter(
+              (member) => member !== userId
+            );
 
-        const data = await res.json();
+            // console.log("CURRENT USER ID", userId);
 
-        console.log(JSON.parse(data.body));
+            // console.log("OTHER MEMBERS LIST", otherMembersList);
 
-        const chatInfo = JSON.parse(data.body);
+            const otherMemberId = otherMembersList[0];
 
-        const chatPreview = {
-          chat_id: chatInfo.chat_id,
-          user_ids: chatInfo.chat_members,
-          name: chatInfo.chat_name,
-          preview: chatInfo.last_message?.message || "blank",
-          timestamp: chatInfo.last_message?.timestamp || "ts",
-        };
+            const res = await fetch(`${apiUrl}/users/${otherMemberId}`);
+            const data = await res.json();
 
-        chatList.push(chatPreview);
+            const otherMember: User = JSON.parse(data.body);
+
+            const chatPreview: ChatPreview = {
+              chat: chat,
+              avatar: otherMember.profile_picture,
+              username: otherMember.username,
+            };
+
+            chatPreviewList.push(chatPreview);
+          }
+
+          // console.log("chat list:", chatPreviewList);
+          setChatPreviewList(chatPreviewList);
+          setIsLoading(false);
+        } catch (error) {
+          console.error("Error fetching chats:", error);
+          setIsLoading(false);
+        }
       }
 
-      console.log("chat list:", chatList);
-      setChatList(chatList);
-    }
-
-    if (currentUserId) {
-      console.log(currentUserId);
       getChats();
-    }
-  }, [currentUserId]);
+    }, [])
+  );
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    // Filter chat list based on search query
     if (query === "") {
-      // If query is empty, show all users
-      setData(fullData);
       return;
     }
-    const formattedQuery = query.toLowerCase();
-    const filteredData = filter(fullData, (user) => {
-      return contains(user, formattedQuery);
-    });
-    setData(filteredData);
+    // Implement chat search if needed
   };
 
-  const contains = (user: User, query: string): boolean => {
-    if (user.username.toLowerCase().includes(query)) {
-      return true;
-    }
-    if (user.full_name && user.full_name.toLowerCase().includes(query)) {
-      return true;
-    }
-    if (user.email.toLowerCase().includes(query)) {
-      return true;
-    }
-    // Check if phone number contains the query (if available)
-    if (user.phone_number && user.phone_number.includes(query)) {
-      return true;
-    }
-    return false;
-  };
-
-  useEffect(() => {
-    setIsLoading(true);
-    const getUsers = async () => {
-      try {
-        const res = await fetch(`${apiUrl}/users`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const responseData = await res.json();
-        const parsedUsers: User[] = JSON.parse(responseData.body);
-        setData(parsedUsers);
-        setFullData(parsedUsers);
-        setIsLoading(false);
-        console.log(data);
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error(String(err)));
-        setIsLoading(false);
-        console.error("Error fetching users:", err);
-      }
-    };
-    getUsers();
-  }, []);
-
-  // Loading handling state
-  if (isLoading) {
+  // Loading state
+  if (isLoading && currentUserId) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>
-          Error fetching data ... Please check your internet connection!
-        </Text>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          ...styles.container,
+        }}
+      >
+        <ActivityIndicator size="large" color="#FC5E1A" />
+        <Text style={{ marginTop: 10 }}>Loading chats...</Text>
       </View>
     );
   }
@@ -212,7 +167,9 @@ export default function MessagesScreen() {
 
           {/* Right section - Edit icon */}
           <View style={{ flex: 1, alignItems: "flex-end", paddingRight: 10 }}>
-            <Pressable onPress={() => router.push("/newMess")}>
+            <Pressable
+              onPress={() => router.push("/newMess" as RelativePathString)}
+            >
               <Image
                 source={{
                   uri: "https://img.icons8.com/external-anggara-glyph-anggara-putra/120/ffffff/external-edit-user-interface-anggara-glyph-anggara-putra.png",
@@ -229,26 +186,42 @@ export default function MessagesScreen() {
           style={styles.input}
           value={searchQuery}
           onChangeText={(query) => handleSearch(query)}
-          placeholder="Search for users"
+          placeholder="Search for chats"
           placeholderTextColor="#A6A6A6"
         />
       </View>
 
-      <FlatList
-        data={chatList}
-        keyExtractor={(item) => item.chat_id}
-        renderItem={({ item }) => (
-          <UserMessage
-            name={item.name}
-            preview={item.preview}
-            timestamp={item.timestamp}
-            unread={item.unread}
-            avatar={item.avatar}
-            onPress={() => navigateToDM(item)}
-          />
-        )}
-        contentContainerStyle={styles.listContent}
-      />
+      {chatPreviewList.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No conversations yet</Text>
+          <Pressable
+            style={styles.newChatButton}
+            onPress={() => router.push("/newMess" as RelativePathString)}
+          >
+            <Text style={styles.newChatButtonText}>
+              Start a new conversation
+            </Text>
+          </Pressable>
+        </View>
+      ) : (
+        <FlatList
+          data={chatPreviewList}
+          keyExtractor={(item) => item.chat.chat_id}
+          renderItem={({ item }) => (
+            <UserMessage
+              name={item.username}
+              preview={item.chat.last_message}
+              timestamp={new Date(
+                parseInt(item.chat.last_updated)
+              ).toDateString()}
+              unread={false}
+              avatar={item.avatar}
+              onPress={() => navigateToDM(item)}
+            />
+          )}
+          contentContainerStyle={styles.listContent}
+        />
+      )}
     </View>
   );
 }
@@ -276,6 +249,27 @@ const styles = StyleSheet.create({
     borderColor: "#F5F5F5",
     paddingHorizontal: 15,
     fontSize: 16,
-    fontWeight: 500,
+    fontWeight: "500",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 20,
+  },
+  newChatButton: {
+    backgroundColor: "#FC5E1A",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+  },
+  newChatButtonText: {
+    color: "white",
+    fontWeight: "600",
   },
 });

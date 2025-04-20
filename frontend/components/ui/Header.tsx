@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 import React from "react";
 import { RelativePathString, router } from "expo-router";
 
@@ -43,9 +44,9 @@ const Header = () => {
           <TouchableOpacity
             onPress={() => router.push("/messages" as RelativePathString)}
           >
-            <View style={styles.unreadBadge}>
+            {/* <View style={styles.unreadBadge}>
               <Text style={styles.unreadBadgeText}>1</Text>
-            </View>
+            </View> */}
             <Image
               source={{
                 uri: "https://img.icons8.com/fluency-systems-regular/90/000000/speech-bubble-with-dots--v1.png",
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
   icon: {
     width: 40,
     height: 40,
-    resizeMode: "center",
+    resizeMode: "cover",
   },
   unreadBadge: {
     backgroundColor: "#FC5E1A",

@@ -1,13 +1,15 @@
+// ProfilePage.tsx
+
 "use client";
 import {
   StyleSheet,
-  Image,
   TouchableOpacity,
   SafeAreaView,
   View,
   Text,
   StatusBar,
 } from "react-native";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import ProfileStats from "@/components/ui/ProfileStats";
@@ -35,7 +37,7 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 const ProfilePage: React.FC = () => {
   const scrollY = useSharedValue(0);
   const [activeSection, setActiveSection] = useState<
-    "posts" | "found" | "lost"
+    "posts" | "Found" | "Lost"
   >("posts");
 
   const [userData, setUserData] = useState<User>(defaultUser);
@@ -65,11 +67,6 @@ const ProfilePage: React.FC = () => {
   // };
 
   // Stats - in a real app, these would be calculated from actual data
-  const stats = {
-    posts: userData.posts.length,
-    found: userData.posts.filter((post: Item) => post.status === "found").length,
-    lost: userData.posts.filter((post: Item) => post.status === "lost").length,
-  };
 
   const avatarStyle = useAnimatedStyle(() => {
     const scale = interpolate(
@@ -84,7 +81,7 @@ const ProfilePage: React.FC = () => {
     };
   });
 
-  const handleStatsPress = (type: "posts" | "found" | "lost") => {
+  const handleStatsPress = (type: "posts" | "Found" | "Lost") => {
     setActiveSection(type);
   };
 
@@ -103,7 +100,10 @@ const ProfilePage: React.FC = () => {
       {/* Profile avatar and name */}
       <View style={styles.profileContainer}>
         <Animated.View style={[styles.avatarContainer, avatarStyle]}>
-          <Image source={{ uri: userData.profile_picture }} style={styles.avatar} />
+          <Image
+            source={{ uri: userData.profile_picture }}
+            style={styles.avatar}
+          />
         </Animated.View>
         <View style={{ alignItems: "center", marginBottom: 20 }}>
           <Text style={styles.username}>@{userData.username}</Text>
@@ -120,12 +120,16 @@ const ProfilePage: React.FC = () => {
       />
 
       {/* Profile info */}
-      <ProfileInfo
-        phone={userData.phone_number}
-        email={userData.email}
-      />
+      <ProfileInfo phone={userData.phone_number} email={userData.email} />
     </View>
   );
+
+  const stats = {
+    posts: userData.posts.length,
+    found: userData.posts.filter((post: Item) => post.status === "Found")
+      .length,
+    lost: userData.posts.filter((post: Item) => post.status === "Lost").length,
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -134,18 +138,21 @@ const ProfilePage: React.FC = () => {
       <PostsGrid
         posts={
           activeSection === "posts"
-            ? userData.posts.map(item => ({item, user: userData} as Post))
-            : userData.posts.filter((post: Item) => post.status === activeSection).map(item => ({item, user: userData} as Post))
+            ? userData.posts.map((item) => ({ item, user: userData } as Post))
+            : userData.posts
+                .filter((post: Item) => post.status === activeSection)
+                .map((item) => ({ item, user: userData } as Post))
         }
         title={
           activeSection === "posts"
             ? "All Posts"
-            : activeSection === "found"
+            : activeSection === "Found"
             ? "Found Items"
             : "Lost Items"
         }
         ListHeaderComponent={ProfileHeader()}
       />
+      <View style={{ height: 25 }}></View>
     </SafeAreaView>
   );
 };

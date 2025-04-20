@@ -1,5 +1,6 @@
 import type React from "react";
-import { TouchableOpacity, StyleSheet, View, Image } from "react-native";
+import { TouchableOpacity, StyleSheet, View } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 

@@ -7,10 +7,7 @@ interface ProfileInfoProps {
   email: string;
 }
 
-const ProfileInfo: React.FC<ProfileInfoProps> = ({
-  phone,
-  email,
-}) => {
+const ProfileInfo: React.FC<ProfileInfoProps> = ({ phone, email }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Contact Information</Text>

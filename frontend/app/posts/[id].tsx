@@ -5,43 +5,35 @@ import YourPost from "../YourPost";
 import { useSearchParams } from "expo-router/build/hooks";
 import { Text, View } from "react-native";
 
-const apiUrl = process.env.EXPO_PUBLIC_API_URL
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function PostDetails() {
+  const params = useSearchParams();
 
-    const params = useSearchParams()
+  const id = params.get("id");
 
-    const id = params.get('id')
+  console.log("yeahhh", id);
+  const [item, setItem] = useState<Item>();
 
-    console.log("yeahhh", id)
-    const [item, setItem] = useState<Item>()
+  useEffect(() => {
+    async function getPost() {
+      const res = await fetch(`${apiUrl}/items/${id}`);
 
-    useEffect(() => {
-        async function getPost() {
-            const res = await fetch(`${apiUrl}/items/${id}`)
+      const data = await res.json();
 
-            const data = await res.json()
+      console.log(JSON.parse(data.body));
+      setItem(JSON.parse(data.body));
+    }
+    getPost();
+  }, []);
 
-            console.log(JSON.parse(data.body))
-            setItem(JSON.parse(data.body))
-        }
-        getPost()
-    }, [])
-
-    return (
-        (
-            item 
-            ? 
-            <View style={{flex: 1, backgroundColor: 'white'}}>
-                <YourPost {...item} /> 
-            </View>
-            
-            : 
-            <View style={{flex: 1, backgroundColor: 'white'}}>
-                <Text>No post found</Text>
-            </View>
-        )
-    )
-
-
+  return item ? (
+    <View style={{ flex: 1, backgroundColor: "white" }}>
+      <YourPost {...item} />
+    </View>
+  ) : (
+    <View style={{ flex: 1, backgroundColor: "white" }}>
+      <Text>No post found</Text>
+    </View>
+  );
 }

@@ -1,3 +1,5 @@
+// AddItemScreen.tsx
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -8,7 +10,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Pressable,
-  Image,
   Platform,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -20,7 +21,9 @@ import * as base64 from "base64-js";
 import { LinearGradient } from "expo-linear-gradient";
 import { RelativePathString, useRouter } from "expo-router";
 import { Entypo } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { ImageManipulator, SaveFormat, } from "expo-image-manipulator";
 
 import {
   S3Client,
@@ -65,7 +68,7 @@ const AddItemScreen = () => {
   const [itemName, setItemName] = useState("");
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
-  const [postKeywordsString, setPostKeywordsString] = useState("")
+  const [postKeywordsString, setPostKeywordsString] = useState("");
 
   const [form, setForm] = useState<FormData>({
     item: "",
@@ -132,15 +135,32 @@ const AddItemScreen = () => {
     setImage("");
   };
 
+  const manipulateImage = async (uri: string) => {
+    const context = ImageManipulator.manipulate(uri)
+
+    context.resize({
+      width: 800
+    })
+
+    const image = await context.renderAsync()
+    const result = await image.saveAsync({
+      format: SaveFormat.WEBP,
+      compress: 0.7,
+      base64: true
+    })
+
+    return result.uri
+  };
+
   const uploadImage = async () => {
     if (!image) {
       return "";
     }
     try {
       setIsUploading(true);
-      const fileURI = image;
+      const fileURI = await manipulateImage(image);
       const fileName = fileURI.split("/").pop();
-      const fileType = "image/jpeg";
+      const fileType = "image/webp";
       const fileData = await ExpoFileSystem.readAsStringAsync(fileURI, {
         encoding: ExpoFileSystem.EncodingType.Base64,
       });
@@ -174,25 +194,40 @@ const AddItemScreen = () => {
 
   const handleSubmit = async () => {
     try {
-      const s3URL = await uploadImage();
-      // console.log("THIS IS THE FORM RIGHT NOW: \n" + JSON.stringify(form))
-      if (!s3URL) {
-        throw "Image failed to upload to S3";
+      let s3URL = "";
+      if (image) {
+        s3URL = await uploadImage();
+        if (image && !s3URL) {
+          throw "Image failed to upload to S3";
+        }
       }
 
       const reporterId = await AsyncStorage.getItem("userId");
       const reporterRes = await fetch(`${apiUrl}/users/${reporterId}`, {
-        method: 'GET'
-      })
+        method: "GET",
+      });
 
-      const reporterData = await reporterRes.json()
+      const reporterData = await reporterRes.json();
+      const reporter = JSON.parse(reporterData.body);
 
-      const reporter = JSON.parse(reporterData.body)
+      // Only include image_url in the payload if it exists
+      const payload = {
+        ...form,
+        date_reported: new Date()
+          .toLocaleString("sv", { timeZone: "CST" })
+          .replace(" ", "T"),
+        reporter_id: reporterId,
+        reporter: reporter,
+      };
 
-      const submissionData = { ...form };
       if (s3URL) {
-        submissionData.image_url = s3URL;
+        payload.image_url = s3URL;
       }
+
+      // const submissionData = { ...form };
+      // if (s3URL) {
+      //   submissionData.image_url = s3URL;
+      // }
       const response = await fetch(`${apiUrl}/items/`, {
         method: "POST",
         headers: {
@@ -205,7 +240,7 @@ const AddItemScreen = () => {
             .toLocaleString("sv", { timeZone: "CST" })
             .replace(" ", "T"),
           reporter_id: reporterId,
-          reporter: reporter
+          reporter: reporter,
         }),
       });
 
@@ -494,7 +529,12 @@ const AddItemScreen = () => {
               <TextInput
                 placeholder="Enter keywords (comma separated)"
                 placeholderTextColor="#888"
-                onChangeText={ (value) => setForm((oldForm) => ({...oldForm, keywords: value.split(",").map(val => val.trim()) }) ) }
+                onChangeText={(value) =>
+                  setForm((oldForm) => ({
+                    ...oldForm,
+                    keywords: value.split(",").map((val) => val.trim()),
+                  }))
+                }
                 style={styles.input}
               />
             </View>

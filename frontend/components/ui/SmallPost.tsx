@@ -1,6 +1,7 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import { RelativePathString, router } from "expo-router";
+import { Image } from "expo-image";
 import { defaultUser, Post, User } from "@/types";
 
 interface PostProps {
@@ -12,31 +13,31 @@ interface PostProps {
 //   imgUrl: string;
 // }
 
-const apiUrl = process.env.EXPO_PUBLIC_API_URL
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 const SmallPost: React.FC<Post> = (post) => {
+  // const [postAuthor, setPostAuthor] = useState<User>(defaultUser)
 
-  const [postAuthor, setPostAuthor] = useState<User>(defaultUser)
-    
-  
-  useEffect(() => {
-    async function getPostAuthor() {
-      const res = await fetch(`${apiUrl}/users/${post.reporter_id}`)
-      const data = await res.json()
-      setPostAuthor(data)
-    }
-    getPostAuthor()
-  }, [])
+  // useEffect(() => {
+  //   async function getPostAuthor() {
+  //     const res = await fetch(`${apiUrl}/users/${post.reporter_id}`)
+  //     const data = await res.json()
+  //     setPostAuthor(data)
+  //   }
+  //   getPostAuthor()
+  // }, [])
 
   return (
     <View style={{ marginBottom: 10 }}>
       <TouchableOpacity
         style={styles.backPost}
-        onPress={() => router.push(`/posts/${post.item_id}` as RelativePathString)}
+        onPress={() =>
+          router.push(`/posts/${post.item.item_id}` as RelativePathString)
+        }
       >
-        <PostHeader post={post} author={postAuthor} />
-        <PostImage post={post} author={postAuthor} />
-        <PostFooter post={post} author={postAuthor} />
+        <PostHeader post={post} author={post.user} />
+        <PostImage post={post} author={post.user} />
+        <PostFooter post={post} author={post.user} />
       </TouchableOpacity>
     </View>
   );
@@ -64,7 +65,7 @@ const PostHeader: React.FC<PostProps> = ({ post, author }) => {
 const PostImage: React.FC<PostProps> = ({ post }) => (
   <View style={styles.imagePost}>
     <Image
-      source={{ uri: post.image_url }}
+      source={{ uri: post.item.image_url }}
       style={{
         width: 170,
         aspectRatio: 1,
@@ -82,7 +83,7 @@ const PostFooter: React.FC<PostProps> = ({ post }) => (
 
 const Caption: React.FC<Post> = (post) => (
   <View>
-    <Text style={{ fontSize: 13, margin: 10 }}>{post.description}</Text>
+    <Text style={{ fontSize: 13, margin: 10 }}>{post.item.description}</Text>
   </View>
 );
 
@@ -113,6 +114,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingBottom: 10,
     width: 190,
-    flexGrow: 1, // Allows the container to expand
+    // flexGrow: 1, // Allows the container to expand
   },
 });

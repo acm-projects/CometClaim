@@ -10,9 +10,9 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Image,
 } from "react-native";
-import { router } from "expo-router";
+import { Image } from "expo-image";
+import { router, RelativePathString } from "expo-router";
 import { Item, Post } from "@/types";
 
 interface PostsGridProps {
@@ -38,8 +38,9 @@ const PostsGrid: React.FC<PostsGridProps> = ({
       style={styles.postItem}
       onPress={() =>
         router.push({
-          pathname: "/YourPost",
-          params: { id: item.item_id },
+          // pathname: "/YourPost",
+          // params: { id: item.item_id },
+          pathname: `/posts/${item.item_id}` as RelativePathString,
         })
       }
     >
@@ -129,7 +130,7 @@ const PostsGrid: React.FC<PostsGridProps> = ({
 
   return (
     <FlatList
-      data={filteredPosts.map(post => post.item)}
+      data={filteredPosts.map((post) => post.item)}
       renderItem={renderItem}
       keyExtractor={(item) => item.item_id.toString()}
       numColumns={2}

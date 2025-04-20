@@ -3,9 +3,9 @@
 "use client";
 
 import type React from "react";
+import { Image } from "expo-image";
 import {
   StyleSheet,
-  Image,
   TouchableOpacity,
   SafeAreaView,
   View,
@@ -17,7 +17,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import ProfileStats from "@/components/ui/ProfileStats";
 import ProfileInfo from "@/components/ui/ProfileInfo";
 import PostsGrid from "@/components/ui/PostsGrid";
-import { USERPOSTS } from "@/data/userPosts";
+// import { USERPOSTS } from "@/data/userPosts";
 import { useState, useEffect } from "react";
 import { useLocalSearchParams } from "expo-router";
 import Animated, {
@@ -26,18 +26,23 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
+import { defaultUser, Item, Post, User } from "@/types";
 
-interface User {
-  user_id: string;
-  username: string;
-  full_name?: string;
-  email: string;
-  profile_picture?: string;
-  phone_number?: string;
-  posts?: any[];
-  comments?: any[];
-  location?: string;
-}
+type ItemProps = {
+  item: Item;
+};
+
+// interface User {
+//   user_id: string;
+//   username: string;
+//   full_name?: string;
+//   email: string;
+//   profile_picture?: string;
+//   phone_number?: string;
+//   posts?: any[];
+//   comments?: any[];
+//   location?: string;
+// }
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL; // Replace with your actual API URL
 
@@ -66,28 +71,22 @@ const ProfilePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const scrollY = useSharedValue(0);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userData, setUserData] = useState<User>(defaultUser);
 
   const [activeSection, setActiveSection] = useState<
-    "posts" | "found" | "lost"
+    "posts" | "Found" | "Lost"
   >("posts");
 
   // User data - in a real app, this would come from a user context or API
-  const userData = {
-    username: "johndoe",
-    fullName: "John Doe",
-    phone: "(434) 423-7563",
-    email: "johndoe@example.com",
-    location: "989 Loop Rd, Richardson, TX 75080",
-    avatar:
-      "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
-  };
-
-  // Stats - in a real app, these would be calculated from actual data
-  const stats = {
-    posts: USERPOSTS.length,
-    found: USERPOSTS.filter((post) => post.type === "found").length,
-    lost: USERPOSTS.filter((post) => post.type === "lost").length,
-  };
+  // const userData = {
+  //   username: "johndoe",
+  //   fullName: "John Doe",
+  //   phone: "(434) 423-7563",
+  //   email: "johndoe@example.com",
+  //   location: "989 Loop Rd, Richardson, TX 75080",
+  //   avatar:
+  //     "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+  // };
 
   const avatarStyle = useAnimatedStyle(() => {
     const scale = interpolate(
@@ -102,7 +101,7 @@ const ProfilePage: React.FC = () => {
     };
   });
 
-  const handleStatsPress = (type: "posts" | "found" | "lost") => {
+  const handleStatsPress = (type: "posts" | "Found" | "Lost") => {
     setActiveSection(type);
   };
 
@@ -174,6 +173,17 @@ const ProfilePage: React.FC = () => {
         </View>
       );
     }
+
+    // Stats - in a real app, these would be calculated from actual data
+    const stats = {
+      posts: currentUser?.posts?.length || 0,
+      found:
+        currentUser?.posts?.filter((post: Item) => post.status === "Found")
+          .length || 0,
+      lost:
+        currentUser?.posts?.filter((post: Item) => post.status === "Lost")
+          .length || 0,
+    };
     return (
       <View style={{ marginTop: "15%" }}>
         {/* Profile avatar and name */}
@@ -220,9 +230,9 @@ const ProfilePage: React.FC = () => {
 
         {/* Profile info */}
         <ProfileInfo
-          phone={currentUser?.phone_number || userData.phone}
+          phone={currentUser?.phone_number || userData.phone_number}
           email={currentUser?.email || userData.email}
-          location={currentUser?.location || userData.location}
+          // location={currentUser?.location || userData.location}
         />
       </View>
     );
@@ -237,13 +247,17 @@ const ProfilePage: React.FC = () => {
       <PostsGrid
         posts={
           activeSection === "posts"
-            ? USERPOSTS
-            : USERPOSTS.filter((post) => post.type === activeSection)
+            ? currentUser?.posts?.map(
+                (item) => ({ item, user: currentUser } as Post)
+              ) || []
+            : currentUser?.posts
+                .filter((post: Item) => post.status === activeSection)
+                .map((item) => ({ item, user: currentUser } as Post)) || []
         }
         title={
           activeSection === "posts"
             ? "All Posts"
-            : activeSection === "found"
+            : activeSection === "Found"
             ? "Found Items"
             : "Lost Items"
         }
