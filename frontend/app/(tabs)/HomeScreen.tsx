@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Modal,
   Animated,
+  Button,
 } from "react-native";
 import type React from "react";
 import { useCallback, useEffect, useState, useRef } from "react";
@@ -18,6 +19,8 @@ import ShareScreen from "@/components/ui/ShareScreen"; // <- extract this into i
 import { useFocusEffect } from "expo-router";
 import ChatbotButton from "@/components/ui/ChatbotButton";
 import CategoryFilter from "@/components/ui/CategoryFilter";
+import LoadingScreen from "../Landing";
+import { requestNotificationPermission, sendLocalNotification } from "../utils/NotificationUtils";
 
 const HomeScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -50,6 +53,7 @@ const HomeScreen: React.FC = () => {
     outputRange: [1, 0],
     extrapolate: "clamp",
   });
+  const [loading, setLoading ] = useState(true)
 
   const openShareModal = (item: Item) => {
     setSelectedItem(item);
@@ -119,6 +123,9 @@ const HomeScreen: React.FC = () => {
         } catch (error) {
           console.error("Error fetching items:", error);
         }
+        setTimeout(() => {
+          setLoading(false);
+        }, 1500); // 2 second delay
       }
       getItems();
     }, [activeCategory, refreshTrigger])
@@ -141,8 +148,17 @@ const HomeScreen: React.FC = () => {
     // filterItems(items, category);
   };
 
+  //TODO: 
+  //useEffect and sendLocalNotification
+  //To put into any button
+
+  useEffect(() => {
+    // Request notification permission when component mounts
+    requestNotificationPermission();
+  }, []);
+
   return (
-    <View
+    loading ? (<LoadingScreen/>):( <View
       style={{ flex: 1, flexDirection: "column", backgroundColor: "#FFFAF8" }}
     >
       <SafeAreaView style={{ flex: 1 }}>
@@ -213,8 +229,8 @@ const HomeScreen: React.FC = () => {
         </Modal>
       </SafeAreaView>
       <ChatbotButton />
-    </View>
-  );
+    </View> )
+  )
 };
 
 export default HomeScreen;
