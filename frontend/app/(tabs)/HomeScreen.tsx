@@ -7,19 +7,23 @@ import {
   SafeAreaView,
   ScrollView,
   Modal,
+  Button,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import Header from "@/components/ui/Header";
 import { Post } from "@/components/ui/Post";
 import { defaultUser, Item } from "@/types";
-import ShareScreen from "@/components/ui/ShareScreen"; // <- extract this into its own component
+import ShareScreen from "@/components/ui/ShareScreen"; 
 import { useFocusEffect } from "expo-router";
 import ChatbotButton from "@/components/ui/ChatbotButton";
+import LoadingScreen from "../Landing";
+import { requestNotificationPermission, sendLocalNotification } from "../utils/NotificationUtils";
 
 const HomeScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [loading, setLoading ] = useState(true)
 
   const openShareModal = (item: Item) => {
     setSelectedItem(item);
@@ -43,10 +47,22 @@ const HomeScreen: React.FC = () => {
         const items = JSON.parse(data.body)
         items.sort((a: Item, b: Item) => {return (new Date(b.date_reported)).getTime() - (new Date(a.date_reported)).getTime()})
         setItems(items);
+        setTimeout(() => {
+          setLoading(false);
+        }, 1500); // 2 second delay
       }
       getItems();
     }, [])
   );
+
+  //TODO: 
+  //useEffect and sendLocalNotification
+  //To put into any button
+
+  useEffect(() => {
+    // Request notification permission when component mounts
+    requestNotificationPermission();
+  }, []);
 
   return (
     // <LinearGradient
@@ -55,11 +71,20 @@ const HomeScreen: React.FC = () => {
     //   start={{ x: 0.5, y: 0.5 }}
     //   end={{ x: 0.5, y: 0 }}
     // >
-    <View
+    loading ? (<LoadingScreen/>):( <View
       style={{ flex: 1, flexDirection: "column", backgroundColor: "#FFFAF8" }}
     >
       <SafeAreaView style={{ flex: 1 }}>
         <Header />
+
+      
+        {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+      <Text style={{ marginBottom: 20, fontSize: 18, textAlign: 'center' }}>
+        Press the button for a notification in about 3 seconds.
+      </Text>
+      <Button title="Send Notification" onPress={sendLocalNotification} />
+    </View> */}
+
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{ paddingBottom: 70 }}
@@ -79,7 +104,8 @@ const HomeScreen: React.FC = () => {
       </SafeAreaView>
       <ChatbotButton />
       {/* // </LinearGradient> */}
-    </View>
+    </View>)
+   
   );
 };
 
