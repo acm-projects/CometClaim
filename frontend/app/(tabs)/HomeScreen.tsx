@@ -35,32 +35,32 @@ const HomeScreen: React.FC = () => {
     {
       id: "tech",
       name: "Tech",
-      icon: "https://v0.dev/placeholder.svg?height=60&width=60",
+      icon: "https://i.imgur.com/Achigdr.png",
     },
     {
       id: "shirts",
       name: "Shirts",
-      icon: "https://v0.dev/placeholder.svg?height=60&width=60",
+      icon: "https://www.mrporter.com/variants/images/1647597307228448/in/w2000_q60.jpg",
     },
     {
       id: "books",
       name: "Books",
-      icon: "https://v0.dev/placeholder.svg?height=60&width=60",
+      icon: "https://static.scientificamerican.com/sciam/cache/file/1DDFE633-2B85-468D-B28D05ADAE7D1AD8_source.jpg?w=1200",
     },
     {
       id: "keys",
       name: "Keys",
-      icon: "https://v0.dev/placeholder.svg?height=60&width=60",
+      icon: "https://cdn.shopify.com/s/files/1/2245/3557/files/CSE-AS-ExtraKeys.png?v=1713479233",
     },
     {
       id: "wallets",
       name: "Wallets",
-      icon: "https://v0.dev/placeholder.svg?height=60&width=60",
+      icon: "https://i.ebayimg.com/00/s/MTU1OFgxNjAw/z/z8AAAOSwsFdfvAg7/$_57.JPG?set_id=8800005007",
     },
     {
       id: "bags",
       name: "Bags",
-      icon: "https://v0.dev/placeholder.svg?height=60&width=60",
+      icon: "https://prenelove.ca/cdn/shop/articles/how-many-bags-should-you-own-225009_1024x733.jpg?v=1709320764",
     },
   ];
 
@@ -134,7 +134,7 @@ const HomeScreen: React.FC = () => {
   useEffect(() => {
     // Force a refresh when changing categories
     refreshItems();
-  }, [activeCategory, activeItemCategory]);
+  }, [activeCategory]);
 
   useFocusEffect(
     useCallback(() => {

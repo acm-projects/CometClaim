@@ -487,6 +487,22 @@ const PostDateAndLocation: React.FC<Item> = (post) => (
         marginTop: 5,
       }}
     >
+      <View
+        key={`status-${post.status}`}
+        style={{
+          backgroundColor: post.status === "Lost" ? "#CB3131" : "#419D44",
+          paddingVertical: 8,
+          paddingHorizontal: 16,
+          marginLeft: 10,
+          marginRight: 15,
+          borderRadius: 20,
+          alignSelf: "flex-start",
+        }}
+      >
+        <Text style={{ color: "white", fontWeight: "600", fontSize: 12 }}>
+          {post.status === "Lost" ? "Lost" : "Found"}
+        </Text>
+      </View>
       <Icon
         imgStyle={styles.dateLocationIcon}
         imgUrl={PostDateLocationIcon[0].imageUrl}
@@ -527,6 +543,11 @@ const PostDateAndLocation: React.FC<Item> = (post) => (
     </View>
   </View>
 );
+// const PostImageSkeleton = () => (
+//   <View style={styles.imagePost}>
+//     <Shimmer style={{ width: "100%", height: 370 }} />
+//   </View>
+// );
 
 const PostImage: React.FC<Item> = (post) => (
   <View style={styles.imagePost}>
@@ -543,7 +564,12 @@ const PostImage: React.FC<Item> = (post) => (
 const Caption: React.FC<Item> = (post: Item) => (
   <View>
     <Text
-      style={{ fontSize: 16, paddingBottom: 5, paddingLeft: 20, marginTop: 10 }}
+      style={{
+        fontSize: 15,
+        paddingVertical: 10,
+        paddingLeft: 20,
+        color: "#444",
+      }}
     >
       {post.description}
     </Text>

@@ -18,7 +18,7 @@ const Header = () => {
           >
             <Image
               source={{
-                uri: "https://img.icons8.com/ios-filled/90/000000/search--v1.png",
+                uri: "https://img.icons8.com/ios-filled/90/FC5E1A/search--v1.png",
               }}
               style={styles.icon}
             />
@@ -34,7 +34,7 @@ const Header = () => {
           >
             <Image
               source={{
-                uri: "https://img.icons8.com/fluency-systems-regular/100/000000/appointment-reminders--v1.png",
+                uri: "https://img.icons8.com/fluency-systems-regular/100/FC5E1A/appointment-reminders--v1.png",
               }}
               style={styles.icon}
             />
@@ -49,7 +49,7 @@ const Header = () => {
             </View> */}
             <Image
               source={{
-                uri: "https://img.icons8.com/fluency-systems-regular/90/000000/speech-bubble-with-dots--v1.png",
+                uri: "https://img.icons8.com/fluency-systems-regular/90/FC5E1A/speech-bubble-with-dots--v1.png",
               }}
               style={styles.icon}
             />
@@ -109,9 +109,18 @@ const styles = StyleSheet.create({
   iconBorder: {
     width: 40,
     height: 40,
+    backgroundColor: "#fff",
     borderRadius: "100%",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 6,
+    marginRight: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
 });

@@ -13,6 +13,7 @@ import { Image } from "expo-image";
 // import { Divider } from "react-native-elements";
 // import { useState } from "react";
 import { router } from "expo-router";
+import { Entypo } from "@expo/vector-icons";
 
 type YourPostHeaderProps = {
   isCurrentUserAuthor: boolean;
@@ -33,12 +34,7 @@ const YourPostHeader: React.FC<YourPostHeaderProps> = ({
           style={{ position: "absolute", left: 0 }}
           onPress={() => router.back()}
         >
-          <Image
-            source={{
-              uri: "https://img.icons8.com/ios-filled/60/ffffff/back.png",
-            }}
-            style={styles.icon}
-          />
+          <Entypo name="chevron-left" size={32} color="white" />
         </TouchableOpacity>
         <Text
           style={{
