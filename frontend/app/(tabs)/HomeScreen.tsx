@@ -18,6 +18,7 @@ import ShareScreen from "@/components/ui/ShareScreen"; // <- extract this into i
 import { useFocusEffect } from "expo-router";
 import ChatbotButton from "@/components/ui/ChatbotButton";
 import CategoryFilter from "@/components/ui/CategoryFilter";
+import ItemCategoryFilter from "@/components/ui/ItemCategories";
 
 const HomeScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -26,6 +27,42 @@ const HomeScreen: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<
     "all" | "Lost" | "Found"
   >("all");
+  const [activeItemCategory, setActiveItemCategory] = useState<string | null>(
+    null
+  );
+
+  const itemCategories = [
+    {
+      id: "tech",
+      name: "Tech",
+      icon: "https://v0.dev/placeholder.svg?height=60&width=60",
+    },
+    {
+      id: "shirts",
+      name: "Shirts",
+      icon: "https://v0.dev/placeholder.svg?height=60&width=60",
+    },
+    {
+      id: "books",
+      name: "Books",
+      icon: "https://v0.dev/placeholder.svg?height=60&width=60",
+    },
+    {
+      id: "keys",
+      name: "Keys",
+      icon: "https://v0.dev/placeholder.svg?height=60&width=60",
+    },
+    {
+      id: "wallets",
+      name: "Wallets",
+      icon: "https://v0.dev/placeholder.svg?height=60&width=60",
+    },
+    {
+      id: "bags",
+      name: "Bags",
+      icon: "https://v0.dev/placeholder.svg?height=60&width=60",
+    },
+  ];
 
   const scrollY = useRef(new Animated.Value(0)).current;
   const filterHeight = 70;
@@ -97,7 +134,7 @@ const HomeScreen: React.FC = () => {
   useEffect(() => {
     // Force a refresh when changing categories
     refreshItems();
-  }, [activeCategory]);
+  }, [activeCategory, activeItemCategory]);
 
   useFocusEffect(
     useCallback(() => {
@@ -105,7 +142,9 @@ const HomeScreen: React.FC = () => {
         try {
           const res = await fetch(`${apiUrl}/items`);
           const data = await res.json();
+          console.log(data);
           const fetchedItems = JSON.parse(data.body);
+          console.log(fetchedItems);
 
           const sortedItems = [...fetchedItems].sort((a: Item, b: Item) => {
             return (
@@ -140,6 +179,13 @@ const HomeScreen: React.FC = () => {
     refreshItems();
     // filterItems(items, category);
   };
+  const handleItemCategoryChange = (categoryId: string) => {
+    // Toggle category if already selected
+    setActiveItemCategory(
+      activeItemCategory === categoryId ? null : categoryId
+    );
+    refreshItems();
+  };
 
   return (
     <View
@@ -164,6 +210,11 @@ const HomeScreen: React.FC = () => {
             {/* Add a spacer for the filter height */}
             <View style={{ height: filterHeight }} />
 
+            <ItemCategoryFilter
+              categories={itemCategories}
+              activeCategory={activeItemCategory}
+              onCategoryChange={handleItemCategoryChange}
+            />
             {filteredItems.map((item: Item, index: number) => (
               <Post
                 item={item}
@@ -194,11 +245,6 @@ const HomeScreen: React.FC = () => {
               right: 0,
               zIndex: 2,
               backgroundColor: "#FFFAF8",
-              // shadowColor: "#000",
-              // shadowOffset: { width: 0, height: 2 },
-              // shadowOpacity: 0.1,
-              // shadowRadius: 3,
-              // elevation: 3,
             }}
           >
             <CategoryFilter

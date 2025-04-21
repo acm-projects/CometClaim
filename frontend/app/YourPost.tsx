@@ -24,7 +24,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather, Ionicons, AntDesign } from "@expo/vector-icons";
 import Shimmer from "@/components/ui/Shimmer";
 import { Image } from "expo-image";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 
 type IconProps = {
@@ -340,21 +340,33 @@ const PostTop: React.FC<PostProps & { isCurrentUserAuthor: boolean }> = ({
   return (
     <View style={styles.headerView}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Image
-          source={{
-            uri: author.profile_picture || defaultUser.profile_picture,
-          }}
-          style={styles.story}
-        />
-        <Text
-          style={{
-            color: "black",
-            marginLeft: 5,
-            fontWeight: "500",
-          }}
+        <Pressable
+          style={{ flexDirection: "row", alignItems: "center" }}
+          onPress={() =>
+            router.push({
+              pathname: "/UsersProfile",
+              params: {
+                userId: JSON.parse(JSON.stringify(author.user_id)),
+              },
+            })
+          }
         >
-          {author.username}
-        </Text>
+          <Image
+            source={{
+              uri: author.profile_picture || defaultUser.profile_picture,
+            }}
+            style={styles.story}
+          />
+          <Text
+            style={{
+              color: "black",
+              marginLeft: 5,
+              fontWeight: "500",
+            }}
+          >
+            {author.username}
+          </Text>
+        </Pressable>
         <Text
           style={{
             color: "black",

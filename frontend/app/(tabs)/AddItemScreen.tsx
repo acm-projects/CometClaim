@@ -23,7 +23,7 @@ import { RelativePathString, useRouter } from "expo-router";
 import { Entypo } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { ImageManipulator, SaveFormat, } from "expo-image-manipulator";
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 
 import {
   S3Client,
@@ -136,20 +136,20 @@ const AddItemScreen = () => {
   };
 
   const manipulateImage = async (uri: string) => {
-    const context = ImageManipulator.manipulate(uri)
+    const context = ImageManipulator.manipulate(uri);
 
     context.resize({
-      width: 800
-    })
+      width: 800,
+    });
 
-    const image = await context.renderAsync()
+    const image = await context.renderAsync();
     const result = await image.saveAsync({
       format: SaveFormat.WEBP,
       compress: 0.7,
-      base64: true
-    })
+      base64: true,
+    });
 
-    return result.uri
+    return result.uri;
   };
 
   const uploadImage = async () => {
@@ -241,6 +241,7 @@ const AddItemScreen = () => {
             .replace(" ", "T"),
           reporter_id: reporterId,
           reporter: reporter,
+          comments: [],
         }),
       });
 

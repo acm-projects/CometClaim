@@ -10,10 +10,66 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Entypo, Feather, Ionicons } from "@expo/vector-icons";
-import { Link, useNavigation, router } from "expo-router";
+import { Link, useNavigation, router, useLocalSearchParams } from "expo-router";
 import { Comment } from "@/components/Comment";
+import { useEffect, useState } from "react";
 
 export default function CommentsScreen() {
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
+  const { item_id } = useLocalSearchParams<{ item_id: string }>();
+  console.log(item_id);
+  const [comments, setComments] = useState([
+    {
+      id: "1",
+      username: "Neeha",
+      commentMessage:
+        "I found this item at the ECSS around 7 PM coming into class",
+      replies: [
+        { id: "1-1", username: "Mohammad", commentMessage: "lol" },
+        {
+          id: "1-2",
+          username: "Jason",
+          commentMessage:
+            "@Neeha I found this item at the ECSS around 7 PM coming into class",
+        },
+      ],
+    },
+    {
+      id: "2",
+      username: "Tien",
+      commentMessage:
+        "I found this item at the ECSS around 7 PM coming into class",
+      replies: [],
+    },
+  ]);
+
+  // useEffect(() => {
+  //   async function getItemComments() {
+  //     try {
+  //       const res = await fetch(`${apiUrl}/items/${item_id}`, {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //       });
+
+  //       if (res.ok) {
+  //         const data = await res.json();
+  //         console.log(data);
+  //         const itemData =
+  //           typeof data.body === "string" ? JSON.parse(data.body) : data.body;
+  //         console.log(itemData.comments);
+  //         // setComments(itemData.comments);
+  //       } else {
+  //         console.error("Failed to fetch current user");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching current user:", error);
+  //     }
+  //   }
+  //   getItemComments();
+  // }, []);
+
   return (
     <KeyboardAvoidingView
       style={{ height: "100%", width: "100%", backgroundColor: "white" }}
@@ -72,22 +128,14 @@ export default function CommentsScreen() {
       </LinearGradient>
 
       <ScrollView style={{ paddingVertical: 15, paddingHorizontal: 15 }}>
-        <Comment
-          username="Neeha"
-          commentMessage="I found this item at the ECSS around 7 PM coming into class "
-          replies={[
-            { username: "Mohammad", commentMessage: "lol" },
-            {
-              username: "Jason",
-              commentMessage:
-                "@Neeha I found this item at the ECSS around 7 PM coming into class ",
-            },
-          ]}
-        />
-        <Comment
-          username="Tien"
-          commentMessage="I found this item at the ECSS around 7 PM coming into class "
-        />
+        {comments.map((commentItem) => (
+          <Comment
+            key={commentItem.id}
+            username={commentItem.username}
+            commentMessage={commentItem.commentMessage}
+            replies={commentItem.replies}
+          />
+        ))}
       </ScrollView>
 
       <LinearGradient

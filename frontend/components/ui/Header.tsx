@@ -86,9 +86,9 @@ const styles = StyleSheet.create({
     marginBottom: 120,
   },
   icon: {
-    width: 40,
-    height: 40,
-    resizeMode: "cover",
+    width: 29,
+    height: 29,
+    resizeMode: "center",
   },
   unreadBadge: {
     backgroundColor: "#FC5E1A",
