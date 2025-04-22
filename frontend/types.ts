@@ -61,7 +61,7 @@ export const defaultUser: User = {
   full_name: "John Doe",
   phone_number: "000-000-0000",
   profile_picture:
-    "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+    "https://t3.ftcdn.net/jpg/00/64/67/80/360_F_64678017_zUpiZFjj04cnLri7oADnyMH0XBYyQghG.webp",
   comments: [],
   posts: [],
 };

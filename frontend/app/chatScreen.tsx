@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchAnswerFromOpenAI } from "./openaiAPI";
@@ -20,6 +21,10 @@ import { router } from "expo-router";
 // List of FAQs
 const predefinedQuestions = [
   { question: "What is my name?", answer: "Your name is Hannah, silly!" },
+  {
+    question: "Has anyone found Jason?",
+    answer: "It seems that no one has found Jason yet. 😔",
+  },
   // Add more predefined questions here
 ];
 type Message = {
@@ -34,6 +39,9 @@ const ChatScreen: React.FC = () => {
   const scrollViewRef = useRef<ScrollView>(null);
   // const websocketApiUrl = Constants.expoConfig?.extra?.websocketApiUrl
   const websocketApiUrl = process.env.EXPO_PUBLIC_WS_API_URL;
+
+  const wait = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
 
   useEffect(() => {
     let socket: WebSocket;
@@ -84,20 +92,41 @@ const ChatScreen: React.FC = () => {
   };
   const handleSendMessage = async () => {
     // Check if there is a predefined answer
+
+    setChatHistory(
+      (prevHistory) =>
+        [...prevHistory, { type: "user", text: message }] as Message[]
+    );
+
     const predefinedAnswer = getPredefinedAnswer(message);
+    setMessage("");
+    Keyboard.dismiss();
+
     if (predefinedAnswer) {
       // Use if available
+      await wait(1000);
       setChatHistory((prevHistory) => [
         ...prevHistory,
         { type: "bot", text: predefinedAnswer },
       ]);
     } else {
       // Call openAI to make something up
-      const answer = await fetchAnswerFromOpenAI(message);
-      setChatHistory((prevHistory) => [
-        ...prevHistory,
-        { type: "bot", text: answer },
-      ]);
+      // const answer = await fetchAnswerFromOpenAI(message);
+      // setChatHistory((prevHistory) => [
+      //   ...prevHistory,
+      //   { type: "bot", text: answer },
+      // ]);
+
+      setChatHistory(
+        (prevHistory) =>
+          [
+            ...prevHistory,
+            {
+              type: "bot",
+              text: "Sorry, I couldn't understand your question.",
+            },
+          ] as Message[]
+      );
     }
   };
   return (

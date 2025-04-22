@@ -20,13 +20,17 @@ import { useFocusEffect } from "expo-router";
 import ChatbotButton from "@/components/ui/ChatbotButton";
 import CategoryFilter from "@/components/ui/CategoryFilter";
 import LoadingScreen from "../Landing";
-import { requestNotificationPermission, sendLocalNotification } from "../utils/NotificationUtils";
+import {
+  requestNotificationPermission,
+  sendLocalNotification,
+} from "../utils/NotificationUtils";
 import ItemCategoryFilter from "@/components/ui/ItemCategories";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-  const [currentUser, setCurrentUser] = useState<User>(defaultUser);
+  const [currentUserId, setCurrentUserId] = useState<string>("");
   const [activeCategory, setActiveCategory] = useState<
     "all" | "Lost" | "Found"
   >("all");
@@ -90,7 +94,7 @@ const HomeScreen: React.FC = () => {
     outputRange: [1, 0],
     extrapolate: "clamp",
   });
-  const [loading, setLoading ] = useState(true)
+  const [loading, setLoading] = useState(true);
 
   const openShareModal = (item: Item) => {
     setSelectedItem(item);
@@ -113,24 +117,8 @@ const HomeScreen: React.FC = () => {
 
   useEffect(() => {
     async function getCurrentUser() {
-      try {
-        const res = await fetch(`${apiUrl}/users/me`, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          const userData =
-            typeof data.body === "string" ? JSON.parse(data.body) : data.body;
-          setCurrentUser(userData);
-        } else {
-          console.error("Failed to fetch current user");
-        }
-      } catch (error) {
-        console.error("Error fetching current user:", error);
-      }
+      const currentUserId = await AsyncStorage.getItem("userId");
+      if (currentUserId) setCurrentUserId(currentUserId);
     }
     getCurrentUser();
   }, []);
@@ -146,7 +134,7 @@ const HomeScreen: React.FC = () => {
         try {
           const res = await fetch(`${apiUrl}/items`);
           const data = await res.json();
-          console.log(data);
+          // console.log(typeof data, data);
           const fetchedItems = JSON.parse(data.body);
           console.log(fetchedItems);
 
@@ -187,7 +175,7 @@ const HomeScreen: React.FC = () => {
     // filterItems(items, category);
   };
 
-  //TODO: 
+  //TODO:
   //useEffect and sendLocalNotification
   //To put into any button
 
@@ -203,8 +191,10 @@ const HomeScreen: React.FC = () => {
     refreshItems();
   };
 
-  return (
-    loading ? (<LoadingScreen/>):( <View
+  return loading ? (
+    <LoadingScreen />
+  ) : (
+    <View
       style={{ flex: 1, flexDirection: "column", backgroundColor: "#FFFAF8" }}
     >
       <SafeAreaView style={{ flex: 1 }}>
@@ -275,8 +265,8 @@ const HomeScreen: React.FC = () => {
         </Modal>
       </SafeAreaView>
       <ChatbotButton />
-    </View> )
-  )
+    </View>
+  );
 };
 
 export default HomeScreen;
