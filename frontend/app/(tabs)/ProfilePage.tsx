@@ -49,6 +49,7 @@ const ProfilePage: React.FC = () => {
         const res = await fetch(`${apiUrl}/users/${userId}`);
         const data = await res.json();
         // console.log("thing", JSON.parse(data.body))
+        console.log("BLAHHH", data.body);
         setUserData(JSON.parse(data.body));
       };
       updateUserInfo();

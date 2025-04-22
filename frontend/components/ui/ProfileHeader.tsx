@@ -2,8 +2,9 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import React from "react";
 import { RelativePathString, router } from "expo-router";
 import { UserProfileInfo } from "@/app/EditProfile";
-import * as ExpoFileSystem from 'expo-file-system'
-import * as base64 from 'base64-js'
+import * as ExpoFileSystem from "expo-file-system";
+import * as base64 from "base64-js";
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 
 import {
   S3Client,
@@ -12,6 +13,7 @@ import {
   PutObjectCommandInput,
 } from "@aws-sdk/client-s3";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Item } from "@/types";
 
 const bucketName = "cometclaim-images-utd";
 const bucketRegion = "us-east-1";
@@ -28,43 +30,59 @@ export const s3Client = new S3Client({
 } as S3ClientConfig);
 
 const ProfileHeader = (userInfo: UserProfileInfo) => {
+  const manipulateImage = async (uri: string) => {
+    const context = ImageManipulator.manipulate(uri);
+
+    context.resize({
+      width: 400,
+    });
+
+    const image = await context.renderAsync();
+    const result = await image.saveAsync({
+      format: SaveFormat.WEBP,
+      compress: 0.7,
+      base64: true,
+    });
+
+    return result.uri;
+  };
 
   const uploadImage = async () => {
-      try {
-        const fileURI = userInfo.profile_picture;
-        const fileName = fileURI.split("/").pop();
-        const fileType = "image/jpeg";
-        const fileData = await ExpoFileSystem.readAsStringAsync(fileURI, {
-          encoding: ExpoFileSystem.EncodingType.Base64,
-        });
-  
-        const binaryData = base64.toByteArray(fileData);
-  
-        const params = {
-          Bucket: bucketName,
-          Key: `uploads/${fileName}`,
-          Body: binaryData,
-          ContentType: fileType,
-        };
-  
-        const command = new PutObjectCommand(params as PutObjectCommandInput);
-        const data = await s3Client.send(command);
-  
-        // setForm({...form, image_url: `https://cometclaim-image-bucket.s3.amazonaws.com/uploads/${fileName}`})
-        // setImage(`https://cometclaim-image-bucket.s3.amazonaws.com/uploads/${fileName}`)
-        // console.log("FORMFORMFORM: \n" + form)
-        // console.log("THIS IS THE IMAGE AT THIS VERY MOMENT: " + image)
-        console.log("image uploaded successfully", data);
-  
-        return `https://${bucketName}.s3.amazonaws.com/uploads/${fileName}`;
-      } catch (err) {
-        console.error("Error uploading image", err);
-        return "";
-      }
-    };
+    try {
+      const fileURI = await manipulateImage(userInfo.profile_picture);
+      const fileName = fileURI.split("/").pop();
+      const fileType = "image/webp";
+      const fileData = await ExpoFileSystem.readAsStringAsync(fileURI, {
+        encoding: ExpoFileSystem.EncodingType.Base64,
+      });
+
+      const binaryData = base64.toByteArray(fileData);
+
+      const params = {
+        Bucket: bucketName,
+        Key: `uploads/${fileName}`,
+        Body: binaryData,
+        ContentType: fileType,
+      };
+
+      const command = new PutObjectCommand(params as PutObjectCommandInput);
+      const data = await s3Client.send(command);
+
+      // setForm({...form, image_url: `https://cometclaim-image-bucket.s3.amazonaws.com/uploads/${fileName}`})
+      // setImage(`https://cometclaim-image-bucket.s3.amazonaws.com/uploads/${fileName}`)
+      // console.log("FORMFORMFORM: \n" + form)
+      // console.log("THIS IS THE IMAGE AT THIS VERY MOMENT: " + image)
+      console.log("image uploaded successfully", data);
+
+      return `https://${bucketName}.s3.amazonaws.com/uploads/${fileName}`;
+    } catch (err) {
+      console.error("Error uploading image", err);
+      return "";
+    }
+  };
 
   async function saveProfileChanges() {
-    console.log("user info", userInfo)
+    console.log("user info", userInfo);
     try {
       const s3URL = await uploadImage();
 
@@ -72,14 +90,14 @@ const ProfileHeader = (userInfo: UserProfileInfo) => {
         throw "Image failed to upload to S3";
       }
 
-      const userId = await AsyncStorage.getItem('userId')
+      const userId = await AsyncStorage.getItem("userId");
 
-      console.log('user id is', userId)
+      console.log("user id is", userId);
 
       const response = await fetch(`${apiUrl}/users/${userId}`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           full_name: userInfo.full_name,
@@ -87,16 +105,42 @@ const ProfileHeader = (userInfo: UserProfileInfo) => {
           username: userInfo.username,
           email: userInfo.email,
           phone_number: userInfo.phone_number,
-        })
-      })
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
+
+      const getItemsOfUser = async () => {
+        const res = await fetch(`${apiUrl}/items/`);
+        const data = await res.json();
+        const items: Item[] = JSON.parse(data.body);
+        const itemsOfUser: Item[] = items.filter(
+          (item) => item.reporter_id === userId
+        );
+        return itemsOfUser;
+      };
+
+      const itemsOfUser = await getItemsOfUser();
+
+      const updateItemRequests = itemsOfUser.map((item) => async () => {
+        const res = await fetch(`${apiUrl}/items/${item.item_id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            reporter: { ...item.reporter, profile_picture: s3URL },
+          }),
+        });
+      });
+
+      await Promise.all(updateItemRequests.map((req) => req()));
+
       console.log("User updated:", data);
-      router.push("/ProfilePage" as RelativePathString)
-    } catch(error) {
+      router.push("/ProfilePage" as RelativePathString);
+    } catch (error) {
       console.error("Error updating user:", error);
     }
-    
   }
 
   return (

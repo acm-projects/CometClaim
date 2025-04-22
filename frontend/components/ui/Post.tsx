@@ -122,6 +122,7 @@ export function Post(props: PostProps) {
 }
 
 function PostHeader(props: PostHeaderProps) {
+  // console.log(props.user);
   const screenHeight = Dimensions.get("window").height;
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -297,7 +298,9 @@ function PostHeader(props: PostHeaderProps) {
         >
           <Image
             source={{
-              uri: JSON.parse(JSON.stringify(props.user)).profile_picture,
+              uri:
+                JSON.parse(JSON.stringify(props.user)).profile_picture ||
+                defaultUser.profile_picture,
             }}
             style={styles.story}
           />
