@@ -24,7 +24,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather, Ionicons, AntDesign } from "@expo/vector-icons";
 import Shimmer from "@/components/ui/Shimmer";
 import { Image } from "expo-image";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 
 type IconProps = {
@@ -340,21 +340,33 @@ const PostTop: React.FC<PostProps & { isCurrentUserAuthor: boolean }> = ({
   return (
     <View style={styles.headerView}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Image
-          source={{
-            uri: author.profile_picture || defaultUser.profile_picture,
-          }}
-          style={styles.story}
-        />
-        <Text
-          style={{
-            color: "black",
-            marginLeft: 5,
-            fontWeight: "500",
-          }}
+        <Pressable
+          style={{ flexDirection: "row", alignItems: "center" }}
+          onPress={() =>
+            router.push({
+              pathname: "/UsersProfile",
+              params: {
+                userId: JSON.parse(JSON.stringify(author.user_id)),
+              },
+            })
+          }
         >
-          {author.username}
-        </Text>
+          <Image
+            source={{
+              uri: author.profile_picture || defaultUser.profile_picture,
+            }}
+            style={styles.story}
+          />
+          <Text
+            style={{
+              color: "black",
+              marginLeft: 5,
+              fontWeight: "500",
+            }}
+          >
+            {author.username}
+          </Text>
+        </Pressable>
         <Text
           style={{
             color: "black",
@@ -475,6 +487,22 @@ const PostDateAndLocation: React.FC<Item> = (post) => (
         marginTop: 5,
       }}
     >
+      <View
+        key={`status-${post.status}`}
+        style={{
+          backgroundColor: post.status === "Lost" ? "#CB3131" : "#419D44",
+          paddingVertical: 8,
+          paddingHorizontal: 16,
+          marginLeft: 10,
+          marginRight: 15,
+          borderRadius: 20,
+          alignSelf: "flex-start",
+        }}
+      >
+        <Text style={{ color: "white", fontWeight: "600", fontSize: 12 }}>
+          {post.status === "Lost" ? "Lost" : "Found"}
+        </Text>
+      </View>
       <Icon
         imgStyle={styles.dateLocationIcon}
         imgUrl={PostDateLocationIcon[0].imageUrl}
@@ -515,6 +543,11 @@ const PostDateAndLocation: React.FC<Item> = (post) => (
     </View>
   </View>
 );
+// const PostImageSkeleton = () => (
+//   <View style={styles.imagePost}>
+//     <Shimmer style={{ width: "100%", height: 370 }} />
+//   </View>
+// );
 
 const PostImage: React.FC<Item> = (post) => (
   <View style={styles.imagePost}>
@@ -531,7 +564,12 @@ const PostImage: React.FC<Item> = (post) => (
 const Caption: React.FC<Item> = (post: Item) => (
   <View>
     <Text
-      style={{ fontSize: 16, paddingBottom: 5, paddingLeft: 20, marginTop: 10 }}
+      style={{
+        fontSize: 15,
+        paddingVertical: 10,
+        paddingLeft: 20,
+        color: "#444",
+      }}
     >
       {post.description}
     </Text>

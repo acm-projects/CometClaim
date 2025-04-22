@@ -45,7 +45,7 @@ type PostImageProps = {
 };
 
 type PostFooterProps = {
-  description: string;
+  item: Item;
   onShare: () => void;
 };
 
@@ -111,10 +111,7 @@ export function Post(props: PostProps) {
           <PostImage image_url={props.item.image_url} />
         )}
         <View style={{ marginHorizontal: 15, marginTop: 10 }}>
-          <PostFooter
-            description={props.item.description}
-            onShare={props.onShare}
-          />
+          <PostFooter item={props.item} onShare={props.onShare} />
         </View>
       </Pressable>
     </View>
@@ -446,7 +443,8 @@ function PostDateAndLocation(props: PostDateAndLocationProps) {
             fontSize: 13,
             color: "#666",
             fontWeight: "500",
-            marginLeft: 20,
+            marginLeft: 10,
+            marginRight: 11,
           }}
         >
           {getDateString(props.datetime)}
@@ -500,7 +498,7 @@ function PostImage(props: PostImageProps) {
 function PostFooter(props: PostFooterProps) {
   return (
     <View>
-      <Caption caption={props.description} />
+      <Caption caption={props.item.description} />
       <View
         style={{
           justifyContent: "center",
@@ -519,9 +517,24 @@ function PostFooter(props: PostFooterProps) {
       <View style={styles.actionContainer}>
         <Pressable
           style={styles.leftFooterIconsContainer}
-          onPress={() => router.push("/commentsScreen" as RelativePathString)}
+          onPress={() =>
+            router.push({
+              pathname: "/commentsScreen",
+              params: { item_id: props.item.item_id },
+            })
+          }
         >
-          <FontAwesome name="comment-o" size={20} color="#666" />
+          <Image
+            source={{
+              uri: "https://img.icons8.com/fluency-systems-regular/100/topic.png",
+            }}
+            style={{
+              width: 25,
+              height: 25,
+              resizeMode: "center",
+              marginTop: 5,
+            }}
+          />
           <Text> </Text>
           <Text style={styles.actionText}>Comment</Text>
         </Pressable>
@@ -530,7 +543,17 @@ function PostFooter(props: PostFooterProps) {
           style={styles.rightFooterIconsContainer}
           onPress={props.onShare}
         >
-          <FontAwesome name="share" size={20} color="#666" />
+          <Image
+            source={{
+              uri: "https://img.icons8.com/ios/100/forward-arrow.png",
+            }}
+            style={{
+              width: 30,
+              height: 30,
+              resizeMode: "center",
+              marginTop: 5,
+            }}
+          />
           <Text> </Text>
           <Text style={styles.actionText}>Share</Text>
         </Pressable>
@@ -550,7 +573,14 @@ function Icon(props: IconProps) {
 function Caption(props: CaptionProps) {
   return (
     <View>
-      <Text style={{ fontSize: 16, paddingBottom: 5, paddingLeft: 20 }}>
+      <Text
+        style={{
+          fontSize: 15,
+          paddingBottom: 5,
+          paddingLeft: 20,
+          color: "#444",
+        }}
+      >
         {props.caption}
       </Text>
     </View>
@@ -624,6 +654,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     fontWeight: "500",
+    marginTop: 8,
   },
   leftFooterIconsContainer: {
     alignItems: "center",

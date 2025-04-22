@@ -24,6 +24,7 @@ import {
   requestNotificationPermission,
   sendLocalNotification,
 } from "../utils/NotificationUtils";
+import ItemCategoryFilter from "@/components/ui/ItemCategories";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeScreen: React.FC = () => {
@@ -33,6 +34,42 @@ const HomeScreen: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<
     "all" | "Lost" | "Found"
   >("all");
+  const [activeItemCategory, setActiveItemCategory] = useState<string | null>(
+    null
+  );
+
+  const itemCategories = [
+    {
+      id: "tech",
+      name: "Tech",
+      icon: "https://i.imgur.com/Achigdr.png",
+    },
+    {
+      id: "shirts",
+      name: "Shirts",
+      icon: "https://www.mrporter.com/variants/images/1647597307228448/in/w2000_q60.jpg",
+    },
+    {
+      id: "books",
+      name: "Books",
+      icon: "https://static.scientificamerican.com/sciam/cache/file/1DDFE633-2B85-468D-B28D05ADAE7D1AD8_source.jpg?w=1200",
+    },
+    {
+      id: "keys",
+      name: "Keys",
+      icon: "https://cdn.shopify.com/s/files/1/2245/3557/files/CSE-AS-ExtraKeys.png?v=1713479233",
+    },
+    {
+      id: "wallets",
+      name: "Wallets",
+      icon: "https://i.ebayimg.com/00/s/MTU1OFgxNjAw/z/z8AAAOSwsFdfvAg7/$_57.JPG?set_id=8800005007",
+    },
+    {
+      id: "bags",
+      name: "Bags",
+      icon: "https://prenelove.ca/cdn/shop/articles/how-many-bags-should-you-own-225009_1024x733.jpg?v=1709320764",
+    },
+  ];
 
   const scrollY = useRef(new Animated.Value(0)).current;
   const filterHeight = 70;
@@ -99,6 +136,7 @@ const HomeScreen: React.FC = () => {
           const data = await res.json();
           // console.log(typeof data, data);
           const fetchedItems = JSON.parse(data.body);
+          console.log(fetchedItems);
 
           const sortedItems = [...fetchedItems].sort((a: Item, b: Item) => {
             return (
@@ -145,6 +183,13 @@ const HomeScreen: React.FC = () => {
     // Request notification permission when component mounts
     requestNotificationPermission();
   }, []);
+  const handleItemCategoryChange = (categoryId: string) => {
+    // Toggle category if already selected
+    setActiveItemCategory(
+      activeItemCategory === categoryId ? null : categoryId
+    );
+    refreshItems();
+  };
 
   return loading ? (
     <LoadingScreen />
@@ -171,6 +216,11 @@ const HomeScreen: React.FC = () => {
             {/* Add a spacer for the filter height */}
             <View style={{ height: filterHeight }} />
 
+            <ItemCategoryFilter
+              categories={itemCategories}
+              activeCategory={activeItemCategory}
+              onCategoryChange={handleItemCategoryChange}
+            />
             {filteredItems.map((item: Item, index: number) => (
               <Post
                 item={item}
@@ -201,11 +251,6 @@ const HomeScreen: React.FC = () => {
               right: 0,
               zIndex: 2,
               backgroundColor: "#FFFAF8",
-              // shadowColor: "#000",
-              // shadowOffset: { width: 0, height: 2 },
-              // shadowOpacity: 0.1,
-              // shadowRadius: 3,
-              // elevation: 3,
             }}
           >
             <CategoryFilter
