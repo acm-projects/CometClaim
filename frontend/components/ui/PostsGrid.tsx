@@ -122,7 +122,7 @@ const PostsGrid: React.FC<PostsGridProps> = ({
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.tab, activeTab === "claimed" && styles.activeTab]}
-              onPress={() => setActiveTab("lost")}
+              onPress={() => setActiveTab("claimed")}
             >
               <Text
                 style={[
