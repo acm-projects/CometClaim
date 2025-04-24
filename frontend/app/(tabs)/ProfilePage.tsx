@@ -41,7 +41,7 @@ const ProfilePage: React.FC = () => {
   >("posts");
 
   const [userData, setUserData] = useState<User>(defaultUser);
-  const [userPosts, setUserPosts] = useState<Post[]>([]);
+  const [userPosts, setUserPosts] = useState<Item[]>([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -52,6 +52,15 @@ const ProfilePage: React.FC = () => {
         // console.log("thing", JSON.parse(data.body))
         console.log("BLAHHH", data.body);
         setUserData(JSON.parse(data.body));
+
+        const postsRes = await fetch(`${apiUrl}/items/`);
+        const postsData = await postsRes.json();
+        const posts = JSON.parse(postsData.body);
+        const userPosts = posts.filter(
+          (post: Item) => post.reporter_id === userId
+        );
+
+        setUserPosts(userPosts);
       };
 
       updateUserInfo();
@@ -140,8 +149,8 @@ const ProfilePage: React.FC = () => {
       <PostsGrid
         posts={
           activeSection === "posts"
-            ? userData.posts.map((item) => ({ item, user: userData } as Post))
-            : userData.posts
+            ? userPosts.map((item) => ({ item, user: userData } as Post))
+            : userPosts
                 .filter((post: Item) => post.status === activeSection)
                 .map((item) => ({ item, user: userData } as Post))
         }
