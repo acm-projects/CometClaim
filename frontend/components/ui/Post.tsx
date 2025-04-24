@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { defaultUser, Item, User } from "@/types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type PostProps = {
   user: User;
@@ -28,6 +29,7 @@ type PostProps = {
 };
 
 type PostHeaderProps = {
+  loggedInUserId: string;
   user: User;
   item: Item;
   datetime: string;
@@ -78,6 +80,17 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 // };
 
 export function Post(props: PostProps) {
+  const [currentLoggedInUser, setCurrentLoggedInUser] = useState("");
+
+  useEffect(() => {
+    async function getCurrentUser() {
+      const currentUser = await AsyncStorage.getItem("userId");
+      if (currentUser) setCurrentLoggedInUser(currentUser);
+    }
+
+    getCurrentUser();
+  }, []);
+
   return (
     <View>
       {/* <Divider width={1} orientation="vertical" /> */}
@@ -98,6 +111,7 @@ export function Post(props: PostProps) {
           datetime={props.item.date_reported}
           user={props.user}
           item={props.item}
+          loggedInUserId={currentLoggedInUser}
           onStatusChange={props.onStatusChange} // Pass the prop to PostHeader
         />
         <PostDateAndLocation
@@ -203,6 +217,10 @@ function PostHeader(props: PostHeaderProps) {
   ).current;
 
   const markItemAsFound = async () => {
+    if (props.item.reporter_id !== props.loggedInUserId) {
+      console.log("you arent the user");
+      return;
+    }
     try {
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_API_URL}/items/${props.item.item_id}`,
@@ -212,7 +230,7 @@ function PostHeader(props: PostHeaderProps) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            status: "Found",
+            status: "Claimed",
           }),
         }
       );
@@ -354,21 +372,27 @@ function PostHeader(props: PostHeaderProps) {
               backgroundColor: "#ffffff",
             }}
           >
-            <View style={{ height: 100, width: 100 }}>
-              <Pressable
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-                  markItemAsFound();
-                }}
-              >
-                <AntDesign name="checkcircle" size={90} color={"#f27c1b"} />
-              </Pressable>
-            </View>
+            {props.loggedInUserId === props.item.reporter_id ? (
+              <View style={{ height: 100, width: 100 }}>
+                <Pressable
+                  style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                    markItemAsFound();
+                  }}
+                >
+                  <AntDesign name="checkcircle" size={90} color={"#f27c1b"} />
+                </Pressable>
+              </View>
+            ) : (
+              <View>
+                <Text>Options not available</Text>
+              </View>
+            )}
             <View
               style={{
                 height: 30,
@@ -421,7 +445,12 @@ function PostDateAndLocation(props: PostDateAndLocationProps) {
         <View
           key={`status-${props.status}`}
           style={{
-            backgroundColor: props.status === "Lost" ? "#CB3131" : "#419D44",
+            backgroundColor:
+              props.status === "Lost"
+                ? "#CB3131"
+                : props.status === "Found"
+                ? "#419D44"
+                : "#914CFF",
             paddingVertical: 8,
             paddingHorizontal: 16,
             marginLeft: 10,
@@ -431,7 +460,7 @@ function PostDateAndLocation(props: PostDateAndLocationProps) {
           }}
         >
           <Text style={{ color: "white", fontWeight: "600", fontSize: 12 }}>
-            {props.status === "Lost" ? "Lost" : "Found"}
+            {props.status}
           </Text>
         </View>
         <Icon

@@ -41,6 +41,7 @@ const ProfilePage: React.FC = () => {
   >("posts");
 
   const [userData, setUserData] = useState<User>(defaultUser);
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -52,6 +53,7 @@ const ProfilePage: React.FC = () => {
         console.log("BLAHHH", data.body);
         setUserData(JSON.parse(data.body));
       };
+
       updateUserInfo();
     }, [])
   );
@@ -135,7 +137,6 @@ const ProfilePage: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
-
       <PostsGrid
         posts={
           activeSection === "posts"
