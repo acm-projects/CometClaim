@@ -490,7 +490,12 @@ const PostDateAndLocation: React.FC<Item> = (post) => (
       <View
         key={`status-${post.status}`}
         style={{
-          backgroundColor: post.status === "Lost" ? "#CB3131" : "#419D44",
+          backgroundColor:
+            post.status === "Lost"
+              ? "#CB3131"
+              : post.status === "Found"
+              ? "#419D44"
+              : "#914CFF",
           paddingVertical: 8,
           paddingHorizontal: 16,
           marginLeft: 10,
@@ -500,7 +505,7 @@ const PostDateAndLocation: React.FC<Item> = (post) => (
         }}
       >
         <Text style={{ color: "white", fontWeight: "600", fontSize: 12 }}>
-          {post.status === "Lost" ? "Lost" : "Found"}
+          {post.status}
         </Text>
       </View>
       <Icon

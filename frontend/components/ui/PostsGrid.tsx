@@ -26,7 +26,9 @@ const PostsGrid: React.FC<PostsGridProps> = ({
   title = "Posts",
   ListHeaderComponent,
 }) => {
-  const [activeTab, setActiveTab] = useState<"all" | "found" | "lost">("all");
+  const [activeTab, setActiveTab] = useState<
+    "all" | "found" | "lost" | "claimed"
+  >("all");
 
   const filteredPosts =
     activeTab === "all"
@@ -58,6 +60,11 @@ const PostsGrid: React.FC<PostsGridProps> = ({
       {item.status.toLowerCase() === "lost" && (
         <View style={[styles.postBadge, styles.lostBadge]}>
           <Text style={styles.badgeText}>Lost</Text>
+        </View>
+      )}
+      {item.status.toLowerCase() === "claimed" && (
+        <View style={[styles.postBadge, styles.claimedBadge]}>
+          <Text style={styles.badgeText}>Claimed</Text>
         </View>
       )}
     </TouchableOpacity>
@@ -111,6 +118,19 @@ const PostsGrid: React.FC<PostsGridProps> = ({
                 ]}
               >
                 Lost
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === "claimed" && styles.activeTab]}
+              onPress={() => setActiveTab("lost")}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === "claimed" && styles.activeTabText,
+                ]}
+              >
+                Claimed
               </Text>
             </TouchableOpacity>
           </View>
@@ -245,6 +265,9 @@ const styles = StyleSheet.create({
   },
   lostBadge: {
     backgroundColor: "#F44336",
+  },
+  claimedBadge: {
+    backgroundColor: "#914CFF",
   },
   badgeText: {
     color: "white",

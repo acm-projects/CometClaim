@@ -138,12 +138,14 @@ const HomeScreen: React.FC = () => {
           const fetchedItems = JSON.parse(data.body);
           console.log(fetchedItems);
 
-          const sortedItems = [...fetchedItems].sort((a: Item, b: Item) => {
-            return (
-              new Date(b.date_reported).getTime() -
-              new Date(a.date_reported).getTime()
-            );
-          });
+          const sortedItems = [...fetchedItems]
+            .filter((item: Item) => item.status !== "Claimed")
+            .sort((a: Item, b: Item) => {
+              return (
+                new Date(b.date_reported).getTime() -
+                new Date(a.date_reported).getTime()
+              );
+            });
 
           setItems(sortedItems);
           filterItems(sortedItems, activeCategory);
