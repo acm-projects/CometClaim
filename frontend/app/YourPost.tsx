@@ -51,6 +51,8 @@ const YourPost: React.FC<Item> = (item) => {
   const [isCurrentUserAuthor, setIsCurrentUserAuthor] = useState(false);
   const [currentUser, setCurrentUser] = useState<User>(defaultUser);
 
+  const [post, setPost] = useState<Item>(item);
+
   // Get params from the URL
   const params = useLocalSearchParams();
   const { id, currentUserId } = params;
@@ -115,13 +117,14 @@ const YourPost: React.FC<Item> = (item) => {
         ) : (
           <>
             <PostTop
-              post={item}
+              post={post}
               author={item.reporter}
               isCurrentUserAuthor={isCurrentUserAuthor}
+              setPost={setPost}
             />
-            <PostDateAndLocation {...item} />
-            <PostImage {...item} />
-            <PostFooter {...item} />
+            <PostDateAndLocation {...post} />
+            <PostImage {...post} />
+            <PostFooter {...post} />
             <Divider width={1} orientation="vertical" />
 
             {/* Comments Section */}
@@ -212,11 +215,12 @@ const YourPost: React.FC<Item> = (item) => {
     </KeyboardAvoidingView>
   );
 };
-const PostTop: React.FC<PostProps & { isCurrentUserAuthor: boolean }> = ({
-  post,
-  author,
-  isCurrentUserAuthor,
-}) => {
+const PostTop: React.FC<
+  PostProps & {
+    isCurrentUserAuthor: boolean;
+    setPost: React.Dispatch<React.SetStateAction<Item>>;
+  }
+> = ({ post, author, isCurrentUserAuthor, setPost }) => {
   function datetimeToHowLongAgo(datetime: string) {
     const timeDifferenceInMilliseconds = Date.now() - Date.parse(datetime);
 
@@ -330,10 +334,11 @@ const PostTop: React.FC<PostProps & { isCurrentUserAuthor: boolean }> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          status: "Found",
+          status: "Claimed",
         }),
       });
     };
+    setPost((old) => ({ ...old, status: "Claimed" }));
     sendFoundRequest();
   };
 
@@ -421,6 +426,7 @@ const PostTop: React.FC<PostProps & { isCurrentUserAuthor: boolean }> = ({
                   }}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                    closeModal();
                     markItemAsFound();
                   }}
                 >
