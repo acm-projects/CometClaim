@@ -125,7 +125,13 @@ const HomeScreen: React.FC = () => {
 
   useEffect(() => {
     // Force a refresh when changing categories
-    refreshItems();
+    // refreshItems();
+
+    setFilteredItems(
+      items.filter(
+        (item) => item.status.toLowerCase() === activeCategory.toLowerCase()
+      )
+    );
   }, [activeCategory]);
 
   useFocusEffect(
@@ -136,7 +142,7 @@ const HomeScreen: React.FC = () => {
           const data = await res.json();
           // console.log(typeof data, data);
           const fetchedItems = JSON.parse(data.body);
-          console.log(fetchedItems);
+          // console.log(fetchedItems);
 
           const sortedItems = [...fetchedItems]
             .filter((item: Item) => item.status !== "Claimed")
@@ -149,12 +155,13 @@ const HomeScreen: React.FC = () => {
 
           setItems(sortedItems);
           filterItems(sortedItems, activeCategory);
+          setLoading(false);
         } catch (error) {
           console.error("Error fetching items:", error);
         }
-        setTimeout(() => {
-          setLoading(false);
-        }, 1500); // 2 second delay
+        // setTimeout(() => {
+        //   setLoading(false);
+        // }, 1500); // 2 second delay
       }
       getItems();
     }, [activeCategory, refreshTrigger])
