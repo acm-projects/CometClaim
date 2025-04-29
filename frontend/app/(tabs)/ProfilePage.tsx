@@ -50,17 +50,17 @@ const ProfilePage: React.FC = () => {
         const res = await fetch(`${apiUrl}/users/${userId}`);
         const data = await res.json();
         // console.log("thing", JSON.parse(data.body))
-        console.log("BLAHHH", data.body);
+        // console.log("BLAHHH", data.body);
         setUserData(JSON.parse(data.body));
 
-        const postsRes = await fetch(`${apiUrl}/items/`);
+        const postsRes = await fetch(`${apiUrl}/items?userId=${userId}`);
         const postsData = await postsRes.json();
         const posts = JSON.parse(postsData.body);
-        const userPosts = posts.filter(
-          (post: Item) => post.reporter_id === userId
-        );
+        // const userPosts = posts.filter(
+        //   (post: Item) => post.reporter_id === userId
+        // );
 
-        setUserPosts(userPosts);
+        setUserPosts(posts);
       };
 
       updateUserInfo();

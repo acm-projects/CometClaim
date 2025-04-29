@@ -92,7 +92,7 @@ const AddItemScreen = () => {
       quality: 1,
     });
 
-    console.log(result);
+    // console.log(result);
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
@@ -104,12 +104,12 @@ const AddItemScreen = () => {
 
   const takePhoto = async () => {
     let cameraPermissions = await ExpoImagePicker.getCameraPermissionsAsync();
-    console.log(cameraPermissions);
+    // console.log(cameraPermissions);
     if (!cameraPermissions.granted) {
       cameraPermissions = await ExpoImagePicker.requestCameraPermissionsAsync();
     }
 
-    console.log(cameraPermissions);
+    // console.log(cameraPermissions);
 
     if (cameraPermissions.granted) {
       let result = await ExpoImagePicker.launchCameraAsync({
@@ -120,10 +120,10 @@ const AddItemScreen = () => {
         cameraType: ExpoImagePicker.CameraType.back,
       });
 
-      console.log(result);
+      // console.log(result);
 
       if (!result.canceled) {
-        console.log("BLASH: " + result.assets[0].uri);
+        // console.log("BLASH: " + result.assets[0].uri);
         setImage(result.assets[0].uri);
       }
       // console.log("imageeeeee: " + image)
@@ -177,7 +177,7 @@ const AddItemScreen = () => {
       const command = new PutObjectCommand(params as PutObjectCommandInput);
       const data = await s3Client.send(command);
 
-      console.log("image uploaded successfully", data);
+      // console.log("image uploaded successfully", data);
 
       return `https://${bucketName}.s3.amazonaws.com/uploads/${fileName}`;
     } catch (err) {
@@ -209,6 +209,8 @@ const AddItemScreen = () => {
 
       const reporterData = await reporterRes.json();
       const reporter = JSON.parse(reporterData.body);
+
+      delete reporter.posts
 
       // Only include image_url in the payload if it exists
       const payload = {
@@ -246,7 +248,7 @@ const AddItemScreen = () => {
       });
 
       const data = await response.json();
-      console.log("Item added:", data);
+      // console.log("Item added:", data);
 
       setForm({
         item: "",

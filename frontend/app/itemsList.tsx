@@ -28,7 +28,7 @@ export default function ItemsListPage() {
       });
       const data = await res.json();
       setItems(JSON.parse(data.body));
-      console.log(data);
+      // console.log(data);
     };
     getItems();
   }, []);
@@ -80,7 +80,7 @@ export default function ItemsListPage() {
       ) : (
         <Text style={{ color: "red" }}>No items found</Text>
       )}
-      <Button title="Thing" onPress={() => console.log(items)}></Button>
+      {/* <Button title="Thing" onPress={() => console.log(items)}></Button> */}
       <View style={{ height: 100 }} />
     </ScrollView>
   );
