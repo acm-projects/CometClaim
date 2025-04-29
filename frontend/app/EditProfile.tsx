@@ -128,7 +128,7 @@ const ProfileImage = ({
       quality: 1,
     });
 
-    console.log(result);
+    // console.log(result);
 
     if (!result.canceled) {
       setUserProfileInfo({
@@ -140,12 +140,12 @@ const ProfileImage = ({
 
   const takePhoto = async () => {
     let cameraPermissions = await ExpoImagePicker.getCameraPermissionsAsync();
-    console.log(cameraPermissions);
+    // console.log(cameraPermissions);
     if (!cameraPermissions.granted) {
       cameraPermissions = await ExpoImagePicker.requestCameraPermissionsAsync();
     }
 
-    console.log(cameraPermissions);
+    // console.log(cameraPermissions);
 
     if (cameraPermissions.granted) {
       let result = await ExpoImagePicker.launchCameraAsync({
@@ -156,7 +156,7 @@ const ProfileImage = ({
         cameraType: ExpoImagePicker.CameraType.back,
       });
 
-      console.log(result);
+      // console.log(result);
 
       if (!result.canceled) {
         console.log("BLASH: " + result.assets[0].uri);

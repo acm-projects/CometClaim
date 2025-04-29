@@ -51,7 +51,7 @@ const ChatScreen: React.FC = () => {
       setSocket(socket);
       socket.onopen = (event) => {
         console.log("Connected!");
-        console.log(event);
+        // console.log(event);
         socket.send(
           JSON.stringify({
             action: "sendMessage",
@@ -63,7 +63,7 @@ const ChatScreen: React.FC = () => {
 
       socket.onmessage = (event) => {
         const messageObj = JSON.parse(event.data);
-        console.log("Message from server:", messageObj);
+        // console.log("Message from server:", messageObj);
         setMessages((prevMessages) => [...prevMessages, messageObj]);
       };
 

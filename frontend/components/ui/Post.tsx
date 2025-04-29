@@ -98,7 +98,7 @@ export function Post(props: PostProps) {
         style={styles.backPost}
         // onPress={() => router.push("/seePost")}
         onPress={() => {
-          console.log(`/posts/${props.item.item_id}`);
+          // console.log(`/posts/${props.item.item_id}`);
           router.push({
             pathname: `/posts/${props.item.item_id}` as RelativePathString,
             params: {
@@ -270,7 +270,7 @@ function PostHeader(props: PostHeaderProps) {
   };
 
   const handleDropdownTriggerPress = (key: string) => {
-    console.log("dd trigger pressed: ", key);
+    // console.log("dd trigger pressed: ", key);
   };
 
   function datetimeToHowLongAgo(datetime: string) {
