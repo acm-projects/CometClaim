@@ -21,7 +21,7 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({
     username: "",
-    password: ""
+    password: "",
   });
   const router = useRouter();
 
@@ -43,7 +43,7 @@ const LoginScreen = () => {
       setPassword("");
       setErrors({
         username: "",
-        password: ""
+        password: "",
       });
     }
   };

@@ -7,23 +7,24 @@
 
 */
 
-
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Animated,
   StyleSheet,
   Dimensions,
   Image,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+  SafeAreaView,
+  StatusBar,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 const LoadingScreen: React.FC = () => {
   const spinAnim = useRef(new Animated.Value(0)).current;
 
-  //Spinning logo animation 
+  //Spinning logo animation
   useEffect(() => {
     Animated.loop(
       Animated.timing(spinAnim, {
@@ -36,19 +37,19 @@ const LoadingScreen: React.FC = () => {
 
   const spin = spinAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
+    outputRange: ["0deg", "360deg"],
   });
 
   return (
     //Orange gradient background - update to use correct const?
     <LinearGradient
-      colors={['#FFC480', '#FC801A']}
+      colors={["#FFC480", "#FC801A"]}
       start={{ x: 0, y: 0 }}
       end={{ x: 0, y: 1 }}
       style={styles.container}
     >
       <Animated.Image
-        source={require('../assets/images/CometClaim-Logo.png')} //Is this in the right path?? I ended up just adding it to the same folder lol
+        source={require("../assets/images/CometClaim-Logo.png")} //Is this in the right path?? I ended up just adding it to the same folder lol
         style={[styles.logo, { transform: [{ rotate: spin }] }]}
         resizeMode="contain"
       />
@@ -59,8 +60,10 @@ const LoadingScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    height: "100%",
   },
   logo: {
     width: width * 0.4,
@@ -69,4 +72,3 @@ const styles = StyleSheet.create({
 });
 
 export default LoadingScreen;
-

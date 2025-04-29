@@ -204,9 +204,10 @@ const HomeScreen: React.FC = () => {
     refreshItems();
   };
 
-  return loading ? (
-    <LoadingScreen />
-  ) : (
+  if (loading) {
+    return <LoadingScreen />;
+  }
+  return (
     <View
       style={{ flex: 1, flexDirection: "column", backgroundColor: "#FFFAF8" }}
     >

@@ -99,30 +99,39 @@ const ProfilePage: React.FC = () => {
 
   // Create the profile header component to be passed to PostsGrid
   const ProfileHeader = () => (
-    <View style={{ marginTop: -20 }}>
-      {/* Edit button */}
-      <View style={styles.editButtonContainer}>
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => router.push("/EditProfile")}
-        >
-          <MaterialIcons name="edit" size={20} color="#FC5E1A" />
-        </TouchableOpacity>
-      </View>
-      {/* Profile avatar and name */}
-      <View style={styles.profileContainer}>
-        <Animated.View style={[styles.avatarContainer, avatarStyle]}>
-          <Image
-            source={{ uri: userData.profile_picture }}
-            style={styles.avatar}
-          />
-        </Animated.View>
-        <View style={{ alignItems: "center", marginBottom: 20 }}>
-          <Text style={styles.username}>@{userData.username}</Text>
-          <Text style={styles.fullName}>{userData.full_name}</Text>
+    <View>
+      <LinearGradient
+        colors={[
+          "#FC5E1A", // More opaque at top
+          "rgba(252, 94, 26, 0.7)",
+          "rgba(252, 94, 26, 0.3)",
+          "rgba(252, 94, 26, 0.0)",
+          "transparent", // Fade to transparent at the bottom
+        ]}
+      >
+        {/* Edit button */}
+        <View style={styles.editButtonContainer}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => router.push("/EditProfile")}
+          >
+            <MaterialIcons name="edit" size={20} color="#FC5E1A" />
+          </TouchableOpacity>
         </View>
-      </View>
-
+        {/* Profile avatar and name */}
+        <View style={styles.profileContainer}>
+          <Animated.View style={[styles.avatarContainer, avatarStyle]}>
+            <Image
+              source={{ uri: userData.profile_picture }}
+              style={styles.avatar}
+            />
+          </Animated.View>
+          <View style={{ alignItems: "center", marginBottom: 20 }}>
+            <Text style={styles.username}>@{userData.username}</Text>
+            <Text style={styles.fullName}>{userData.full_name}</Text>
+          </View>
+        </View>
+      </LinearGradient>
       {/* Profile stats */}
       <ProfileStats
         postsCount={stats.posts}
@@ -144,7 +153,7 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
       <PostsGrid
         posts={
@@ -163,8 +172,8 @@ const ProfilePage: React.FC = () => {
         }
         ListHeaderComponent={ProfileHeader()}
       />
-      <View style={{ height: 25 }}></View>
-    </SafeAreaView>
+      <View style={{ height: 60 }}></View>
+    </View>
   );
 };
 
@@ -172,7 +181,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f8f8",
-    paddingTop: 10,
   },
   editButtonContainer: {
     alignSelf: "flex-end",
