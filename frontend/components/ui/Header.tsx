@@ -2,6 +2,12 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import React from "react";
 import { RelativePathString, router } from "expo-router";
+const searchIcon = require("@/assets/images/search--v1.png");
+//  uri: "https://img.icons8.com/ios-filled/90/FC5E1A/search--v1.png",
+const notificationIcon = require("@/assets/images/appointment-reminders--v1.png");
+//  uri: "https://img.icons8.com/fluency-systems-regular/100/FC5E1A/appointment-reminders--v1.png",
+const messageIcon = require("@/assets/images/speech-bubble-with-dots--v1.png");
+//  uri: "https://img.icons8.com/fluency-systems-regular/90/FC5E1A/speech-bubble-with-dots--v1.png",
 
 const Header = () => {
   return (
@@ -16,12 +22,7 @@ const Header = () => {
           <TouchableOpacity
             onPress={() => router.push("/Search" as RelativePathString)}
           >
-            <Image
-              source={{
-                uri: "https://img.icons8.com/ios-filled/90/FC5E1A/search--v1.png",
-              }}
-              style={styles.icon}
-            />
+            <Image source={searchIcon} style={styles.icon} />
           </TouchableOpacity>
         </View>
         <View style={styles.iconBorder}>
@@ -32,12 +33,7 @@ const Header = () => {
               )
             }
           >
-            <Image
-              source={{
-                uri: "https://img.icons8.com/fluency-systems-regular/100/FC5E1A/appointment-reminders--v1.png",
-              }}
-              style={styles.icon}
-            />
+            <Image source={notificationIcon} style={styles.icon} />
           </TouchableOpacity>
         </View>
         <View style={styles.iconBorder}>
@@ -47,12 +43,7 @@ const Header = () => {
             {/* <View style={styles.unreadBadge}>
               <Text style={styles.unreadBadgeText}>1</Text>
             </View> */}
-            <Image
-              source={{
-                uri: "https://img.icons8.com/fluency-systems-regular/90/FC5E1A/speech-bubble-with-dots--v1.png",
-              }}
-              style={styles.icon}
-            />
+            <Image source={messageIcon} style={styles.icon} />
           </TouchableOpacity>
         </View>
       </View>
@@ -86,8 +77,8 @@ const styles = StyleSheet.create({
     marginBottom: 120,
   },
   icon: {
-    width: 29,
-    height: 29,
+    width: 28,
+    height: 28,
     resizeMode: "center",
   },
   unreadBadge: {

@@ -26,6 +26,7 @@ import Shimmer from "@/components/ui/Shimmer";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
+import LoadingScreen from "./Landing";
 
 type IconProps = {
   imgStyle: any;
@@ -47,7 +48,7 @@ const SkeletonPostImage = () => (
 
 const YourPost: React.FC<Item> = (item) => {
   const [comment, setComment] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCurrentUserAuthor, setIsCurrentUserAuthor] = useState(false);
   const [currentUser, setCurrentUser] = useState<User>(defaultUser);
 
@@ -61,6 +62,9 @@ const YourPost: React.FC<Item> = (item) => {
       const currentUserId = await AsyncStorage.getItem("userId");
       const isCurrentUserAuthor = currentUserId === item.reporter_id;
       setIsCurrentUserAuthor(isCurrentUserAuthor);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1500); // 2 second delay
     }
     getCurrentUser();
   }, [item]);
@@ -99,62 +103,57 @@ const YourPost: React.FC<Item> = (item) => {
   //   }
   //   getPostAuthor()
   // }, [])
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: "white" }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={90}
+      keyboardVerticalOffset={30}
     >
       <YourPostHeader isCurrentUserAuthor={isCurrentUserAuthor} />
       <ScrollView>
-        {isLoading ? (
-          <>
-            <SkeletonPostImage />
-          </>
-        ) : (
-          <>
-            <PostTop
-              post={item}
-              author={item.reporter}
-              isCurrentUserAuthor={isCurrentUserAuthor}
-            />
-            <PostDateAndLocation {...item} />
-            <PostImage {...item} />
-            <PostFooter {...item} />
-            <Divider width={1} orientation="vertical" />
+        <PostTop
+          post={item}
+          author={item.reporter}
+          isCurrentUserAuthor={isCurrentUserAuthor}
+        />
+        <PostDateAndLocation {...item} />
+        <PostImage {...item} />
+        <PostFooter {...item} />
+        <Divider width={5} orientation="horizontal" color="#D7C9C2" />
 
-            {/* Comments Section */}
-            <View style={{ marginTop: 20, paddingHorizontal: 15 }}>
-              <Text
-                style={{ fontSize: 18, fontWeight: "600", marginBottom: 10 }}
-              >
-                Comments
-              </Text>
+        {/* Comments Section */}
+        <View style={{ marginTop: 20, paddingHorizontal: 15 }}>
+          <Text style={{ fontSize: 18, fontWeight: "600", marginBottom: 10 }}>
+            Comments
+          </Text>
 
-              {/* Sample comments - replace with real data when available */}
-              <Comment
-                username="Neeha"
-                commentMessage="I found this item at the ECSS around 7 PM coming into class "
-                replies={[
-                  {
-                    username: "Mohammad",
-                    commentMessage: "Thank you for finding it!",
-                  },
-                  {
-                    username: "Jason",
-                    commentMessage:
-                      "@Neeha Can you provide more details about where exactly?",
-                  },
-                ]}
-              />
-              <Comment
-                username="Tien"
-                commentMessage="I think I saw someone looking for this earlier today"
-              />
+          {/* Sample comments - replace with real data when available */}
+          <Comment
+            username="Neeha"
+            commentMessage="I found this item at the ECSS around 7 PM coming into class "
+            replies={[
+              {
+                username: "Mohammad",
+                commentMessage: "Thank you for finding it!",
+              },
+              {
+                username: "Jason",
+                commentMessage:
+                  "@Neeha Can you provide more details about where exactly?",
+              },
+            ]}
+          />
+          <Comment
+            username="Tien"
+            commentMessage="I think I saw someone looking for this earlier today"
+          />
 
-              {/* Map real comments when you have them */}
-              {/* {comments.map((comment) => (
+          {/* Map real comments when you have them */}
+          {/* {comments.map((comment) => (
             <Comment
               key={comment.id}
               username={comment.author.username}
@@ -162,9 +161,7 @@ const YourPost: React.FC<Item> = (item) => {
               replies={comment.replies}
             />
           ))} */}
-            </View>
-          </>
-        )}
+        </View>
       </ScrollView>
 
       {/* Comment input section */}
@@ -554,17 +551,21 @@ const PostDateAndLocation: React.FC<Item> = (post) => (
 //   </View>
 // );
 
-const PostImage: React.FC<Item> = (post) => (
-  <View style={styles.imagePost}>
-    <Image
-      source={{ uri: post.image_url }}
-      style={{
-        width: "100%",
-        height: 370,
-      }}
-    />
-  </View>
-);
+const PostImage = (item: Item) => {
+  return item.image_url ? (
+    <View style={styles.imagePost}>
+      <Image
+        source={{ uri: item.image_url }}
+        style={{
+          width: "100%",
+          height: 370,
+        }}
+      />
+    </View>
+  ) : (
+    <View></View>
+  );
+};
 
 const Caption: React.FC<Item> = (post: Item) => (
   <View>
@@ -574,6 +575,7 @@ const Caption: React.FC<Item> = (post: Item) => (
         paddingVertical: 10,
         paddingLeft: 20,
         color: "#444",
+        marginBottom: 5,
       }}
     >
       {post.description}

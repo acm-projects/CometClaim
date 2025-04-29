@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: "row",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#FC5E1A",
     borderRadius: 25,
     padding: 5,
     shadowColor: "#000",
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   activeTab: {
-    backgroundColor: "white",
+    backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#666",
+    color: "#fff",
   },
   activeTabText: {
     color: "#FC5E1A",

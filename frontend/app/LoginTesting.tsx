@@ -512,7 +512,7 @@ import {
 import { signUp, confirmSignUp, signIn, signOut } from "./Signup";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
-import { Link, RelativePathString } from "expo-router";
+import { Link, RelativePathString, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient"; // Make sure to install expo-linear-gradient
@@ -534,6 +534,7 @@ const App: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [keyboardVisible, setKeyboardVisible] = useState<boolean>(false);
+  const router = useRouter();
 
   // Monitor keyboard visibility
   useEffect(() => {
@@ -555,6 +556,11 @@ const App: React.FC = () => {
       keyboardDidShowListener.remove();
     };
   }, []);
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace("/(tabs)/HomeScreen" as RelativePathString);
+    }
+  }, [isAuthenticated, router]);
 
   const handleSignup = async () => {
     try {
@@ -972,9 +978,7 @@ const App: React.FC = () => {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
           >
-            {isAuthenticated
-              ? renderAuthenticatedScreen()
-              : step === "login"
+            {step === "login"
               ? renderLoginScreen()
               : step === "signup"
               ? renderSignupScreen()

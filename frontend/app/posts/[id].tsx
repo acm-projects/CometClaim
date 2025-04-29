@@ -33,7 +33,7 @@ export default function PostDetails() {
     </View>
   ) : (
     <View style={{ flex: 1, backgroundColor: "white" }}>
-      <Text>No post found</Text>
+      <Text>d</Text>
     </View>
   );
 }
