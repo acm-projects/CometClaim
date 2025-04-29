@@ -12,7 +12,7 @@ export default function PostDetails() {
 
   const id = params.get("id");
 
-  console.log("yeahhh", id);
+  // console.log("yeahhh", id);
   const [item, setItem] = useState<Item>();
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function PostDetails() {
 
       const data = await res.json();
 
-      console.log(JSON.parse(data.body));
+      // console.log(JSON.parse(data.body));
       setItem(JSON.parse(data.body));
     }
     getPost();

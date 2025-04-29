@@ -72,7 +72,7 @@ const ProfileHeader = (userInfo: UserProfileInfo) => {
       // setImage(`https://cometclaim-image-bucket.s3.amazonaws.com/uploads/${fileName}`)
       // console.log("FORMFORMFORM: \n" + form)
       // console.log("THIS IS THE IMAGE AT THIS VERY MOMENT: " + image)
-      console.log("image uploaded successfully", data);
+      // console.log("image uploaded successfully", data);
 
       return `https://${bucketName}.s3.amazonaws.com/uploads/${fileName}`;
     } catch (err) {
@@ -82,7 +82,7 @@ const ProfileHeader = (userInfo: UserProfileInfo) => {
   };
 
   async function saveProfileChanges() {
-    console.log("user info", userInfo);
+    // console.log("user info", userInfo);
     try {
       const s3URL = await uploadImage();
 
@@ -92,7 +92,7 @@ const ProfileHeader = (userInfo: UserProfileInfo) => {
 
       const userId = await AsyncStorage.getItem("userId");
 
-      console.log("user id is", userId);
+      // console.log("user id is", userId);
 
       const response = await fetch(`${apiUrl}/users/${userId}`, {
         method: "PATCH",
@@ -136,7 +136,7 @@ const ProfileHeader = (userInfo: UserProfileInfo) => {
 
       await Promise.all(updateItemRequests.map((req) => req()));
 
-      console.log("User updated:", data);
+      // console.log("User updated:", data);
       router.push("/ProfilePage" as RelativePathString);
     } catch (error) {
       console.error("Error updating user:", error);

@@ -116,7 +116,7 @@ const DMScreen = () => {
 
     newSocket.onopen = (event) => {
       console.log("WebSocket Connected!");
-      console.log("event", event);
+      // console.log("event", event);
       // Join the conversation with the specific user
       // newSocket.send(
       //   JSON.stringify({
@@ -130,7 +130,7 @@ const DMScreen = () => {
     newSocket.onmessage = (event) => {
       // console.log("ejehfuisdgfauigdfishdfauidhgfuigasyudfg", event.data);
       const eventData = JSON.parse(event.data);
-      console.log("Message from server:", eventData);
+      // console.log("Message from server:", eventData);
 
       const messageReceived: Message = {
         sender_id: eventData.sender_id,
@@ -224,7 +224,7 @@ const DMScreen = () => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       // Create message object
 
-      console.log("DM INFO RECIPIENT IDS:", dmInfo?.recipient_ids);
+      // console.log("DM INFO RECIPIENT IDS:", dmInfo?.recipient_ids);
 
       const messageObj = {
         action: "sendMessage",
@@ -233,7 +233,7 @@ const DMScreen = () => {
         message: messageInput,
       };
 
-      console.log({ messageObj });
+      // console.log({ messageObj });
 
       const res = await fetch(`${apiUrl}/chats/${dmInfo?.chat_id}/messages`, {
         method: "POST",
@@ -248,16 +248,16 @@ const DMScreen = () => {
 
       const data = await res.json();
 
-      console.log(data);
+      // console.log(data);
 
-      console.log(messageObj);
+      // console.log(messageObj);
 
-      console.log("bkahsdf 1");
+      // console.log("bkahsdf 1");
 
       // Send to WebSocket server
       socket.send(JSON.stringify(messageObj));
 
-      console.log("bkahsdf 2");
+      // console.log("bkahsdf 2");
 
       // Add to local messages (optimistic update)
       const newMessage: Message = {
@@ -267,11 +267,11 @@ const DMScreen = () => {
         sender_id: currentUserId || "",
         timestamp: new Date().toISOString(),
       };
-      console.log("data", data);
+      // console.log("data", data);
       // const newMessage: Message = JSON.parse(data.body);
-      console.log("bkahsdf 3");
+      // console.log("bkahsdf 3");
 
-      console.log("NEW MESSAGE:", newMessage);
+      // console.log("NEW MESSAGE:", newMessage);
 
       setMessages((prevMessages) => [...prevMessages, newMessage]);
       setMessageInput("");
@@ -292,7 +292,7 @@ const DMScreen = () => {
 
       const data = await res.json();
 
-      console.log(data);
+      // console.log(data);
       const newMessage: Message = JSON.parse(data.body);
 
       setMessages((prevMessages) => [...prevMessages, newMessage]);

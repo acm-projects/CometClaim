@@ -58,7 +58,7 @@ export default function AddItemForm() {
       quality: 1,
     });
 
-    console.log(result);
+    // console.log(result);
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
@@ -67,12 +67,12 @@ export default function AddItemForm() {
 
   const takePhoto = async () => {
     let cameraPermissions = await ExpoImagePicker.getCameraPermissionsAsync();
-    console.log(cameraPermissions);
+    // console.log(cameraPermissions);
     if (!cameraPermissions.granted) {
       cameraPermissions = await ExpoImagePicker.requestCameraPermissionsAsync();
     }
 
-    console.log(cameraPermissions);
+    // console.log(cameraPermissions);
 
     if (cameraPermissions.granted) {
       let result = await ExpoImagePicker.launchCameraAsync({
@@ -83,10 +83,10 @@ export default function AddItemForm() {
         cameraType: ExpoImagePicker.CameraType.back,
       });
 
-      console.log(result);
+      // console.log(result);
 
       if (!result.canceled) {
-        console.log("BLASH: " + result.assets[0].uri);
+        // console.log("BLASH: " + result.assets[0].uri);
         setImage(result.assets[0].uri);
       }
       // console.log("imageeeeee: " + image)
@@ -120,7 +120,7 @@ export default function AddItemForm() {
       // setImage(`https://cometclaim-image-bucket.s3.amazonaws.com/uploads/${fileName}`)
       // console.log("FORMFORMFORM: \n" + form)
       // console.log("THIS IS THE IMAGE AT THIS VERY MOMENT: " + image)
-      console.log("image uploaded successfully", data);
+      // console.log("image uploaded successfully", data);
 
       return `https://cometclaim-image-bucket.s3.amazonaws.com/uploads/${fileName}`;
     } catch (err) {
@@ -149,7 +149,7 @@ export default function AddItemForm() {
         body: JSON.stringify({ ...form, image_url: s3URL }),
       });
       const data = await response.json();
-      console.log("Item added:", data);
+      // console.log("Item added:", data);
     } catch (error) {
       console.error("Error adding item:", error);
     }
@@ -188,7 +188,7 @@ export default function AddItemForm() {
       <Button
         title="print test"
         onPress={() => {
-          console.log("Image" + image);
+          // console.log("Image" + image);
         }}
       />
       <View style={{ height: 150 }}></View>

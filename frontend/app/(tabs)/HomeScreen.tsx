@@ -123,41 +123,50 @@ const HomeScreen: React.FC = () => {
     getCurrentUser();
   }, []);
 
-  useEffect(() => {
-    // Force a refresh when changing categories
-    refreshItems();
-  }, [activeCategory]);
+  // useEffect(() => {
+  //   // Force a refresh when changing categories
+  //   // refreshItems();
+
+  //   setFilteredItems(
+  //     items.filter(
+  //       (item) => item.status.toLowerCase() === activeCategory.toLowerCase()
+  //     )
+  //   );
+  // }, [activeCategory]);
 
   useFocusEffect(
     useCallback(() => {
       async function getItems() {
         try {
-          const res = await fetch(`${apiUrl}/items`);
+          // console.log("Getting items");
+          const res = await fetch(`${apiUrl}/items?excludeStatus=Claimed`);
           const data = await res.json();
           // console.log(typeof data, data);
           const fetchedItems = JSON.parse(data.body);
-          console.log(fetchedItems);
+          // console.log(fetchedItems);
 
-          const sortedItems = [...fetchedItems]
-            .filter((item: Item) => item.status !== "Claimed")
-            .sort((a: Item, b: Item) => {
-              return (
-                new Date(b.date_reported).getTime() -
-                new Date(a.date_reported).getTime()
-              );
-            });
+          const sortedItems = fetchedItems
+          // const sortedItems = [...fetchedItems]
+            // .filter((item: Item) => item.status !== "Claimed")
+            // .sort((a: Item, b: Item) => {
+            //   return (
+            //     new Date(b.date_reported).getTime() -
+            //     new Date(a.date_reported).getTime()
+            //   );
+            // });
 
           setItems(sortedItems);
           filterItems(sortedItems, activeCategory);
+          setLoading(false);
         } catch (error) {
           console.error("Error fetching items:", error);
         }
-        setTimeout(() => {
-          setLoading(false);
-        }, 1500); // 2 second delay
+        // setTimeout(() => {
+        //   setLoading(false);
+        // }, 1500); // 2 second delay
       }
       getItems();
-    }, [activeCategory, refreshTrigger])
+    }, [refreshTrigger])
   );
 
   const filterItems = (
@@ -172,8 +181,9 @@ const HomeScreen: React.FC = () => {
   };
 
   const handleCategoryChange = (category: "all" | "Lost" | "Found") => {
+    // console.log("test", category);
     setActiveCategory(category);
-    refreshItems();
+    // refreshItems();
     // filterItems(items, category);
   };
 
@@ -187,6 +197,7 @@ const HomeScreen: React.FC = () => {
   }, []);
   const handleItemCategoryChange = (categoryId: string) => {
     // Toggle category if already selected
+    console.log("test 2");
     setActiveItemCategory(
       activeItemCategory === categoryId ? null : categoryId
     );
