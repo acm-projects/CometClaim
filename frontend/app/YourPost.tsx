@@ -38,6 +38,10 @@ type PostProps = {
   author: User;
 };
 
+type PostDateAndLocationProps = {
+  post: Item;
+};
+
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 const SkeletonPostImage = () => (
@@ -118,14 +122,14 @@ const YourPost: React.FC<Item> = (item) => {
       <YourPostHeader isCurrentUserAuthor={isCurrentUserAuthor} />
       <ScrollView>
         <PostTop
-          post={item}
+          post={post}
           author={item.reporter}
           isCurrentUserAuthor={isCurrentUserAuthor}
           setPost={setPost}
         />
-        <PostDateAndLocation {...item} />
-        <PostImage {...item} />
-        <PostFooter {...item} />
+        <PostDateAndLocation post={post} />
+        <PostImage {...post} />
+        <PostFooter {...post} />
         <Divider width={5} orientation="horizontal" color="#D7C9C2" />
 
         {/* Comments Section */}
@@ -481,7 +485,7 @@ const PostDateLocationIcon = [
   },
 ];
 
-const PostDateAndLocation: React.FC<Item> = (post) => (
+const PostDateAndLocation: React.FC<PostDateAndLocationProps> = ({ post }) => (
   <View style={styles.dateLocation}>
     <View
       style={{
